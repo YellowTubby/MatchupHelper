@@ -1,6 +1,6 @@
 [versions]
 agp = "8.5.2"
-kotlin = "1.9.0"
+kotlin = "1.9.24"
 coreKtx = "1.13.1"
 junit = "4.13.2"
 junitVersion = "1.2.1"
@@ -12,6 +12,8 @@ navigation = "2.7.7"
 koin-bom = "4.0.0-RC1"
 glide_ver = "4.16.0"
 glide_compose_ver = "1.0.0-beta01"
+room_version = "2.6.1"
+ksp = "1.9.24-1.0.20"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -40,8 +42,12 @@ koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin-bom
 koin-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koin-bom"}
 koin-compose-navigation = { module = "io.insert-koin:koin-androidx-compose-navigation", version.ref = "koin-bom"}
 
+room-runtime = { module = "androidx.room:room-runtime", version.ref = "room_version"}
+room-compiler-ktx = { module = "androidx.room:room-compiler", version.ref = "room_version"}
+room-ktx = { module = "androidx.room:room-ktx", version.ref = "room_version"}
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

@@ -171,7 +171,7 @@ fun MatchTopBar(
 @Composable
 fun ChampionSelector(
     championList: List<Champion>,
-    initialChampion: Champion = Champion("Aatrox"),
+    initialChampion: Champion = championList[0],
     onSelected: (Champion) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -291,7 +291,7 @@ fun MatchFab(
                     icon = Icons.Filled.Face,
                     label = "Add Matchup",
                     onClick = {
-                        navController.navigate("addMatchup/${uiState.currentChampion?.name}/${roleToStringMap[uiState.currentRole]}")
+                        navController.navigate("addMatchup")
                     }
                 )
                 Spacer(modifier = Modifier.height(16.dp))
@@ -299,7 +299,7 @@ fun MatchFab(
                     icon = Icons.Filled.Face,
                     label = "Add Champion",
                     onClick = {
-                        navController.navigate("addMatchup/${uiState.currentChampion?.name}/${roleToStringMap[uiState.currentRole]}")
+                        navController.navigate("addChampion")
                     }
                 )
                 Spacer(modifier = Modifier.height(16.dp))

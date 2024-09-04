@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -30,17 +31,17 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
     buildFeatures {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        kotlinCompilerExtensionVersion = "1.5.14"
     }
     packaging {
         resources {
@@ -68,6 +69,11 @@ dependencies {
     implementation(libs.koin.android)
     implementation(libs.koin.compose.navigation)
     implementation(libs.koin.compose)
+    implementation(libs.room.runtime)
+    annotationProcessor(libs.room.compiler.ktx)
+    ksp(libs.room.compiler.ktx)
+    implementation(libs.room.ktx)
+
 
 
     testImplementation(libs.junit)

@@ -1,7 +1,8 @@
 package com.yellowtubby.matchuphelper.ui.screens.matchup
 
-import com.yellowtubby.matchuphelper.ui.model.ChampFilter
+import com.yellowtubby.matchuphelper.ui.model.MatchupFilter
 import com.yellowtubby.matchuphelper.ui.model.Champion
+import com.yellowtubby.matchuphelper.ui.model.Matchup
 import com.yellowtubby.matchuphelper.ui.model.Role
 
 
@@ -18,10 +19,10 @@ data class MatchupUiState(
     val definedChampion: List<Champion>,
     val currentChampion: Champion?,
     val currentRole : Role?,
-    val matchupsForCurrentChampion: List<Champion>,
+    val matchupsForCurrentChampion: List<Matchup>,
     val isInMultiSelect : Boolean,
     val selectedChampions: List<Champion>,
-    val filterList : List<ChampFilter>,
+    val filterList : List<MatchupFilter>,
     val textQuery : String = "",
 ) {
 }

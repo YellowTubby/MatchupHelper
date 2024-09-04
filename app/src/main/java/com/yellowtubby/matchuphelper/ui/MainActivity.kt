@@ -102,6 +102,8 @@ class MainActivity : ComponentActivity() {
                         ) {
                             AddMatchupScreen(
                                 mainViewModel = mainViewModel,
+                                scope = scope,
+                                navController = navController
                             )
                         }
 

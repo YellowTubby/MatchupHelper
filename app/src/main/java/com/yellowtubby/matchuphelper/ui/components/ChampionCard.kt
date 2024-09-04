@@ -1,5 +1,7 @@
 package com.yellowtubby.matchuphelper.ui.components
 
+import android.animation.ArgbEvaluator
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,6 +23,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
@@ -39,6 +43,7 @@ fun ChampionCard(
     viewModel: MatchupViewModel,
     scope : CoroutineScope,
     champion: Champion,
+    difficulty: Int,
     onClick: () -> Unit
 ) {
     val uiState : MatchupUiState by viewModel.uiStateMatchupScreen.collectAsState()
@@ -87,7 +92,11 @@ fun ChampionCard(
             GlideImage(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .wrapContentHeight(),
+                    .wrapContentHeight().border(
+                        width = 4.dp,
+                        color = Color(ArgbEvaluator().evaluate(difficulty.toFloat()/10, Color.Green.toArgb(), Color.Red.toArgb()) as Int),
+                        shape = RoundedCornerShape(48.dp, 48.dp, 4.dp, 4.dp)
+                    ),
                 contentScale = ContentScale.FillBounds,
                 model = champion.iconUri, contentDescription = "grid_icon_${champion.name}"
             )

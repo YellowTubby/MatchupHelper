@@ -1,6 +1,7 @@
 package com.yellowtubby.matchuphelper.ui.screens.matchup
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -31,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -82,30 +84,49 @@ fun MatchupScreen(
                 scope,
                 mainViewModel,
             )
-            LazyVerticalGrid(
-                modifier = Modifier.padding(8.dp),
-                columns = GridCells.Fixed(3)
-            ) {
-                var filteredList = uiState.matchupsForCurrentChampion.sortedBy { it.name }
-                uiState.filterList.forEach {
-                        filter -> filteredList = filteredList.filter(filter.filterFunction)
-                }
-                filteredList = filteredList.filter {
-                    it.name.lowercase().contains(uiState.textQuery.lowercase())
-                }
-                items(filteredList) {
-                    ChampionCard(
-                        mainViewModel, scope = scope, it
-                    ) {
-                        if (uiState.isInMultiSelect) {
-                            scope.launch {
-                                mainViewModel.intentChannel.trySend(
-                                    MatchupIntent.MultiSelectChampion(it)
-                                )
+            if(uiState.matchupsForCurrentChampion.isNotEmpty()) {
+                LazyVerticalGrid(
+                    modifier = Modifier.padding(8.dp),
+                    columns = GridCells.Fixed(3)
+                ) {
+                    var filteredList = uiState.matchupsForCurrentChampion.sortedBy { it.enemy.name }
+                    uiState.filterList.forEach {
+                            filter -> filteredList = filteredList.filter(filter.filterFunction)
+                    }
+                    filteredList = filteredList.filter {
+                        it.enemy.name.lowercase().contains(uiState.textQuery.lowercase())
+                    }
+                    items(filteredList) {
+                        ChampionCard(
+                            mainViewModel, scope = scope, it.enemy, it.difficulty
+                        ) {
+                            if (uiState.isInMultiSelect) {
+                                scope.launch {
+                                    mainViewModel.intentChannel.trySend(
+                                        MatchupIntent.MultiSelectChampion(it.enemy)
+                                    )
+                                }
+                            } else {
+                                navController.navigate("champion/{${it.enemy.name}}")
                             }
-                        } else {
-                            navController.navigate("champion/{${it.name}}")
                         }
+                    }
+                }
+            } else {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ){
+                    Text(
+                        modifier = Modifier.padding(16.dp),
+                        text = stringResource(R.string.no_matchups),
+                        textAlign = TextAlign.Center
+                    )
+                    Button(onClick = {
+                        navController.navigate("addMatchup")
+                    }) {
+                        Text(text = stringResource(R.string.add_matchup_string))
                     }
                 }
             }

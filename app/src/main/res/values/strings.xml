@@ -2,4 +2,7 @@
     <string name="app_name">MatchupHelper</string>
     <string name="add_matchup_string">Add Matchup</string>
     <string name="add_champion_string">Add Champion</string>
+    <string name="no_matchups">No matchups found, please add a matchup</string>
+    <string name="difficulty_slider">Difficulty:</string>
+    <string name="matchup_description">Matchup Description</string>
 </resources>

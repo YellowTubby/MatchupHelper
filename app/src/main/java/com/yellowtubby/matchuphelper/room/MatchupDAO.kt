@@ -2,15 +2,35 @@ package com.yellowtubby.matchuphelper.room
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.yellowtubby.matchuphelper.ui.model.Champion
+import androidx.room.Update
+import com.yellowtubby.matchuphelper.ui.model.Role
 
 @Dao
 interface MatchupDAO {
 
     @Insert
-    fun insertChampion(champion: ChampionMatchupEntity)
+    suspend fun insertChampion(champion: ChampionEntity)
 
-    @Query("Select * from championMatchupEntity WHERE champion_name = :champion LIMIT 1")
-    fun getSpecificChampionMatchups(champion: Champion) : ChampionMatchupEntity
+    @Insert(
+        onConflict = OnConflictStrategy.REPLACE
+    )
+    suspend fun insertMatchup(matchup: MatchupEntity)
+
+    @Query("Select * from matchupentity WHERE champion_name = :champion")
+    suspend fun getSpecificChampionMatchups(champion: String) : List<ChampionMatchups>
+
+    @Query("Select * from championentity")
+    suspend fun getAllChampions() : List<ChampionEntity>
+
+    @Update
+    suspend fun updateChampion(champion: ChampionEntity)
+
+    @Query("DELETE FROM matchupentity WHERE champion_name = :champion_name AND role = :role AND champion_enemy IN (:names)")
+    suspend fun deleteMatchups(champion_name : String, role: Role, names: List<String>)
+
+    @Query("DELETE FROM championentity WHERE champion_name = :champion_name")
+    suspend fun deleteChampion(champion_name: String)
+
 }

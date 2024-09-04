@@ -19,7 +19,7 @@ val matchUpModule = module {
         Room.databaseBuilder(
             androidContext(),
             MatchupDatabase::class.java, "database-name"
-        ).build()
+        ).fallbackToDestructiveMigration().build()
     }
     viewModelOf(::MatchupViewModel)
     scope<MatchupViewModel> {
