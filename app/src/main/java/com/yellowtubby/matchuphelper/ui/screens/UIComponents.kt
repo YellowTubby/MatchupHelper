@@ -67,9 +67,8 @@ import com.bumptech.glide.integration.compose.GlideImage
 import com.yellowtubby.matchuphelper.R
 import com.yellowtubby.matchuphelper.ui.model.Champion
 import com.yellowtubby.matchuphelper.ui.model.Role
-import com.yellowtubby.matchuphelper.ui.model.roleToStringMap
-import com.yellowtubby.matchuphelper.ui.screens.matchup.MatchupIntent
-import com.yellowtubby.matchuphelper.ui.screens.matchup.MatchupUiState
+import com.yellowtubby.matchuphelper.ui.screens.matchup.MainScreenIntent
+import com.yellowtubby.matchuphelper.ui.screens.matchup.MainScreenUiState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -81,6 +80,7 @@ fun MatchTopBar(
     navController: NavController
 ) {
     val uiState by mainViewModel.uiStateMainActivity.collectAsState()
+    val uiStateForSelectedMatchups = mainViewModel.uiStateMainScreen.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     val leftActionList = listOf(BACK_BUTTON_STRING)
     val rightActionList =
@@ -114,7 +114,7 @@ fun MatchTopBar(
                             if (uiState.isInMultiSelect) {
                                 scope.launch {
                                     mainViewModel.intentChannel.trySend(
-                                        MatchupIntent.StartMultiSelectChampion(false)
+                                        MainScreenIntent.StartMultiSelectChampion(false)
                                     )
                                 }
                             } else {
@@ -149,7 +149,9 @@ fun MatchTopBar(
                             if (uiState.isInMultiSelect) {
                                 scope.launch {
                                     mainViewModel.intentChannel.trySend(
-                                        MatchupIntent.DeleteSelected
+                                        MainScreenIntent.DeleteSelected(
+                                            uiStateForSelectedMatchups.value.selectedMatchups
+                                        )
                                     )
                                 }
                             }
@@ -171,7 +173,7 @@ fun MatchTopBar(
 @Composable
 fun ChampionSelector(
     championList: List<Champion>,
-    initialChampion: Champion = championList[0],
+    initialChampion: Champion? = championList[0],
     onSelected: (Champion) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -280,7 +282,7 @@ fun MatchFab(
     mainViewModel: MatchupViewModel,
     navController: NavController
 ) {
-    val uiState :MatchupUiState by mainViewModel.uiStateMatchupScreen.collectAsState()
+    val uiState :MainScreenUiState by mainViewModel.uiStateMainScreen.collectAsState()
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
 
     var fabExpanded by remember { mutableStateOf(false) }

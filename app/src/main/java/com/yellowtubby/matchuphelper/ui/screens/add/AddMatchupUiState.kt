@@ -12,8 +12,8 @@ val ADD_MATCHUP_INIT_STATE = AddMatchupUiState(
 )
 
 data class AddMatchupUiState(
-    val currentRole : Role,
-    val currentChampion: Champion,
+    val currentRole : Role?,
+    val currentChampion: Champion?,
     val allChampions: List<Champion>,
     val selectedChampion: Champion?,
     val selectedDifficulty: Float,

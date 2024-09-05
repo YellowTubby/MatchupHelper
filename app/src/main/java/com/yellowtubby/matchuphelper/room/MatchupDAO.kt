@@ -19,7 +19,7 @@ interface MatchupDAO {
     suspend fun insertMatchup(matchup: MatchupEntity)
 
     @Query("Select * from matchupentity WHERE champion_name = :champion")
-    suspend fun getSpecificChampionMatchups(champion: String) : List<ChampionMatchups>
+    suspend fun getSpecificChampionMatchups(champion: String) : List<MatchupEntity>
 
     @Query("Select * from championentity")
     suspend fun getAllChampions() : List<ChampionEntity>

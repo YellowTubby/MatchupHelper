@@ -14,6 +14,7 @@ glide_ver = "4.16.0"
 glide_compose_ver = "1.0.0-beta01"
 room_version = "2.6.1"
 ksp = "1.9.24-1.0.20"
+gson_ver = "2.11.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -35,6 +36,7 @@ navigation-compose = { module = "androidx.navigation:navigation-compose", versio
 navigation-ui = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "navigation" }
 glide = {module = "com.github.bumptech.glide:glide", version.ref = "glide_ver"}
 glide-compose = {module = "com.github.bumptech.glide:compose", version.ref = "glide_compose_ver"}
+gson = {module = "com.google.code.gson:gson", version.ref = "gson_ver" }
 
 koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin-bom" }
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin-bom"}

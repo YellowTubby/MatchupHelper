@@ -1,7 +1,8 @@
 package com.yellowtubby.matchuphelper.ui.screens.matchup
 
+import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -31,21 +32,26 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.google.gson.Gson
+import com.google.gson.Strictness
+import com.google.gson.stream.JsonReader
 import com.yellowtubby.matchuphelper.R
 import com.yellowtubby.matchuphelper.ui.screens.ChampionSelector
 import com.yellowtubby.matchuphelper.ui.screens.MatchupViewModel
-import com.yellowtubby.matchuphelper.ui.components.ChampionCard
+import com.yellowtubby.matchuphelper.ui.components.MatchupCard
 import com.yellowtubby.matchuphelper.ui.screens.getIconPainerResource
 import com.yellowtubby.matchuphelper.ui.model.Role
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.koin.java.KoinJavaComponent.inject
+import java.io.StringReader
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MatchupScreen(
     navController: NavController,
@@ -53,7 +59,8 @@ fun MatchupScreen(
     innerPadding: PaddingValues,
     mainViewModel: MatchupViewModel
 ) {
-    val uiState: MatchupUiState by mainViewModel.uiStateMatchupScreen.collectAsState()
+    val gson : Gson by inject(Gson::class.java)
+    val uiState: MainScreenUiState by mainViewModel.uiStateMainScreen.collectAsState()
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -69,7 +76,7 @@ fun MatchupScreen(
                 champion ->
                 scope.launch {
                     mainViewModel.intentChannel.trySend(
-                        MatchupIntent.SelectChampion(champion)
+                        MainScreenIntent.SelectChampion(champion)
                     )
                 }
             }
@@ -84,30 +91,35 @@ fun MatchupScreen(
                 scope,
                 mainViewModel,
             )
-            if(uiState.matchupsForCurrentChampion.isNotEmpty()) {
+            var filteredList = uiState.matchupsForCurrentChampion.sortedBy { it.enemy.name }
+            uiState.filterList.forEach {
+                    filter ->
+                        filteredList = filteredList.filter(filter.filterFunction)
+            }
+            filteredList = filteredList.filter {
+                it.enemy.name.lowercase().contains(uiState.textQuery.lowercase())
+            }
+            if(filteredList.isNotEmpty()) {
                 LazyVerticalGrid(
                     modifier = Modifier.padding(8.dp),
                     columns = GridCells.Fixed(3)
                 ) {
-                    var filteredList = uiState.matchupsForCurrentChampion.sortedBy { it.enemy.name }
-                    uiState.filterList.forEach {
-                            filter -> filteredList = filteredList.filter(filter.filterFunction)
-                    }
-                    filteredList = filteredList.filter {
-                        it.enemy.name.lowercase().contains(uiState.textQuery.lowercase())
-                    }
                     items(filteredList) {
-                        ChampionCard(
-                            mainViewModel, scope = scope, it.enemy, it.difficulty
+                        MatchupCard(
+                            mainViewModel, scope = scope, it, it.difficulty
                         ) {
+                            Log.d("SERJ", "MatchupScreen: $it")
                             if (uiState.isInMultiSelect) {
                                 scope.launch {
                                     mainViewModel.intentChannel.trySend(
-                                        MatchupIntent.MultiSelectChampion(it.enemy)
+                                        MainScreenIntent.MultiSelectMatchups(it)
                                     )
                                 }
                             } else {
-                                navController.navigate("champion/{${it.enemy.name}}")
+                                scope.launch {
+                                    val json = Uri.encode(gson.toJson(it))
+                                    navController.navigate("matchupInfo/${json}}")
+                                }
                             }
                         }
                     }
@@ -157,14 +169,17 @@ fun ChampionFilter(
     scope: CoroutineScope,
     mainViewModel: MatchupViewModel
 ) {
-    val uiState: MatchupUiState by mainViewModel.uiStateMatchupScreen.collectAsState()
+    val uiState: MainScreenUiState by mainViewModel.uiStateMainScreen.collectAsState()
     TextField(
-        modifier = Modifier.fillMaxWidth().wrapContentHeight().clip(RoundedCornerShape(8.dp)),
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .clip(RoundedCornerShape(8.dp)),
         value = uiState.textQuery,
         onValueChange = { str: String ->
             scope.launch {
                 mainViewModel.intentChannel.trySend(
-                    MatchupIntent.TextFilterChanged(filter = str)
+                    MainScreenIntent.TextFilterChanged(filter = str)
                 )
             }
         },
@@ -181,7 +196,7 @@ fun ChampionFilter(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RoleSegmentedButton(
-    uiState: MatchupUiState,
+    uiState: MainScreenUiState,
     mainViewModel: MatchupViewModel,
     scope: CoroutineScope
 ) {
@@ -202,7 +217,7 @@ fun RoleSegmentedButton(
                 onCheckedChange = {
                     scope.launch {
                         mainViewModel.intentChannel.trySend(
-                            MatchupIntent.RoleChanged(options[index])
+                            MainScreenIntent.RoleChanged(options[index])
                         )
                     }
                 },

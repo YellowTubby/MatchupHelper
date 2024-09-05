@@ -1,6 +1,7 @@
 package com.yellowtubby.matchuphelper.ui.screens.add
 
 import android.animation.ArgbEvaluator
+import android.util.Log
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -92,7 +93,7 @@ fun AddMatchupScreen(
                     modifier = Modifier,
                     contentScale = ContentScale.FillBounds,
                     model = it.splashUri,
-                    contentDescription = "grid_icon_${uiState.currentChampion.name}"
+                    contentDescription = "grid_icon_${uiState.currentChampion?.name}"
                 )
             }
             val shape = RoundedCornerShape(8.dp)
@@ -110,7 +111,7 @@ fun AddMatchupScreen(
                 )) {
                 GlideImage(
                     contentScale = ContentScale.FillBounds,
-                    model = champion.splashUri, contentDescription = "grid_icon_${champion.name}"
+                    model = champion?.splashUri, contentDescription = "grid_icon_${champion?.name}"
                 )
                 Icon(
                     modifier = Modifier.align(alignment = Alignment.BottomEnd),
@@ -134,7 +135,10 @@ fun AddMatchupScreen(
             label = { Text (stringResource(R.string.matchup_description)) },
             minLines = 3,
             maxLines = 3,
-            modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(16.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .padding(16.dp)
         )
 
         Button(onClick = {
@@ -142,9 +146,9 @@ fun AddMatchupScreen(
                 mainViewModel.intentChannel.trySend(
                     AddMatchupIntent.AddMatchup(
                         Matchup(
-                            orig = uiState.currentChampion,
+                            orig = uiState.currentChampion!!,
                             enemy = uiState.selectedChampion!!,
-                            role = uiState.currentRole,
+                            role = uiState.currentRole!!,
                             difficulty = sliderPosition.floatValue.toInt(),
                             description = description.value
                         )

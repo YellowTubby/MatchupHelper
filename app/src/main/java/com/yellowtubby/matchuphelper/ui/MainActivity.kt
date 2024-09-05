@@ -1,10 +1,12 @@
 package com.yellowtubby.matchuphelper.ui
 
 import android.annotation.SuppressLint
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -23,26 +25,27 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.yellowtubby.matchuphelper.ui.model.Matchup
+import com.yellowtubby.matchuphelper.ui.model.MatchupNavType
 import com.yellowtubby.matchuphelper.ui.screens.MainActivityUIState
 import com.yellowtubby.matchuphelper.ui.screens.MatchFab
 import com.yellowtubby.matchuphelper.ui.screens.MatchTopBar
 import com.yellowtubby.matchuphelper.ui.screens.MatchupViewModel
 import com.yellowtubby.matchuphelper.ui.screens.add.AddChampionScreen
 import com.yellowtubby.matchuphelper.ui.screens.add.AddMatchupScreen
-import com.yellowtubby.matchuphelper.ui.screens.champion.ChampionScreen
-import com.yellowtubby.matchuphelper.ui.screens.matchup.MatchupIntent
+import com.yellowtubby.matchuphelper.ui.screens.champion.MatchupScreen
+import com.yellowtubby.matchuphelper.ui.screens.matchup.MainScreenIntent
 import com.yellowtubby.matchuphelper.ui.screens.matchup.MatchupScreen
-import com.yellowtubby.matchuphelper.ui.screens.matchup.MatchupUiState
 import com.yellowtubby.matchuphelper.ui.theme.MatchupHelperTheme
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 class MainActivity : ComponentActivity() {
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,7 +57,7 @@ class MainActivity : ComponentActivity() {
             LaunchedEffect(true) {
                 scope.launch {
                     mainViewModel.intentChannel.trySend(
-                        MatchupIntent.LoadLocalData
+                        MainScreenIntent.LoadLocalData
                     )
                 }
             }
@@ -75,8 +78,7 @@ class MainActivity : ComponentActivity() {
                             navController = navController
                         )
                     }
-                ) {
-                    innerPadding ->
+                ) { innerPadding ->
                     NavHost(navController = navController, startDestination = "home") {
                         composable("home") {
                             MatchupScreen(
@@ -87,13 +89,15 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable(
-                            "champion/{championID}",
-                            arguments = listOf(navArgument("championID") {
-                                type = NavType.StringType
+                            "matchupInfo/{mathchup}",
+                            arguments = listOf(navArgument("mathchup") {
+                                type = MatchupNavType()
                             })
-                        ) { backstackEntry ->
-                            ChampionScreen(
-                                backstackEntry.arguments?.getString("championID")
+                        ) {
+                            val matchup = it.arguments?.getParcelable("mathchup", Matchup::class.java)!!
+                            MatchupScreen(
+                                mainViewModel = mainViewModel,
+                                matchup = matchup
                             )
                         }
 

@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -33,8 +32,6 @@ import com.yellowtubby.matchuphelper.R
 import com.yellowtubby.matchuphelper.ui.model.Champion
 import com.yellowtubby.matchuphelper.ui.screens.ChampionSelector
 import com.yellowtubby.matchuphelper.ui.screens.MatchupViewModel
-import com.yellowtubby.matchuphelper.ui.screens.getIconPainerResource
-import com.yellowtubby.matchuphelper.ui.screens.matchup.MatchupIntent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 

@@ -6,22 +6,22 @@ import com.yellowtubby.matchuphelper.ui.model.Matchup
 import com.yellowtubby.matchuphelper.ui.model.Role
 
 
-val MATCH_SCREEN_INIT_STATE = MatchupUiState(
+val MAIN_SCREEN_INIT_STATE = MainScreenUiState(
     definedChampion = listOf(),
     currentChampion = null,
     matchupsForCurrentChampion = listOf(),
     isInMultiSelect = false,
-    selectedChampions = emptyList(),
+    selectedMatchups = emptyList(),
     currentRole = null,
     filterList = emptyList()
 )
-data class MatchupUiState(
+data class MainScreenUiState(
     val definedChampion: List<Champion>,
     val currentChampion: Champion?,
     val currentRole : Role?,
     val matchupsForCurrentChampion: List<Matchup>,
     val isInMultiSelect : Boolean,
-    val selectedChampions: List<Champion>,
+    val selectedMatchups: List<Matchup>,
     val filterList : List<MatchupFilter>,
     val textQuery : String = "",
 ) {

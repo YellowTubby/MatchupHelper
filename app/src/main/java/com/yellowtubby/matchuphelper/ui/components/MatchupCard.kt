@@ -31,22 +31,22 @@ import androidx.compose.ui.unit.dp
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.yellowtubby.matchuphelper.ui.screens.MatchupViewModel
-import com.yellowtubby.matchuphelper.ui.model.Champion
-import com.yellowtubby.matchuphelper.ui.screens.matchup.MatchupIntent
-import com.yellowtubby.matchuphelper.ui.screens.matchup.MatchupUiState
+import com.yellowtubby.matchuphelper.ui.model.Matchup
+import com.yellowtubby.matchuphelper.ui.screens.matchup.MainScreenIntent
+import com.yellowtubby.matchuphelper.ui.screens.matchup.MainScreenUiState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun ChampionCard(
+fun MatchupCard(
     viewModel: MatchupViewModel,
     scope : CoroutineScope,
-    champion: Champion,
+    matchup: Matchup,
     difficulty: Int,
     onClick: () -> Unit
 ) {
-    val uiState : MatchupUiState by viewModel.uiStateMatchupScreen.collectAsState()
+    val uiState : MainScreenUiState by viewModel.uiStateMainScreen.collectAsState()
     var isSelected by remember { mutableStateOf(false) }
     Card(
         modifier = Modifier
@@ -64,11 +64,11 @@ fun ChampionCard(
                         scope.launch {
                             viewModel.intentChannel
                                 .trySend(
-                                    MatchupIntent.StartMultiSelectChampion(true)
+                                    MainScreenIntent.StartMultiSelectChampion(true)
                                 )
                                 .also {
                                     viewModel.intentChannel.trySend(
-                                        MatchupIntent.MultiSelectChampion(champion)
+                                        MainScreenIntent.MultiSelectMatchups(matchup)
                                     )
                                 }
 
@@ -98,10 +98,10 @@ fun ChampionCard(
                         shape = RoundedCornerShape(48.dp, 48.dp, 4.dp, 4.dp)
                     ),
                 contentScale = ContentScale.FillBounds,
-                model = champion.iconUri, contentDescription = "grid_icon_${champion.name}"
+                model = matchup.enemy.iconUri, contentDescription = "grid_icon_${matchup.enemy.name}"
             )
             Text(
-                text = champion.name
+                text = matchup.enemy.name
             )
         }
     }

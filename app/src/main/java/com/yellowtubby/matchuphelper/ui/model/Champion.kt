@@ -1,6 +1,10 @@
 package com.yellowtubby.matchuphelper.ui.model
 
-data class Champion(val name: String, val iconUri: String, val splashUri: String) {
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
+data class Champion(val name: String, val iconUri: String, val splashUri: String) : Parcelable {
     constructor(name: String) : this(
         name = name,
         iconUri = "https://ddragon.leagueoflegends.com/cdn/14.17.1/img/champion/$name.png",

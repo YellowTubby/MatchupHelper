@@ -1,11 +1,14 @@
 package com.yellowtubby.matchuphelper.repositories
 
+import android.util.Log
 import com.yellowtubby.matchuphelper.room.ChampionEntity
 import com.yellowtubby.matchuphelper.room.MatchupDatabase
 import com.yellowtubby.matchuphelper.room.MatchupEntity
 import com.yellowtubby.matchuphelper.ui.model.Champion
 import com.yellowtubby.matchuphelper.ui.model.Matchup
+import com.yellowtubby.matchuphelper.ui.model.Role
 import org.koin.java.KoinJavaComponent.inject
+import kotlin.math.log
 
 class MatchupRepositoryImpl : MatchupRepository {
     val db: MatchupDatabase by inject(MatchupDatabase::class.java)
@@ -29,7 +32,7 @@ class MatchupRepositoryImpl : MatchupRepository {
     }
 
     override suspend fun getAllMatchupsforChampion(champion: Champion) : List<Matchup> {
-        return db.matchupsDao().getSpecificChampionMatchups(champion.name).map { it.matchup }.map {
+        return db.matchupsDao().getSpecificChampionMatchups(champion.name).map {
             Matchup(
                 orig = Champion(it.championName),
                 enemy = Champion(it.championEnemy),
@@ -49,6 +52,14 @@ class MatchupRepositoryImpl : MatchupRepository {
                 difficulty = matchup.difficulty,
                 description = matchup.description
             )
+        )
+    }
+
+    override suspend fun deleteMatchups(champion : String, role : Role, matchups: List<Matchup>) {
+        db.matchupsDao().deleteMatchups(
+            champion,role, matchups.map {
+                it.enemy.name
+            }
         )
     }
 }
