@@ -18,6 +18,7 @@ import com.yellowtubby.matchuphelper.ui.screens.add.AddChampionUiState
 import com.yellowtubby.matchuphelper.ui.screens.add.AddMatchupIntent
 import com.yellowtubby.matchuphelper.ui.screens.add.AddMatchupUiState
 import com.yellowtubby.matchuphelper.ui.screens.champion.MATCHUP_SCREEN_INIT_STATE
+import com.yellowtubby.matchuphelper.ui.screens.champion.MatchupScreenIntent
 import com.yellowtubby.matchuphelper.ui.screens.champion.MatchupScreenUiState
 import com.yellowtubby.matchuphelper.ui.screens.matchup.MAIN_SCREEN_INIT_STATE
 import com.yellowtubby.matchuphelper.ui.screens.matchup.MainScreenIntent
@@ -37,8 +38,7 @@ import org.koin.java.KoinJavaComponent.inject
 class MatchupViewModel : ViewModel(), KoinScopeComponent {
 
 
-    override val scope: Scope
-        get() = createScope(this)
+    override val scope: Scope = createScope(this)
 
     val matchupRepository: MatchupRepository by inject(MatchupRepository::class.java)
     val championInfoRepository: ChampionInfoRepository by inject(ChampionInfoRepository::class.java)
@@ -49,6 +49,7 @@ class MatchupViewModel : ViewModel(), KoinScopeComponent {
     init {
         viewModelScope.launch(coroutineDispatcher.ui) {
             intentChannel.consumeEach {
+                Log.d("SERJ", "intent received : $it ")
                 when (it) {
                     is MainScreenIntent.MultiSelectMatchups -> {
                         val selectedChampions =
@@ -185,6 +186,7 @@ class MatchupViewModel : ViewModel(), KoinScopeComponent {
                                 _uiStateAddMatchupScreen.value =
                                     _uiStateAddMatchupScreen.value.copy(
                                         allChampions = allChampions,
+                                        selectedChampion = allChampions[0],
                                         currentChampion = firstDefined,
                                         currentRole = role
                                     )
@@ -212,15 +214,21 @@ class MatchupViewModel : ViewModel(), KoinScopeComponent {
                             loading = true
                         )
                         matchupRepository.selectChampion(championInfoRepository)
-                        _uiStateAddMatchupScreen.value = _uiStateAddMatchupScreen.value.copy(
-                            currentChampion = it.champion,
-                        )
-                        _uiStateMainScreen.value = _uiStateMainScreen.value.copy(
-                            currentChampion = it.champion,
-                        )
-                        _uiStateMainActivity.value = _uiStateMainActivity.value.copy(
-                            loading = false
-                        )
+                        withContext(coroutineDispatcher.io){
+                            val matchupsForNewChamp = mutableStateOf(matchupRepository.getAllMatchupsforChampion(it.champion))
+                            withContext(coroutineDispatcher.ui){
+                                _uiStateAddMatchupScreen.value = _uiStateAddMatchupScreen.value.copy(
+                                    currentChampion = it.champion,
+                                )
+                                _uiStateMainScreen.value = _uiStateMainScreen.value.copy(
+                                    currentChampion = it.champion,
+                                    matchupsForCurrentChampion = matchupsForNewChamp.value
+                                )
+                                _uiStateMainActivity.value = _uiStateMainActivity.value.copy(
+                                    loading = false
+                                )
+                            }
+                        }
                     }
 
                     is AddChampionIntent.ChampionSelected -> {
@@ -262,7 +270,6 @@ class MatchupViewModel : ViewModel(), KoinScopeComponent {
                             val addMatch = async { matchupRepository.addMatchup(it.matchup) }
                             addMatch.await()
                             val matchups = mutableStateOf(matchupRepository.getAllMatchupsforChampion(it.matchup.orig))
-                            Log.d("SERJ", "MATCHUPS: ${matchups.value.map { it.enemy.name }} ")
                             withContext(coroutineDispatcher.ui) {
                                 _uiStateMainScreen.value = _uiStateMainScreen.value.copy(
                                     matchupsForCurrentChampion = matchups.value
@@ -272,6 +279,12 @@ class MatchupViewModel : ViewModel(), KoinScopeComponent {
                                 )
                             }
                         }
+                    }
+
+                    is MatchupScreenIntent.LoadMatchup -> {
+                        _uiStateMatchupScreen.value = _uiStateMatchupScreen.value.copy(
+                            matchup = it.matchup
+                        )
                     }
                 }
             }
@@ -312,8 +325,9 @@ class MatchupViewModel : ViewModel(), KoinScopeComponent {
         get() = _uiStateMatchupScreen
 
     override fun onCleared() {
-        super.onCleared()
         scope.close()
+        super.onCleared()
     }
+
 
 }

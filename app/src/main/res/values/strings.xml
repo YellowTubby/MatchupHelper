@@ -5,4 +5,6 @@
     <string name="no_matchups">No matchups found, please add a matchup</string>
     <string name="difficulty_slider">Difficulty:</string>
     <string name="matchup_description">Matchup Description</string>
+    <string name="cooldown">"CD: "</string>
+    <string name="damage_or_shield">Scale: </string>
 </resources>

@@ -18,5 +18,6 @@ class ChampionInfoRepositoryImpl : ChampionInfoRepository {
             Champion(resourceName.capitalize(Locale.current))
         }.toList()
     }
+
 }
 

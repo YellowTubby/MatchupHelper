@@ -39,6 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.NavOptions
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.yellowtubby.matchuphelper.R
@@ -156,7 +157,11 @@ fun AddMatchupScreen(
                 )
                 navController.navigate(
                     route = "home"
-                )
+                ) {
+                    popUpTo("home"){
+                        inclusive = true
+                    }
+                }
             }
         }) {
             Text(stringResource(R.string.add_matchup_string))

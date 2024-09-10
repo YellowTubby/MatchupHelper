@@ -5,16 +5,17 @@ coreKtx = "1.13.1"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
-lifecycleRuntimeKtx = "2.8.4"
-activityCompose = "1.9.1"
+lifecycleRuntimeKtx = "2.8.5"
+activityCompose = "1.9.2"
 composeBom = "2024.08.00"
-navigation = "2.7.7"
+navigation = "2.8.0"
 koin-bom = "4.0.0-RC1"
 glide_ver = "4.16.0"
 glide_compose_ver = "1.0.0-beta01"
 room_version = "2.6.1"
 ksp = "1.9.24-1.0.20"
 gson_ver = "2.11.0"
+splash_screen_ver = "1.0.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -47,6 +48,8 @@ koin-compose-navigation = { module = "io.insert-koin:koin-androidx-compose-navig
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room_version"}
 room-compiler-ktx = { module = "androidx.room:room-compiler", version.ref = "room_version"}
 room-ktx = { module = "androidx.room:room-ktx", version.ref = "room_version"}
+
+splash-screen = { module = "androidx.core:core-splashscreen", version.ref = "splash_screen_ver"}
 
 
 [plugins]

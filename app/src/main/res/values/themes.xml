@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.MatchupHelper" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.MatchupHelper" parent="android:Theme.Material.Light.NoActionBar" >
+    </style>
+    <style name="Theme.MatchupHelper.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/purple_500</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/full_logo_splash</item>
+        <item name="postSplashScreenTheme">@style/Theme.MatchupHelper</item>
+    </style>
+
 </resources>

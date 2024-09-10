@@ -76,6 +76,7 @@ dependencies {
     ksp(libs.room.compiler.ktx)
     implementation(libs.room.ktx)
     implementation(libs.gson)
+    implementation(libs.splash.screen)
 
 
 

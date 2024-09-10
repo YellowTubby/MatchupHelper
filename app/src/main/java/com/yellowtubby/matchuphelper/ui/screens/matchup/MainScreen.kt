@@ -37,8 +37,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.google.gson.Gson
-import com.google.gson.Strictness
-import com.google.gson.stream.JsonReader
 import com.yellowtubby.matchuphelper.R
 import com.yellowtubby.matchuphelper.ui.screens.ChampionSelector
 import com.yellowtubby.matchuphelper.ui.screens.MatchupViewModel
@@ -46,11 +44,8 @@ import com.yellowtubby.matchuphelper.ui.components.MatchupCard
 import com.yellowtubby.matchuphelper.ui.screens.getIconPainerResource
 import com.yellowtubby.matchuphelper.ui.model.Role
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.java.KoinJavaComponent.inject
-import java.io.StringReader
 
 @Composable
 fun MatchupScreen(
@@ -118,7 +113,11 @@ fun MatchupScreen(
                             } else {
                                 scope.launch {
                                     val json = Uri.encode(gson.toJson(it))
-                                    navController.navigate("matchupInfo/${json}}")
+                                    navController.navigate("matchupInfo/${json}}") {
+                                        popUpTo("home") {
+                                            inclusive = false
+                                        }
+                                    }
                                 }
                             }
                         }

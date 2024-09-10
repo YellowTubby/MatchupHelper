@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -48,83 +49,88 @@ class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+            MainContent()
+        }
+    }
+}
 
-            val mainViewModel = koinViewModel<MatchupViewModel>()
-            val scope = rememberCoroutineScope()
-            LaunchedEffect(true) {
-                scope.launch {
-                    mainViewModel.intentChannel.trySend(
-                        MainScreenIntent.LoadLocalData
+@Composable
+fun MainContent() {
+    val mainViewModel = koinViewModel<MatchupViewModel>()
+    val scope = rememberCoroutineScope()
+    LaunchedEffect(true) {
+        scope.launch {
+            mainViewModel.intentChannel.trySend(
+                MainScreenIntent.LoadLocalData
+            )
+        }
+    }
+    MatchupHelperTheme {
+        val navController = rememberNavController()
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            topBar = {
+                MatchTopBar(
+                    scope = scope,
+                    mainViewModel = mainViewModel,
+                    navController = navController
+                )
+            },
+            floatingActionButton = {
+                MatchFab(
+                    mainViewModel = mainViewModel,
+                    navController = navController
+                )
+            }
+        ) { innerPadding ->
+            NavHost(navController = navController, startDestination = "home") {
+                composable("home") {
+                    MatchupScreen(
+                        innerPadding = innerPadding,
+                        scope = scope,
+                        navController = navController,
+                        mainViewModel = mainViewModel
+                    )
+                }
+                composable(
+                    "matchupInfo/{mathchup}",
+                    arguments = listOf(navArgument("mathchup") {
+                        type = MatchupNavType()
+                    })
+                ) {
+                    val matchup = it.arguments?.getParcelable("mathchup", Matchup::class.java)!!
+                    MatchupScreen(
+                        mainViewModel = mainViewModel,
+                        matchup = matchup
+                    )
+                }
+
+                composable(
+                    route = "addMatchup",
+                ) {
+                    AddMatchupScreen(
+                        mainViewModel = mainViewModel,
+                        scope = scope,
+                        navController = navController
+                    )
+                }
+
+                composable(
+                    route = "addChampion",
+                ) {
+                    AddChampionScreen(
+                        mainViewModel = mainViewModel,
+                        navController = navController,
+                        scope = scope
                     )
                 }
             }
-            MatchupHelperTheme {
-                val navController = rememberNavController()
-                Scaffold(
-                    modifier = Modifier.fillMaxSize(),
-                    topBar = {
-                        MatchTopBar(
-                            scope = scope,
-                            mainViewModel = mainViewModel,
-                            navController = navController
-                        )
-                    },
-                    floatingActionButton = {
-                        MatchFab(
-                            mainViewModel = mainViewModel,
-                            navController = navController
-                        )
-                    }
-                ) { innerPadding ->
-                    NavHost(navController = navController, startDestination = "home") {
-                        composable("home") {
-                            MatchupScreen(
-                                innerPadding = innerPadding,
-                                scope = scope,
-                                navController = navController,
-                                mainViewModel = mainViewModel
-                            )
-                        }
-                        composable(
-                            "matchupInfo/{mathchup}",
-                            arguments = listOf(navArgument("mathchup") {
-                                type = MatchupNavType()
-                            })
-                        ) {
-                            val matchup = it.arguments?.getParcelable("mathchup", Matchup::class.java)!!
-                            MatchupScreen(
-                                mainViewModel = mainViewModel,
-                                matchup = matchup
-                            )
-                        }
-
-                        composable(
-                            route = "addMatchup",
-                        ) {
-                            AddMatchupScreen(
-                                mainViewModel = mainViewModel,
-                                scope = scope,
-                                navController = navController
-                            )
-                        }
-
-                        composable(
-                            route = "addChampion",
-                        ) {
-                            AddChampionScreen(
-                                mainViewModel = mainViewModel,
-                                navController = navController,
-                                scope = scope
-                            )
-                        }
-                    }
-                }
-                MatchupProgressIndicator(mainViewModel)
-            }
         }
+        MatchupProgressIndicator(mainViewModel)
     }
 }
 
