@@ -19,6 +19,8 @@ data class Matchup(
     val enemy : Champion,
     val role : Role,
     val description: String,
+    val numWins: Int,
+    val numTotal: Int,
     val difficulty: Int
 ) : Parcelable
 

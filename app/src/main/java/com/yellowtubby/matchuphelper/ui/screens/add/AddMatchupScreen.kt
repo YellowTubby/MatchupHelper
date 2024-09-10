@@ -151,6 +151,8 @@ fun AddMatchupScreen(
                             enemy = uiState.selectedChampion!!,
                             role = uiState.currentRole!!,
                             difficulty = sliderPosition.floatValue.toInt(),
+                            numWins = 0,
+                            numTotal = 0,
                             description = description.value
                         )
                     )

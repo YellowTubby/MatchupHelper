@@ -1,7 +1,10 @@
 package com.yellowtubby.matchuphelper.ui.screens.champion
 
-import android.util.Log
+import android.animation.ArgbEvaluator
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
@@ -19,35 +22,42 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Clear
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.MultiChoiceSegmentedButtonRow
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
@@ -59,15 +69,14 @@ import com.yellowtubby.matchuphelper.ui.model.AbilityType
 import com.yellowtubby.matchuphelper.ui.model.DamageModifier
 import com.yellowtubby.matchuphelper.ui.model.DamageType
 import com.yellowtubby.matchuphelper.ui.model.Matchup
+import com.yellowtubby.matchuphelper.ui.model.Role
 import com.yellowtubby.matchuphelper.ui.screens.MatchupViewModel
-import com.yellowtubby.matchuphelper.ui.screens.add.DifficultySlider
 import com.yellowtubby.matchuphelper.ui.screens.getIconPainerResource
 import com.yellowtubby.matchuphelper.ui.screens.matchup.MainScreenIntent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 
-@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun MatchupScreen(
     mainViewModel: MatchupViewModel,
@@ -90,18 +99,19 @@ fun MatchupScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .padding(8.dp)
                     .scrollable(
                         state = scrollState,
-                        orientation = Orientation.Vertical)
-                    .padding(8.dp),
+                        orientation = Orientation.Vertical
+                    ),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top
             ) {
                 MatchupImage(matchup)
                 Spacer(modifier = Modifier.height(16.dp))
-                WinrateSection()
+                WinrateSection(mainViewModel,scope, it)
                 Spacer(modifier = Modifier.height(16.dp))
-                AbilitySection(mainViewModel, scope, matchup)
+                AbilitySection(scope, it)
                 Spacer(modifier = Modifier.height(16.dp))
                 ItemBuildSection()
             }
@@ -114,7 +124,7 @@ fun ItemBuildSection() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .wrapContentHeight()
+            .height(400.dp)
             .clip(RoundedCornerShape(16.dp))
             .border(2.dp, MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(16.dp))
     ) {
@@ -123,7 +133,7 @@ fun ItemBuildSection() {
 }
 
 @Composable
-fun AbilitySection(mainViewModel: MatchupViewModel, scope: CoroutineScope, matchup: Matchup) {
+fun AbilitySection(scope: CoroutineScope, matchup: Matchup) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -134,6 +144,7 @@ fun AbilitySection(mainViewModel: MatchupViewModel, scope: CoroutineScope, match
         AbilityType.entries.forEach { abilityType ->
             AbilityWithText(
                 ability = Ability(
+                    abilityName = "Bandage Toss",
                     championName = matchup.enemy.name,
                     iconUri = buildIconURIFromTypeAndChampion(abilityType, matchup.enemy.name),
                     type = abilityType,
@@ -151,16 +162,97 @@ fun buildIconURIFromTypeAndChampion(abilityType: AbilityType, name: String): Str
     return "https://ddragon.leagueoflegends.com/cdn/14.17.1/img/passive/Anivia_P.png"
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun WinrateSection() {
+fun WinrateSection(mainViewModel: MatchupViewModel, scope: CoroutineScope, matchup: Matchup) {
+    val options = listOf("Win", "Loss")
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .height(150.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .border(2.dp, MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(16.dp))
+            .wrapContentHeight()
+            .clip(
+                RoundedCornerShape(16.dp)
+            )
+            .border(
+                width = 2.dp,
+                color = MaterialTheme.colorScheme.secondary,
+                shape = RoundedCornerShape(16.dp)
+            )
     ) {
-        Text(text = "WinrateSection")
+        MultiChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+            options.forEachIndexed { index, label ->
+                SegmentedButton(
+                    modifier = Modifier.clickable {
+                        scope.launch {
+                            mainViewModel.intentChannel.trySend(
+                                MatchupScreenIntent.WinLossChanged(index == 0)
+                            )
+                        }
+                    },
+                    shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
+                    icon = {
+                        Icon(
+                            imageVector = if (index == 0) Icons.Rounded.Add else Icons.Rounded.Clear,
+                            contentDescription = null,
+                            modifier = Modifier.size(SegmentedButtonDefaults.IconSize)
+                        )
+                    },
+                    onCheckedChange = { },
+                    checked = false
+                ) {
+                    Text(text = options[index])
+                }
+            }
+        }
+        Text(
+            modifier = Modifier.fillMaxWidth(),
+            text = stringResource(R.string.total_games) + matchup.numTotal.toString(),
+            textAlign = TextAlign.Center
+        )
+        // Canvas drawing for the progress indicator.
+        val modifier = Modifier
+            .fillMaxWidth()
+            .height(48.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .border(1.dp, MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(16.dp))
+
+        Box(modifier) {
+            val trackColor = MaterialTheme.colorScheme.surface
+            Canvas(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+            ) {
+                val canvasWidth = size.width
+                val canvasHeight = size.height
+                drawLine(
+                    start = Offset(x = 0.dp.toPx(), y = canvasHeight / 2),
+                    end = Offset(x = canvasWidth, y = canvasHeight / 2),
+                    color = trackColor,
+                    strokeWidth = 48.dp.toPx() // instead of 5.dp.toPx() , you can also pass 5f
+                )
+                drawLine(
+                    start = Offset(x = 0.dp.toPx(), y = canvasHeight / 2),
+                    end = Offset(x = calculateProgress(matchup) * canvasWidth, y = canvasHeight / 2),
+                    color = Color(ArgbEvaluator().evaluate(calculateProgress(matchup), Color.Red.toArgb(), Color.Green.toArgb()) as Int),
+                    strokeWidth = 48.dp.toPx() // instead of 5.dp.toPx() , you can also pass 5f
+                )
+            }
+
+            Text(
+                text = "${calculateProgress(matchup) * 100}%",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.align(Alignment.Center)
+            )
+        }
+    }
+}
+
+fun calculateProgress(matchup: Matchup): Float {
+    return if (matchup.numTotal == 0) {
+        0f
+    } else {
+        matchup.numWins.toFloat() / matchup.numTotal.toFloat()
     }
 }
 
@@ -226,29 +318,42 @@ fun AbilityWithText(ability: Ability) {
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(
-            modifier = Modifier.padding(0.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+        Box(
+            modifier = Modifier.padding(4.dp),
+            contentAlignment = Alignment.BottomEnd,
         ) {
             GlideImage(
                 modifier = Modifier
                     .size(48.dp)
-                    .padding(8.dp)
-                    .clip(RoundedCornerShape(8.dp))
+                    .clip(RoundedCornerShape(16.dp))
                     .border(
                         width = 2.dp,
                         color = MaterialTheme.colorScheme.secondary,
-                        shape = RoundedCornerShape(8.dp)
+                        shape = RoundedCornerShape(16.dp)
                     ),
                 contentScale = ContentScale.Fit,
                 model = ability.iconUri,
                 contentDescription = "ability_icon_${ability.championName}_${ability.type}"
             )
-            Text(
-                text = ability.type.name,
-                style = MaterialTheme.typography.titleSmall,
-                textAlign = TextAlign.Center
-            )
+            Box(
+                modifier = Modifier
+                    .padding(4.dp)
+                    .size(20.dp)
+                    .clip(CircleShape)
+                    .background(color = MaterialTheme.colorScheme.surfaceVariant)
+                    .border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.secondary,
+                        shape = CircleShape
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = ability.type.name,
+                    style = MaterialTheme.typography.titleSmall,
+                    textAlign = TextAlign.Center
+                )
+            }
         }
 
         Column {
@@ -286,6 +391,7 @@ fun getColorBasedOnDamageType(type: DamageType): Color {
         DamageType.AP -> Color(0xFF7A6DFF)
         DamageType.Armor -> Color(0xFFFFFF00)
         DamageType.MagicResist -> Color(0xff00FFFF)
+        DamageType.HP -> Color(0xFF198E54)
     }
 
 }

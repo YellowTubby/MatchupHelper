@@ -4,7 +4,9 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
+import com.yellowtubby.matchuphelper.ui.model.Ability
 import com.yellowtubby.matchuphelper.ui.model.Role
 
 @Dao
@@ -17,6 +19,9 @@ interface MatchupDAO {
         onConflict = OnConflictStrategy.REPLACE
     )
     suspend fun insertMatchup(matchup: MatchupEntity)
+
+    @Insert
+    suspend fun insertAbility(ability: AbilityEntity)
 
     @Query("Select * from matchupentity WHERE champion_name = :champion")
     suspend fun getSpecificChampionMatchups(champion: String) : List<MatchupEntity>
@@ -32,5 +37,9 @@ interface MatchupDAO {
 
     @Query("DELETE FROM championentity WHERE champion_name = :champion_name")
     suspend fun deleteChampion(champion_name: String)
+
+    @Transaction
+    @Query("SELECT * FROM championentity WHERE champion_name = :champion_name")
+    fun getChampionAbilities(champion_name: String): List<ChampionAbilities>
 
 }

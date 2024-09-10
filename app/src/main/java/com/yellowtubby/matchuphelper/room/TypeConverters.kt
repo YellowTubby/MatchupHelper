@@ -1,6 +1,8 @@
 package com.yellowtubby.matchuphelper.room
 
 import androidx.room.TypeConverter
+import com.yellowtubby.matchuphelper.ui.model.DamageModifier
+import com.yellowtubby.matchuphelper.ui.model.DamageType
 import com.yellowtubby.matchuphelper.ui.model.Role
 
 
@@ -25,6 +27,29 @@ class MatchupTypeConverters() {
             Role.MID -> "Mid"
             Role.BOTTOM -> "Bottom"
             Role.SUPPORT -> "Support"
+        }
+    }
+
+    @TypeConverter
+    fun stringToDamageModifier(value: String): DamageModifier {
+        value.split("_").also {
+            return DamageModifier(stringToDamageType(it[0]), it[1].toInt())
+        }
+    }
+
+    @TypeConverter
+    fun damageModToString(value: DamageModifier): String {
+        return value.type.name + "_" + value.percentage
+    }
+
+    private fun stringToDamageType(s: String): DamageType {
+        return when(s){
+            "AP" -> DamageType.AP
+            "AD" -> DamageType.AD
+            "HP" -> DamageType.HP
+            "Armor" -> DamageType.Armor
+            "MagicResist" -> DamageType.MagicResist
+            else -> DamageType.AD
         }
     }
 }
