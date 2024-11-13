@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace = "com.yellowtubby.matchuphelper"
+    namespace = "com.yellowtubby.victoryvault"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.yellowtubby.matchuphelper"
+        applicationId = "com.yellowtubby.victoryvault"
         minSdk = 26
         targetSdk = 34
         versionCode = 1
@@ -72,6 +72,10 @@ dependencies {
     implementation(libs.koin.compose.navigation)
     implementation(libs.koin.compose)
     implementation(libs.room.runtime)
+    implementation(libs.androidx.foundation.layout.android)
+    implementation(libs.androidx.foundation.layout.android)
+    implementation(libs.androidx.foundation.layout.android)
+    implementation(libs.androidx.foundation.layout.android)
     annotationProcessor(libs.room.compiler.ktx)
     ksp(libs.room.compiler.ktx)
     implementation(libs.room.ktx)
@@ -89,4 +93,5 @@ dependencies {
 
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation(kotlin("reflect"))
 }
