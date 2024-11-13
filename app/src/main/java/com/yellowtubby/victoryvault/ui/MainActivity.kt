@@ -29,10 +29,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.example.compose.VictoryVaultTheme
-import com.yellowtubby.victoryvault.ui.model.Matchup
-import com.yellowtubby.victoryvault.ui.model.MatchupNavType
 import com.yellowtubby.victoryvault.ui.screens.MainActivityUIState
 import com.yellowtubby.victoryvault.ui.screens.uicomponents.MatchFab
 import com.yellowtubby.victoryvault.ui.screens.uicomponents.MatchTopBar
@@ -41,7 +38,7 @@ import com.yellowtubby.victoryvault.ui.screens.add.AddChampionScreen
 import com.yellowtubby.victoryvault.ui.screens.add.AddMatchupScreen
 import com.yellowtubby.victoryvault.ui.screens.champion.MatchupScreen
 import com.yellowtubby.victoryvault.ui.screens.matchup.MainScreenIntent
-import com.yellowtubby.victoryvault.ui.screens.matchup.MatchupScreen
+import com.yellowtubby.victoryvault.ui.screens.matchup.MainScreen
 import com.yellowtubby.victoryvault.ui.screens.profile.ProfileScreen
 import com.yellowtubby.victoryvault.ui.screens.statistics.StatisticsScreen
 import com.yellowtubby.victoryvault.ui.screens.uicomponents.MatchBottomNavigation
@@ -81,12 +78,13 @@ fun MainContent() {
                 MatchTopBar(
                     scope = scope,
                     mainViewModel = mainViewModel,
-                    navController = navController
+                    navController = navController,
                 )
             },
             bottomBar = {
                 MatchBottomNavigation(
-                    navController
+                    mainViewModel = mainViewModel,
+                    navController = navController
                 )
             },
             floatingActionButton = {
@@ -98,7 +96,7 @@ fun MainContent() {
         ) { innerPadding ->
             NavHost(navController = navController, startDestination = "home") {
                 composable("home") {
-                    MatchupScreen(
+                    MainScreen(
                         innerPadding = innerPadding,
                         scope = scope,
                         navController = navController,
@@ -106,15 +104,11 @@ fun MainContent() {
                     )
                 }
                 composable(
-                    "matchupInfo/{mathchup}",
-                    arguments = listOf(navArgument("mathchup") {
-                        type = MatchupNavType()
-                    })
+                    "matchupInfo",
                 ) {
-                    val matchup = it.arguments?.getParcelable("mathchup", Matchup::class.java)!!
                     MatchupScreen(
-                        mainViewModel = mainViewModel,
-                        matchup = matchup
+                        mainViewModel,
+                        scope
                     )
                 }
 

@@ -15,13 +15,13 @@ import java.io.StringReader
 
 @Parcelize
 data class Matchup(
-    val orig : Champion,
-    val enemy : Champion,
-    val role : Role,
-    val description: String,
-    val numWins: Int,
-    val numTotal: Int,
-    val difficulty: Int
+    val orig : Champion = Champion("Aatrox"),
+    val enemy : Champion = Champion("Aatrox"),
+    val role : Role = Role.MID,
+    val description: String = "",
+    val numWins: Int = 0,
+    val numTotal: Int = 0,
+    val difficulty: Int = 0
 ) : Parcelable
 
 

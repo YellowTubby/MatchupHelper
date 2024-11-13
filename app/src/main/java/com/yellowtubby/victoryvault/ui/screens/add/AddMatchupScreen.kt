@@ -127,18 +127,6 @@ fun AddMatchupScreen(
         ) {
             sliderPosition.floatValue = it
         }
-        val description = remember { mutableStateOf("") }
-        OutlinedTextField(
-            value = description.value,
-            onValueChange = { description.value = it },
-            label = { Text (stringResource(R.string.matchup_description)) },
-            minLines = 3,
-            maxLines = 3,
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .padding(16.dp)
-        )
 
         Button(onClick = {
             scope.launch {
@@ -151,7 +139,7 @@ fun AddMatchupScreen(
                             difficulty = sliderPosition.floatValue.toInt(),
                             numWins = 0,
                             numTotal = 0,
-                            description = description.value
+                            description = ""
                         )
                     )
                 )

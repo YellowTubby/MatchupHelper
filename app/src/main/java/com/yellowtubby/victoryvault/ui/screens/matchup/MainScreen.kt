@@ -1,6 +1,5 @@
 package com.yellowtubby.victoryvault.ui.screens.matchup
 
-import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -48,7 +47,7 @@ import kotlinx.coroutines.launch
 import org.koin.java.KoinJavaComponent.inject
 
 @Composable
-fun MatchupScreen(
+fun MainScreen(
     navController: NavController,
     scope: CoroutineScope,
     innerPadding: PaddingValues,
@@ -112,8 +111,10 @@ fun MatchupScreen(
                                 }
                             } else {
                                 scope.launch {
-                                    val json = Uri.encode(gson.toJson(it))
-                                    navController.navigate("matchupInfo/${json}}") {
+                                    mainViewModel.intentChannel.trySend(
+                                        MainScreenIntent.LoadMatchupInfo(it)
+                                    )
+                                    navController.navigate("matchupInfo") {
                                         popUpTo("home") {
                                             inclusive = false
                                         }

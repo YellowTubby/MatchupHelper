@@ -4,6 +4,6 @@ import com.yellowtubby.victoryvault.ui.model.Matchup
 
 val MATCHUP_SCREEN_INIT_STATE : MatchupScreenUiState =
     MatchupScreenUiState(
-        null
+        Matchup()
     )
-data class MatchupScreenUiState(val matchup : Matchup?)
+data class MatchupScreenUiState(val matchup : Matchup)

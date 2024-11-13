@@ -40,14 +40,28 @@ class MatchupRepositoryImpl : MatchupRepository {
         )
     }
 
+    override suspend fun updateMatchup(prevMatch: Matchup) {
+        db.matchupsDao().updateMatchup(
+            MatchupEntity(
+                prevMatch.orig.name,
+                prevMatch.enemy.name,
+                prevMatch.role,
+                prevMatch.numWins,
+                prevMatch.numTotal,
+                prevMatch.description,
+                prevMatch.difficulty
+            )
+        )
+    }
+
     override suspend fun getAllChampions(): List<Champion> {
         return db.matchupsDao().getAllChampions().map {
             Champion(it.champion_name)
         }
     }
 
-    override suspend fun getAllMatchupsforChampion(champion: Champion) : List<Matchup> {
-        return db.matchupsDao().getSpecificChampionMatchups(champion.name).map {
+    override suspend fun getAllMatchups(): List<Matchup> {
+        return db.matchupsDao().getAllMatchups().map {
             Matchup(
                 orig = Champion(it.championName),
                 enemy = Champion(it.championEnemy),

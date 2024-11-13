@@ -1,5 +1,6 @@
 package com.yellowtubby.victoryvault.ui.screens.uicomponents
 
+import android.app.Activity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -16,10 +17,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -37,7 +40,8 @@ import kotlinx.coroutines.launch
 fun MatchTopBar(
     scope: CoroutineScope,
     mainViewModel: MatchupViewModel,
-    navController: NavController
+    navController: NavController,
+    activity: Activity? = LocalContext.current as Activity
 ) {
     val uiState by mainViewModel.uiStateMainActivity.collectAsState()
     val uiStateForSelectedMatchups = mainViewModel.uiStateMainScreen.collectAsState()
@@ -78,7 +82,14 @@ fun MatchTopBar(
                                     )
                                 }
                             } else {
-                                navController.popBackStack()
+                                scope.launch {
+                                    mainViewModel.intentChannel.trySend(
+                                        MainScreenIntent.NavigatedBottomBar(1)
+                                    )
+                                }
+                                if(navController.currentDestination?.route == "home" || !navController.popBackStack()){
+                                    activity?.finish()
+                                }
                             }
                         }) {
                             Icon(

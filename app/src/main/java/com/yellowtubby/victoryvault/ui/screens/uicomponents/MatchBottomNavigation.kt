@@ -1,13 +1,7 @@
 package com.yellowtubby.victoryvault.ui.screens.uicomponents
 
-import android.graphics.drawable.Icon
-import androidx.compose.foundation.layout.Box
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.outlined.AccountCircle
-import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -17,14 +11,16 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavController
 import com.yellowtubby.victoryvault.R
+import com.yellowtubby.victoryvault.ui.screens.MatchupViewModel
+import com.yellowtubby.victoryvault.ui.screens.matchup.MainScreenIntent
 
 data class BottomNavItem(val route: String,
                          val iconSelected: @Composable () -> Unit,
@@ -49,8 +45,11 @@ internal val navList = listOf(
 )
 
 @Composable
-fun MatchBottomNavigation(navController: NavController) {
-    TabView(navList,navController)
+fun MatchBottomNavigation(
+    navController: NavController,
+    mainViewModel: MatchupViewModel
+) {
+    TabView(navList,navController,mainViewModel)
 }
 
 
@@ -58,28 +57,39 @@ fun MatchBottomNavigation(navController: NavController) {
 // This is a wrapper view that allows us to easily and cleanly
 // reuse this component in any future project
 @Composable
-fun TabView(tabBarItems: List<BottomNavItem>, navController: NavController) {
-    var selectedTabIndex by rememberSaveable {
-        mutableIntStateOf(1)
-    }
-
-    NavigationBar {
-        // looping over each tab to generate the views and navigation for each item
-        tabBarItems.forEachIndexed { index, tabBarItem ->
-            NavigationBarItem(
-                selected = selectedTabIndex == index,
-                onClick = {
-                    selectedTabIndex = index
-                    navController.navigate(tabBarItem.route)
-                },
-                icon = {
-                    TabBarIconView(
-                        isSelected = selectedTabIndex == index,
-                        selectedIcon = tabBarItem.iconSelected,
-                        unselectedIcon = tabBarItem.iconUnselected,
-                    )
-                },
-                label = {Text(tabBarItem.label)})
+fun TabView(
+    tabBarItems: List<BottomNavItem>,
+    navController: NavController,
+    viewModel: MatchupViewModel
+) {
+    val uiState by viewModel.uiStateMainActivity.collectAsState()
+    if(uiState.isBottomBarVisible){
+        NavigationBar {
+            // looping over each tab to generate the views and navigation for each item
+            tabBarItems.forEachIndexed { index, tabBarItem ->
+                NavigationBarItem(
+                    selected = uiState.selectedBottomBarIndex == index,
+                    onClick = {
+                        navController.navigate(tabBarItem.route) {
+                            popUpToRoute?.let {
+                                popUpTo(it) {
+                                    inclusive = true
+                                }
+                            }
+                        }
+                        viewModel.intentChannel.trySend(
+                            MainScreenIntent.NavigatedBottomBar(index)
+                        )
+                    },
+                    icon = {
+                        TabBarIconView(
+                            isSelected = uiState.selectedBottomBarIndex == index,
+                            selectedIcon = tabBarItem.iconSelected,
+                            unselectedIcon = tabBarItem.iconUnselected,
+                        )
+                    },
+                    label = {Text(tabBarItem.label)})
+            }
         }
     }
 }

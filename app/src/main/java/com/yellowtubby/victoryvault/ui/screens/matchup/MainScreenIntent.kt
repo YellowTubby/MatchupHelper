@@ -15,6 +15,9 @@ sealed class MainScreenIntent : ApplicationIntent() {
     data class FilterListChanged(val filter: MatchupFilter) : MainScreenIntent()
     data class RoleChanged(val role: Role): MainScreenIntent()
     data class SelectedMatchup(val matchup: Matchup) : MainScreenIntent()
+    data class NavigatedBottomBar(val selectedIndex: Int) : MainScreenIntent()
+    data class LoadMatchupInfo(val matchup: Matchup) : MainScreenIntent()
+
 
     data object LoadLocalData: MainScreenIntent()
 }

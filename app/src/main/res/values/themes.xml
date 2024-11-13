@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.MatchupHelper" parent="android:Theme.Material.Light.NoActionBar" >
+    <style name="Theme.VictoryVault" parent="android:Theme.Material.Light.NoActionBar" >
     </style>
-    <style name="Theme.MatchupHelper.Splash" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">?attr/colorPrimary</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/logo</item>
-        <item name="postSplashScreenTheme">@style/Theme.MatchupHelper</item>
+    <style name="Theme.VictoryVault.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@drawable/logo</item>
+        <item name="postSplashScreenTheme">@style/Theme.VictoryVault</item>
     </style>
 
 </resources>
