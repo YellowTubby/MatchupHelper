@@ -1,5 +1,6 @@
 package com.yellowtubby.victoryvault.ui.screens
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -109,23 +110,23 @@ class MatchupViewModel : ViewModel(), KoinScopeComponent {
                 withContext(coroutineDispatcher.ui){
                     var prevMatch = _uiStateMatchupScreen.value.matchup
                     prevMatch = prevMatch.copy(
-                        numTotal = prevMatch.numTotal.inc()
+                        numTotal = prevMatch.numTotal + 1
                     )
                     if(it.isWon){
                         prevMatch = prevMatch.copy(
-                            numWins = prevMatch.numWins.inc()
+                            numWins = prevMatch.numWins + 1
                         )
                     }
+                    Log.d("SERJ", "handleMatchupScreenIntent: matchupToInsert ${prevMatch.numTotal} + ${prevMatch.numWins}")
                     withContext(coroutineDispatcher.io){
                         matchupRepository.updateMatchup(prevMatch)
-                        val mutableList : MutableList<Matchup> = allMatchups.toMutableList()
-                        mutableList.removeIf {
-                            it.orig == prevMatch.orig && it.enemy == prevMatch.enemy
-                        }
-                        mutableList.add(prevMatch)
-                        allMatchups = mutableList
                     }
-
+                    val mutableList : MutableList<Matchup> = allMatchups.toMutableList()
+                    mutableList.removeIf {
+                        it.orig == prevMatch.orig && it.enemy == prevMatch.enemy
+                    }
+                    mutableList.add(prevMatch)
+                    allMatchups = mutableList
                     _uiStateMatchupScreen.value = _uiStateMatchupScreen.value.copy(
                         matchup = allMatchups.first {
                             prevMatch.orig == it.orig && prevMatch.enemy == it.enemy
@@ -287,6 +288,7 @@ class MatchupViewModel : ViewModel(), KoinScopeComponent {
 
                     firstDefined?.let {
                         allMatchups = mutableStateOf( matchupRepository.getAllMatchups()).value
+                        Log.d("SERJ", "handleMainScreenIntent: $allMatchups")
                         if(allMatchups.isNotEmpty()){
                             val roleGrouping = allMatchups.groupingBy { it.role }
                             role = roleGrouping.eachCount().maxOf { it.key }
@@ -355,10 +357,19 @@ class MatchupViewModel : ViewModel(), KoinScopeComponent {
             }
 
             is MainScreenIntent.LoadMatchupInfo -> {
+                val filterMatchup = it.matchup
                 _uiStateMatchupScreen.value = _uiStateMatchupScreen.value.copy(
-                    matchup = it.matchup
+                    matchup = allMatchups.first {
+                        it.enemy == filterMatchup.enemy && it.orig == filterMatchup.orig
+                    }
                 )
 
+            }
+
+            is MainScreenIntent.ShowBottomBar -> {
+                _uiStateMainActivity.value = _uiStateMainActivity.value.copy(
+                    isBottomBarVisible = it.shouldShow
+                )
             }
         }
     }

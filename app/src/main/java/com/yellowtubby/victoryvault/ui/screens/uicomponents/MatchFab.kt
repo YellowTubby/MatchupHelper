@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.yellowtubby.victoryvault.ui.screens.MatchupViewModel
+import com.yellowtubby.victoryvault.ui.screens.Route
 import com.yellowtubby.victoryvault.ui.screens.matchup.MainScreenUiState
 
 @SuppressLint("RestrictedApi")
@@ -34,7 +35,7 @@ fun MatchFab(
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
 
     var fabExpanded by remember { mutableStateOf(false) }
-    if(currentBackStackEntry?.destination?.route == "home"){
+    if(currentBackStackEntry?.destination?.route == Route.Home.route){
         Column(horizontalAlignment = Alignment.End) {
             if (fabExpanded) {
                 ActionButtonWithLabel(

@@ -1,12 +1,11 @@
 package com.yellowtubby.victoryvault.ui.screens.champion
 
 import android.animation.ArgbEvaluator
-import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,18 +32,13 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MultiChoiceSegmentedButtonRow
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -70,9 +64,7 @@ import com.yellowtubby.victoryvault.ui.model.Matchup
 import com.yellowtubby.victoryvault.ui.screens.MatchupViewModel
 import com.yellowtubby.victoryvault.ui.screens.getIconPainerResource
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 
 @Composable
@@ -83,7 +75,7 @@ fun MatchupScreen(
     val scrollState = rememberScrollState()
     Column(
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxWidth()
             .padding(8.dp)
             .scrollable(
                 state = scrollState,
@@ -92,31 +84,33 @@ fun MatchupScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
-        MatchupImage(mainViewModel)
-        Spacer(modifier = Modifier.height(16.dp))
-        WinrateSection(mainViewModel,scope)
-        Spacer(modifier = Modifier.height(16.dp))
-        AbilitySection(mainViewModel)
-        Spacer(modifier = Modifier.height(16.dp))
-        ItemBuildSection()
+            MatchupImage(mainViewModel)
+            Spacer(modifier = Modifier.height(16.dp))
+            WinrateSection(mainViewModel,scope)
+            Spacer(modifier = Modifier.height(16.dp))
+            TipsSection(mainViewModel)
+            Spacer(modifier = Modifier.height(16.dp))
+            ItemBuildSection()
     }
 }
+
+
 
 @Composable
 fun ItemBuildSection() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .height(400.dp)
+            .height(700.dp)
             .clip(RoundedCornerShape(16.dp))
             .border(2.dp, MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(16.dp))
     ) {
-        Text(text = "Item Build")
+        Text(modifier = Modifier.fillMaxSize(), text = "Item Build")
     }
 }
 
 @Composable
-fun AbilitySection(mainViewModel: MatchupViewModel) {
+fun TipsSection(mainViewModel: MatchupViewModel) {
     val uiState: MatchupScreenUiState by mainViewModel.uiStateMatchupScreen.collectAsState()
     Column(
         modifier = Modifier

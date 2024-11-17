@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -34,6 +35,7 @@ import com.yellowtubby.victoryvault.ui.screens.MainActivityUIState
 import com.yellowtubby.victoryvault.ui.screens.uicomponents.MatchFab
 import com.yellowtubby.victoryvault.ui.screens.uicomponents.MatchTopBar
 import com.yellowtubby.victoryvault.ui.screens.MatchupViewModel
+import com.yellowtubby.victoryvault.ui.screens.Route
 import com.yellowtubby.victoryvault.ui.screens.add.AddChampionScreen
 import com.yellowtubby.victoryvault.ui.screens.add.AddMatchupScreen
 import com.yellowtubby.victoryvault.ui.screens.champion.MatchupScreen
@@ -63,13 +65,7 @@ class MainActivity : ComponentActivity() {
 fun MainContent() {
     val mainViewModel = koinViewModel<MatchupViewModel>()
     val scope = rememberCoroutineScope()
-    LaunchedEffect(true) {
-        scope.launch {
-            mainViewModel.intentChannel.trySend(
-                MainScreenIntent.LoadLocalData
-            )
-        }
-    }
+    LoadMainData(mainViewModel)
     VictoryVaultTheme {
         val navController = rememberNavController()
         Scaffold(
@@ -94,8 +90,9 @@ fun MainContent() {
                 )
             }
         ) { innerPadding ->
-            NavHost(navController = navController, startDestination = "home") {
-                composable("home") {
+            NavHost(navController = navController, startDestination = Route.Home.route) {
+                composable(Route.Home.route) {
+                    HandleBottomBarVisibility(mainViewModel, true)
                     MainScreen(
                         innerPadding = innerPadding,
                         scope = scope,
@@ -103,18 +100,16 @@ fun MainContent() {
                         mainViewModel = mainViewModel
                     )
                 }
-                composable(
-                    "matchupInfo",
-                ) {
+                composable(Route.MatchupInfo.route) {
+                    HandleBottomBarVisibility(mainViewModel, false)
                     MatchupScreen(
                         mainViewModel,
                         scope
                     )
                 }
 
-                composable(
-                    route = "addMatchup",
-                ) {
+                composable(route = Route.AddMatchup.route) {
+                    HandleBottomBarVisibility(mainViewModel, false)
                     AddMatchupScreen(
                         mainViewModel = mainViewModel,
                         scope = scope,
@@ -122,23 +117,20 @@ fun MainContent() {
                     )
                 }
 
-                composable(
-                    route = "addChampion",
-                ) {
+                composable(route = Route.AddChampion.route) {
+                    HandleBottomBarVisibility(mainViewModel, false)
                     AddChampionScreen(
                         mainViewModel = mainViewModel,
                         navController = navController,
                         scope = scope
                     )
                 }
-                composable(
-                    route = "profile",
-                ) {
+
+                composable(route = Route.MyProfile.route) {
                     ProfileScreen()
                 }
-                composable(
-                    route = "statistics",
-                ) {
+
+                composable(route = Route.Statistics.route) {
                     StatisticsScreen()
                 }
             }
@@ -146,6 +138,25 @@ fun MainContent() {
         MatchupProgressIndicator(mainViewModel)
     }
 }
+
+@Composable
+fun LoadMainData(mainViewModel: MatchupViewModel) {
+    LaunchedEffect(true) {
+        mainViewModel.intentChannel.trySend(
+            MainScreenIntent.LoadLocalData
+        )
+    }
+}
+
+@Composable
+fun HandleBottomBarVisibility(mainViewModel: MatchupViewModel, shouldBeVisibile : Boolean) {
+    LaunchedEffect(true) {
+        mainViewModel.intentChannel.trySend(
+            MainScreenIntent.ShowBottomBar(shouldBeVisibile)
+        )
+    }
+}
+
 
 @Composable
 fun MatchupProgressIndicator(

@@ -17,7 +17,6 @@ sealed class MainScreenIntent : ApplicationIntent() {
     data class SelectedMatchup(val matchup: Matchup) : MainScreenIntent()
     data class NavigatedBottomBar(val selectedIndex: Int) : MainScreenIntent()
     data class LoadMatchupInfo(val matchup: Matchup) : MainScreenIntent()
-
-
+    data class ShowBottomBar(val shouldShow: Boolean) : MainScreenIntent()
     data object LoadLocalData: MainScreenIntent()
 }

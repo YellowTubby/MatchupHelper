@@ -1,12 +1,14 @@
 package com.yellowtubby.victoryvault.ui.screens.uicomponents
 
 import android.app.Activity
+import android.app.Application
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,13 +29,46 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.yellowtubby.victoryvault.R
+import com.yellowtubby.victoryvault.ui.screens.ApplicationIntent
 import com.yellowtubby.victoryvault.ui.screens.BACK_BUTTON_STRING
 import com.yellowtubby.victoryvault.ui.screens.MENU_BUTTON_STRING
 import com.yellowtubby.victoryvault.ui.screens.MENU_DELETE_STRING
+import com.yellowtubby.victoryvault.ui.screens.MENU_EDIT_STRING
+import com.yellowtubby.victoryvault.ui.screens.MainActivityUIState
 import com.yellowtubby.victoryvault.ui.screens.MatchupViewModel
+import com.yellowtubby.victoryvault.ui.screens.Route
 import com.yellowtubby.victoryvault.ui.screens.matchup.MainScreenIntent
+import com.yellowtubby.victoryvault.ui.screens.matchup.MainScreenUiState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+
+fun getIntentBasedOnNavController(actionString: String,
+                                  navController: NavController,
+                                  mainScreenUiState: MainActivityUIState,
+                                  screenUIState: MainScreenUiState
+): ApplicationIntent {
+    return when(navController.currentDestination?.route){
+        Route.Home.route -> {
+            when(actionString){
+                MENU_DELETE_STRING -> {
+                    if (mainScreenUiState.isInMultiSelect) {
+                        MainScreenIntent.DeleteSelected(
+                            screenUIState.selectedMatchups
+                        )
+                    } else {
+                        ApplicationIntent()
+                    }
+                }
+                else -> {
+                    ApplicationIntent()
+                }
+            }
+        }
+        else -> {
+            ApplicationIntent()
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,8 +82,7 @@ fun MatchTopBar(
     val uiStateForSelectedMatchups = mainViewModel.uiStateMainScreen.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     val leftActionList = listOf(BACK_BUTTON_STRING)
-    val rightActionList =
-        if (uiState.isInMultiSelect) listOf(MENU_DELETE_STRING) else listOf(MENU_BUTTON_STRING)
+    val rightActionList = getActionsBasedOnStateAndDestination(uiState, navController)
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
             containerColor = if (uiState.isInMultiSelect) MaterialTheme.colorScheme.inversePrimary else MaterialTheme.colorScheme.primaryContainer,
@@ -87,7 +121,7 @@ fun MatchTopBar(
                                         MainScreenIntent.NavigatedBottomBar(1)
                                     )
                                 }
-                                if(navController.currentDestination?.route == "home" || !navController.popBackStack()){
+                                if(navController.currentDestination?.route == Route.Home.route || !navController.popBackStack()){
                                     activity?.finish()
                                 }
                             }
@@ -105,30 +139,34 @@ fun MatchTopBar(
         },
         actions = {
             rightActionList.forEach {
+                val onClickCallback : () -> Unit = {
+                    scope.launch {
+                        mainViewModel.intentChannel.trySend(
+                            getIntentBasedOnNavController(it, navController, uiState, uiStateForSelectedMatchups.value)
+                        )
+                    }
+                }
                 when (it) {
                     MENU_BUTTON_STRING -> {
-                        IconButton(onClick = { /* do something */ }) {
+                        IconButton(onClick = onClickCallback) {
                             Icon(
                                 imageVector = Icons.Filled.Menu,
                                 contentDescription = "Localized description"
                             )
                         }
                     }
-
                     MENU_DELETE_STRING -> {
-                        IconButton(onClick = {
-                            if (uiState.isInMultiSelect) {
-                                scope.launch {
-                                    mainViewModel.intentChannel.trySend(
-                                        MainScreenIntent.DeleteSelected(
-                                            uiStateForSelectedMatchups.value.selectedMatchups
-                                        )
-                                    )
-                                }
-                            }
-                        }) {
+                        IconButton(onClick = onClickCallback) {
                             Icon(
                                 imageVector = Icons.Filled.Delete,
+                                contentDescription = "Localized description"
+                            )
+                        }
+                    }
+                    MENU_EDIT_STRING -> {
+                        IconButton(onClick = onClickCallback) {
+                            Icon(
+                                imageVector = Icons.Filled.Edit,
                                 contentDescription = "Localized description"
                             )
                         }
@@ -138,4 +176,20 @@ fun MatchTopBar(
         },
         scrollBehavior = scrollBehavior,
     )
+}
+
+fun getActionsBasedOnStateAndDestination(uiState : MainActivityUIState, navController: NavController): List<String> {
+    return when(navController.currentDestination?.route){
+        Route.Home.route -> {
+            if (uiState.isInMultiSelect) listOf(MENU_DELETE_STRING) else listOf(MENU_BUTTON_STRING)
+        }
+
+        Route.MatchupInfo.route -> {
+            listOf(MENU_EDIT_STRING, MENU_BUTTON_STRING)
+        }
+
+        else -> {
+            listOf(MENU_BUTTON_STRING)
+        }
+    }
 }

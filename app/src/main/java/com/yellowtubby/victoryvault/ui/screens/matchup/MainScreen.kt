@@ -42,6 +42,7 @@ import com.yellowtubby.victoryvault.ui.screens.MatchupViewModel
 import com.yellowtubby.victoryvault.ui.screens.uicomponents.MatchupCard
 import com.yellowtubby.victoryvault.ui.screens.getIconPainerResource
 import com.yellowtubby.victoryvault.ui.model.Role
+import com.yellowtubby.victoryvault.ui.screens.Route
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.koin.java.KoinJavaComponent.inject
@@ -53,7 +54,6 @@ fun MainScreen(
     innerPadding: PaddingValues,
     mainViewModel: MatchupViewModel
 ) {
-    val gson : Gson by inject(Gson::class.java)
     val uiState: MainScreenUiState by mainViewModel.uiStateMainScreen.collectAsState()
     Column(
         modifier = Modifier
@@ -102,7 +102,6 @@ fun MainScreen(
                         MatchupCard(
                             mainViewModel, scope = scope, it, it.difficulty
                         ) {
-                            Log.d("SERJ", "MatchupScreen: $it")
                             if (uiState.isInMultiSelect) {
                                 scope.launch {
                                     mainViewModel.intentChannel.trySend(
@@ -114,8 +113,8 @@ fun MainScreen(
                                     mainViewModel.intentChannel.trySend(
                                         MainScreenIntent.LoadMatchupInfo(it)
                                     )
-                                    navController.navigate("matchupInfo") {
-                                        popUpTo("home") {
+                                    navController.navigate(Route.MatchupInfo.route) {
+                                        popUpTo(Route.Home.route) {
                                             inclusive = false
                                         }
                                     }

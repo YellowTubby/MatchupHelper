@@ -20,6 +20,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavController
 import com.yellowtubby.victoryvault.R
 import com.yellowtubby.victoryvault.ui.screens.MatchupViewModel
+import com.yellowtubby.victoryvault.ui.screens.Route
 import com.yellowtubby.victoryvault.ui.screens.matchup.MainScreenIntent
 
 data class BottomNavItem(val route: String,
@@ -28,17 +29,18 @@ data class BottomNavItem(val route: String,
                          val label: String)
 
 internal val navList = listOf(
-    BottomNavItem("profile",
+    BottomNavItem(Route.MyProfile.route,
         { Icon(Icons.Filled.Person, "homeBtn_selected") },
         { Icon(Icons.Outlined.Person, "homeBtn_unselected") },
         "Profile"),
 
-    BottomNavItem("home",
+    BottomNavItem(
+        Route.Home.route,
         @Composable { Icon(painter = painterResource(R.drawable.sword_cross), "matchup_BtnSelected") },
         @Composable { Icon(painter = painterResource(R.drawable.sword_cross_outlined), "matchup_BtnUnSelected") },
         "Matchups"),
 
-    BottomNavItem("statistics",
+    BottomNavItem(Route.Statistics.route,
         @Composable { Icon(painter = painterResource(R.drawable.poll), "statistics selected") },
         @Composable { Icon(painter = painterResource(R.drawable.poll_outlined), "statistics not selected") },
         "Statistics")

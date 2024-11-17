@@ -44,6 +44,7 @@ import com.yellowtubby.victoryvault.R
 import com.yellowtubby.victoryvault.ui.model.Matchup
 import com.yellowtubby.victoryvault.ui.screens.uicomponents.ChampionSelector
 import com.yellowtubby.victoryvault.ui.screens.MatchupViewModel
+import com.yellowtubby.victoryvault.ui.screens.Route
 import com.yellowtubby.victoryvault.ui.screens.getIconPainerResource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -143,10 +144,8 @@ fun AddMatchupScreen(
                         )
                     )
                 )
-                navController.navigate(
-                    route = "home"
-                ) {
-                    popUpTo("home"){
+                navController.navigate(route = Route.Home.route) {
+                    popUpTo(Route.Home.route){
                         inclusive = true
                     }
                 }
