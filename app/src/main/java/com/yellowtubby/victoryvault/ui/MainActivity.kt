@@ -14,7 +14,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -26,7 +29,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -36,7 +38,6 @@ import com.yellowtubby.victoryvault.ui.screens.uicomponents.MatchFab
 import com.yellowtubby.victoryvault.ui.screens.uicomponents.MatchTopBar
 import com.yellowtubby.victoryvault.ui.screens.MatchupViewModel
 import com.yellowtubby.victoryvault.ui.screens.Route
-import com.yellowtubby.victoryvault.ui.screens.add.AddChampionScreen
 import com.yellowtubby.victoryvault.ui.screens.add.AddMatchupScreen
 import com.yellowtubby.victoryvault.ui.screens.champion.MatchupScreen
 import com.yellowtubby.victoryvault.ui.screens.matchup.MainScreenIntent
@@ -44,7 +45,8 @@ import com.yellowtubby.victoryvault.ui.screens.matchup.MainScreen
 import com.yellowtubby.victoryvault.ui.screens.profile.ProfileScreen
 import com.yellowtubby.victoryvault.ui.screens.statistics.StatisticsScreen
 import com.yellowtubby.victoryvault.ui.screens.uicomponents.MatchBottomNavigation
-import kotlinx.coroutines.launch
+import com.yellowtubby.victoryvault.ui.screens.uicomponents.MatchSnackBar
+import com.yellowtubby.victoryvault.ui.screens.uicomponents.SnackBarType
 import org.koin.androidx.compose.koinViewModel
 
 class MainActivity : ComponentActivity() {
@@ -60,12 +62,14 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun MainContent() {
     val mainViewModel = koinViewModel<MatchupViewModel>()
+    val snackBarState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    LoadMainData(mainViewModel)
+    LoadMainData(mainViewModel,snackBarState)
     VictoryVaultTheme {
         val navController = rememberNavController()
         Scaffold(
@@ -83,10 +87,21 @@ fun MainContent() {
                     navController = navController
                 )
             },
+            snackbarHost = {
+                SnackbarHost(snackBarState)
+                { data ->
+                    val parts = data.visuals.message.split(": ")
+                    val title = parts[0]
+                    val description = parts.getOrNull(1) ?: ""
+                    val type = if (title == "Error") SnackBarType.ERROR else SnackBarType.SUCCESS
+                    MatchSnackBar(title, description, type)
+                }
+            },
             floatingActionButton = {
                 MatchFab(
                     mainViewModel = mainViewModel,
-                    navController = navController
+                    navController = navController,
+                    scope = scope
                 )
             }
         ) { innerPadding ->
@@ -97,7 +112,8 @@ fun MainContent() {
                         innerPadding = innerPadding,
                         scope = scope,
                         navController = navController,
-                        mainViewModel = mainViewModel
+                        mainViewModel = mainViewModel,
+                        snackbarHostState = snackBarState
                     )
                 }
                 composable(Route.MatchupInfo.route) {
@@ -117,15 +133,6 @@ fun MainContent() {
                     )
                 }
 
-                composable(route = Route.AddChampion.route) {
-                    HandleBottomBarVisibility(mainViewModel, false)
-                    AddChampionScreen(
-                        mainViewModel = mainViewModel,
-                        navController = navController,
-                        scope = scope
-                    )
-                }
-
                 composable(route = Route.MyProfile.route) {
                     ProfileScreen()
                 }
@@ -140,7 +147,7 @@ fun MainContent() {
 }
 
 @Composable
-fun LoadMainData(mainViewModel: MatchupViewModel) {
+fun LoadMainData(mainViewModel: MatchupViewModel, snackbarHostState: SnackbarHostState) {
     LaunchedEffect(true) {
         mainViewModel.intentChannel.trySend(
             MainScreenIntent.LoadLocalData

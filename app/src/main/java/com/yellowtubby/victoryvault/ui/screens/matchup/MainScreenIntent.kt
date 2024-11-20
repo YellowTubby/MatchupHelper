@@ -19,4 +19,5 @@ sealed class MainScreenIntent : ApplicationIntent() {
     data class LoadMatchupInfo(val matchup: Matchup) : MainScreenIntent()
     data class ShowBottomBar(val shouldShow: Boolean) : MainScreenIntent()
     data object LoadLocalData: MainScreenIntent()
+    data class FabExpanded(val isExpanded: Boolean): MainScreenIntent()
 }

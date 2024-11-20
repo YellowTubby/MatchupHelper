@@ -1,7 +1,6 @@
 package com.yellowtubby.victoryvault.ui.screens.uicomponents
 
 import android.app.Activity
-import android.app.Application
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -19,7 +18,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -38,14 +36,14 @@ import com.yellowtubby.victoryvault.ui.screens.MainActivityUIState
 import com.yellowtubby.victoryvault.ui.screens.MatchupViewModel
 import com.yellowtubby.victoryvault.ui.screens.Route
 import com.yellowtubby.victoryvault.ui.screens.matchup.MainScreenIntent
-import com.yellowtubby.victoryvault.ui.screens.matchup.MainScreenUiState
+import com.yellowtubby.victoryvault.ui.screens.matchup.MainScreenUIState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 fun getIntentBasedOnNavController(actionString: String,
                                   navController: NavController,
                                   mainScreenUiState: MainActivityUIState,
-                                  screenUIState: MainScreenUiState
+                                  screenUIState: MainScreenUIState
 ): ApplicationIntent {
     return when(navController.currentDestination?.route){
         Route.Home.route -> {

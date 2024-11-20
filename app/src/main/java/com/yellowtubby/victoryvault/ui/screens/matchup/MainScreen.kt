@@ -1,6 +1,5 @@
 package com.yellowtubby.victoryvault.ui.screens.matchup
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -22,10 +21,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MultiChoiceSegmentedButtonRow
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -35,26 +36,31 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.google.gson.Gson
 import com.yellowtubby.victoryvault.R
 import com.yellowtubby.victoryvault.ui.screens.uicomponents.ChampionSelector
 import com.yellowtubby.victoryvault.ui.screens.MatchupViewModel
 import com.yellowtubby.victoryvault.ui.screens.uicomponents.MatchupCard
 import com.yellowtubby.victoryvault.ui.screens.getIconPainerResource
 import com.yellowtubby.victoryvault.ui.model.Role
+import com.yellowtubby.victoryvault.ui.screens.ApplicationIntent
 import com.yellowtubby.victoryvault.ui.screens.Route
+import com.yellowtubby.victoryvault.ui.screens.uicomponents.SnackBarType
+import com.yellowtubby.victoryvault.ui.screens.uicomponents.SnackbarManager
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
-import org.koin.java.KoinJavaComponent.inject
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
     navController: NavController,
     scope: CoroutineScope,
     innerPadding: PaddingValues,
-    mainViewModel: MatchupViewModel
+    mainViewModel: MatchupViewModel,
+    snackbarHostState: SnackbarHostState
 ) {
-    val uiState: MainScreenUiState by mainViewModel.uiStateMainScreen.collectAsState()
+    val uiState: MainScreenUIState by mainViewModel.uiStateMainScreen.collectAsState()
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -62,6 +68,30 @@ fun MainScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = if(uiState.definedChampion.isNotEmpty()) Arrangement.Top else Arrangement.Center
     ) {
+        LaunchedEffect(uiState.snackBarMessage) {
+            scope.launch {
+                if(uiState.snackBarMessage.first){
+                    val showingSnackBar = async {
+                        val snackbarManager = SnackbarManager(
+                            snackbarHostState, scope
+                        )
+                        when(uiState.snackBarMessage.second.type){
+                            SnackBarType.SUCCESS -> snackbarManager.showSuccessSnackbar(
+                                uiState.snackBarMessage.second.description
+                            )
+                            SnackBarType.ERROR -> snackbarManager.showErrorSnackbar(
+                                uiState.snackBarMessage.second.description
+                            )
+                            SnackBarType.INFO -> snackbarManager.showInfoSnackbar(
+                                uiState.snackBarMessage.second.description
+                            )
+                        }
+                    }
+                    val clearingError = async { mainViewModel.intentChannel.trySend(ApplicationIntent.ErrorClear) }
+                    awaitAll(showingSnackBar,clearingError)
+                }
+            }
+        }
         uiState.currentChampion?.let {
             ChampionSelector(
                 uiState.definedChampion,
@@ -168,7 +198,7 @@ fun ChampionFilter(
     scope: CoroutineScope,
     mainViewModel: MatchupViewModel
 ) {
-    val uiState: MainScreenUiState by mainViewModel.uiStateMainScreen.collectAsState()
+    val uiState: MainScreenUIState by mainViewModel.uiStateMainScreen.collectAsState()
     TextField(
         modifier = Modifier
             .fillMaxWidth()
@@ -195,7 +225,7 @@ fun ChampionFilter(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RoleSegmentedButton(
-    uiState: MainScreenUiState,
+    uiState: MainScreenUIState,
     mainViewModel: MatchupViewModel,
     scope: CoroutineScope
 ) {

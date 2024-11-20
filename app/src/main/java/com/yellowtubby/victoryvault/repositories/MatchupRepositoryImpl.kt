@@ -14,9 +14,6 @@ import org.koin.java.KoinJavaComponent.inject
 class MatchupRepositoryImpl : MatchupRepository {
     val db: MatchupDatabase by inject(MatchupDatabase::class.java)
 
-    override suspend fun selectChampion(championInfoRepository: ChampionInfoRepository) {
-
-    }
 
     override suspend fun addChampion(champion: Champion) {
         db.matchupsDao().insertChampion(

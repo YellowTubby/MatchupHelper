@@ -33,7 +33,7 @@ import com.bumptech.glide.integration.compose.GlideImage
 import com.yellowtubby.victoryvault.ui.screens.MatchupViewModel
 import com.yellowtubby.victoryvault.ui.model.Matchup
 import com.yellowtubby.victoryvault.ui.screens.matchup.MainScreenIntent
-import com.yellowtubby.victoryvault.ui.screens.matchup.MainScreenUiState
+import com.yellowtubby.victoryvault.ui.screens.matchup.MainScreenUIState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -46,7 +46,7 @@ fun MatchupCard(
     difficulty: Int,
     onClick: () -> Unit
 ) {
-    val uiState : MainScreenUiState by viewModel.uiStateMainScreen.collectAsState()
+    val uiState : MainScreenUIState by viewModel.uiStateMainScreen.collectAsState()
     var isSelected by remember { mutableStateOf(false) }
     Card(
         modifier = Modifier

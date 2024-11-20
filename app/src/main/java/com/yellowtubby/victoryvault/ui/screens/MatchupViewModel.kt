@@ -12,18 +12,18 @@ import com.yellowtubby.victoryvault.ui.model.FilterType
 import com.yellowtubby.victoryvault.ui.model.Matchup
 import com.yellowtubby.victoryvault.ui.model.MatchupFilter
 import com.yellowtubby.victoryvault.ui.model.Role
-import com.yellowtubby.victoryvault.ui.screens.add.ADD_CHAMP_INIT_STATE
 import com.yellowtubby.victoryvault.ui.screens.add.ADD_MATCHUP_INIT_STATE
 import com.yellowtubby.victoryvault.ui.screens.add.AddChampionIntent
-import com.yellowtubby.victoryvault.ui.screens.add.AddChampionUiState
 import com.yellowtubby.victoryvault.ui.screens.add.AddMatchupIntent
 import com.yellowtubby.victoryvault.ui.screens.add.AddMatchupUiState
 import com.yellowtubby.victoryvault.ui.screens.champion.MATCHUP_SCREEN_INIT_STATE
 import com.yellowtubby.victoryvault.ui.screens.champion.MatchupScreenIntent
-import com.yellowtubby.victoryvault.ui.screens.champion.MatchupScreenUiState
+import com.yellowtubby.victoryvault.ui.screens.champion.MatchupScreenUIState
 import com.yellowtubby.victoryvault.ui.screens.matchup.MAIN_SCREEN_INIT_STATE
 import com.yellowtubby.victoryvault.ui.screens.matchup.MainScreenIntent
-import com.yellowtubby.victoryvault.ui.screens.matchup.MainScreenUiState
+import com.yellowtubby.victoryvault.ui.screens.matchup.MainScreenUIState
+import com.yellowtubby.victoryvault.ui.screens.uicomponents.SnackBarType
+import com.yellowtubby.victoryvault.ui.screens.uicomponents.SnackbarMessage
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
@@ -45,9 +45,10 @@ class MatchupViewModel : ViewModel(), KoinScopeComponent {
     private val championInfoRepository: ChampionInfoRepository by inject(ChampionInfoRepository::class.java)
     private val coroutineDispatcher: MatchupCoroutineDispatcher by scope.inject<MatchupCoroutineDispatcher>()
 
-    private lateinit var allMatchups : List<Matchup>
-    private lateinit var allDefinedChampions : List<Champion>
-    private lateinit var allChampions : List<Champion>
+    private lateinit var allMatchups: List<Matchup>
+    private lateinit var allDefinedChampions: List<Champion>
+    lateinit var allChampions: List<Champion>
+    var currentChampion : Champion? = null
 
     val intentChannel: Channel<ApplicationIntent> = Channel(Channel.UNLIMITED)
 
@@ -70,13 +71,28 @@ class MatchupViewModel : ViewModel(), KoinScopeComponent {
                     is AddMatchupIntent -> {
                         handleAddMatchupIntent(it)
                     }
+
+                    is ApplicationIntent.ErrorClear -> {
+                        _uiStateMainActivity.value = _uiStateMainActivity.value.copy(
+                            snackBarMessage = Pair(false, SnackbarMessage())
+                        )
+                        _uiStateAddMatchupScreen.value = _uiStateAddMatchupScreen.value.copy(
+                            snackBarMessage = Pair(false, SnackbarMessage())
+                        )
+                        _uiStateMainScreen.value = _uiStateMainScreen.value.copy(
+                            snackBarMessage = Pair(false, SnackbarMessage())
+                        )
+                        _uiStateMatchupScreen.value = _uiStateMatchupScreen.value.copy(
+                            snackBarMessage = Pair(false, SnackbarMessage())
+                        )
+                    }
                 }
             }
         }
     }
 
     private suspend fun handleAddMatchupIntent(it: AddMatchupIntent) {
-        when(it){
+        when (it) {
             is AddMatchupIntent.SelectedChampion -> {
                 _uiStateAddMatchupScreen.value = _uiStateAddMatchupScreen.value.copy(
                     selectedChampion = it.champion
@@ -105,23 +121,26 @@ class MatchupViewModel : ViewModel(), KoinScopeComponent {
     }
 
     private suspend fun handleMatchupScreenIntent(it: MatchupScreenIntent) {
-        when(it){
+        when (it) {
             is MatchupScreenIntent.WinLossChanged -> {
-                withContext(coroutineDispatcher.ui){
+                withContext(coroutineDispatcher.ui) {
                     var prevMatch = _uiStateMatchupScreen.value.matchup
                     prevMatch = prevMatch.copy(
                         numTotal = prevMatch.numTotal + 1
                     )
-                    if(it.isWon){
+                    if (it.isWon) {
                         prevMatch = prevMatch.copy(
                             numWins = prevMatch.numWins + 1
                         )
                     }
-                    Log.d("SERJ", "handleMatchupScreenIntent: matchupToInsert ${prevMatch.numTotal} + ${prevMatch.numWins}")
-                    withContext(coroutineDispatcher.io){
+                    Log.d(
+                        "SERJ",
+                        "handleMatchupScreenIntent: matchupToInsert ${prevMatch.numTotal} + ${prevMatch.numWins}"
+                    )
+                    withContext(coroutineDispatcher.io) {
                         matchupRepository.updateMatchup(prevMatch)
                     }
-                    val mutableList : MutableList<Matchup> = allMatchups.toMutableList()
+                    val mutableList: MutableList<Matchup> = allMatchups.toMutableList()
                     mutableList.removeIf {
                         it.orig == prevMatch.orig && it.enemy == prevMatch.enemy
                     }
@@ -139,29 +158,47 @@ class MatchupViewModel : ViewModel(), KoinScopeComponent {
     }
 
     private suspend fun handleAddChampionScreenIntent(it: AddChampionIntent) {
-        when(it){
-            is AddChampionIntent.ChampionSelected -> {
-                _uiStateAddChampionScreen.value = _uiStateAddChampionScreen.value.copy(
-                    championSelected = it.champion,
-                )
-            }
-
+        when (it) {
             is AddChampionIntent.AddChampion -> {
-                _uiStateMainActivity.value = _uiStateMainActivity.value.copy(
-                    loading = true
+                _uiStateMainScreen.value = _uiStateMainScreen.value.copy(
+                    loading = true,
+                    snackBarMessage = Pair(false, SnackbarMessage())
                 )
-                withContext(coroutineDispatcher.io) {
-                    matchupRepository.addChampion(it.champion)
-                    val definedChampions = matchupRepository.getAllChampions()
-                    withContext(coroutineDispatcher.ui) {
-                        _uiStateMainScreen.value = _uiStateMainScreen.value.copy(
-                            currentChampion = it.champion,
-                            definedChampion = definedChampions
-                        )
-                        _uiStateMainActivity.value = _uiStateMainActivity.value.copy(
-                            loading = false
-                        )
+                _uiStateMainActivity.value = _uiStateMainActivity.value.copy(
+                    isFabExpanded = false
+                )
+                if (!allDefinedChampions.contains(it.champion)) {
+                    withContext(coroutineDispatcher.io) {
+                        matchupRepository.addChampion(it.champion)
+                        val definedChampions = matchupRepository.getAllChampions()
+                        withContext(coroutineDispatcher.ui) {
+                            _uiStateMainScreen.value = _uiStateMainScreen.value.copy(
+                                currentChampion = it.champion,
+                                definedChampion = definedChampions,
+                                snackBarMessage = Pair(
+                                    true, SnackbarMessage(
+                                        title = "Info",
+                                        description = "${it.champion.name} has been added",
+                                        type = SnackBarType.SUCCESS
+                                    )
+                                )
+                            )
+                            _uiStateMainActivity.value = _uiStateMainActivity.value.copy(
+                                loading = false,
+                            )
+                        }
                     }
+                } else {
+                    _uiStateMainScreen.value = _uiStateMainScreen.value.copy(
+                        loading = false,
+                        snackBarMessage = Pair(
+                            true, SnackbarMessage(
+                                title = "Error",
+                                description = "Champion is already defined",
+                                SnackBarType.ERROR
+                            )
+                        )
+                    )
                 }
             }
         }
@@ -169,7 +206,7 @@ class MatchupViewModel : ViewModel(), KoinScopeComponent {
     }
 
     private suspend fun handleMainScreenIntent(it: MainScreenIntent) {
-        when(it){
+        when (it) {
             is MainScreenIntent.MultiSelectMatchups -> {
                 val selectedChampions =
                     if (_uiStateMainScreen.value.selectedMatchups.contains(it.matchup)) {
@@ -281,15 +318,12 @@ class MatchupViewModel : ViewModel(), KoinScopeComponent {
                 )
                 withContext(coroutineDispatcher.io) {
                     loadLocalData()
-
-                    val firstDefined = allDefinedChampions.firstOrNull()
                     var role: Role? = Role.TOP;
                     val filterRole: MutableList<MatchupFilter> = mutableListOf()
 
-                    firstDefined?.let {
-                        allMatchups = mutableStateOf( matchupRepository.getAllMatchups()).value
-                        Log.d("SERJ", "handleMainScreenIntent: $allMatchups")
-                        if(allMatchups.isNotEmpty()){
+                    currentChampion?.let {
+                        allMatchups = mutableStateOf(matchupRepository.getAllMatchups()).value
+                        if (allMatchups.isNotEmpty()) {
                             val roleGrouping = allMatchups.groupingBy { it.role }
                             role = roleGrouping.eachCount().maxOf { it.key }
                             filterRole.add(MatchupFilter(FilterType.ROLE) {
@@ -304,20 +338,16 @@ class MatchupViewModel : ViewModel(), KoinScopeComponent {
                             _uiStateAddMatchupScreen.value.copy(
                                 allChampions = allChampions,
                                 selectedChampion = allChampions[0],
-                                currentChampion = firstDefined,
+                                currentChampion = currentChampion,
                                 currentRole = role
-                            )
-                        _uiStateAddChampionScreen.value =
-                            _uiStateAddChampionScreen.value.copy(
-                                allChampions = allChampions,
                             )
                         _uiStateMainScreen.value = _uiStateMainScreen.value.copy(
                             definedChampion = allDefinedChampions,
-                            currentChampion = firstDefined,
+                            currentChampion = currentChampion,
                             currentRole = role,
                             filterList = currentFilters,
                             matchupsForCurrentChampion = allMatchups.filter {
-                                it.orig == firstDefined
+                                it.orig == currentChampion
                             }
                         )
                     }
@@ -332,16 +362,18 @@ class MatchupViewModel : ViewModel(), KoinScopeComponent {
                 _uiStateMainActivity.value = _uiStateMainActivity.value.copy(
                     loading = true
                 )
-                matchupRepository.selectChampion(championInfoRepository)
-                withContext(coroutineDispatcher.io){
-                    val matchupsForNewChamp = mutableStateOf(matchupRepository.getAllMatchups())
-                    withContext(coroutineDispatcher.ui){
+                currentChampion = it.champion
+                withContext(coroutineDispatcher.io) {
+                    val matchupsForNewChamp = allMatchups.filter {
+                        matchup -> matchup.orig == it.champion
+                    }
+                    withContext(coroutineDispatcher.ui) {
                         _uiStateAddMatchupScreen.value = _uiStateAddMatchupScreen.value.copy(
-                            currentChampion = it.champion,
+                            currentChampion = currentChampion,
                         )
                         _uiStateMainScreen.value = _uiStateMainScreen.value.copy(
-                            currentChampion = it.champion,
-                            matchupsForCurrentChampion = matchupsForNewChamp.value
+                            currentChampion = currentChampion,
+                            matchupsForCurrentChampion = matchupsForNewChamp
                         )
                         _uiStateMainActivity.value = _uiStateMainActivity.value.copy(
                             loading = false
@@ -371,6 +403,12 @@ class MatchupViewModel : ViewModel(), KoinScopeComponent {
                     isBottomBarVisible = it.shouldShow
                 )
             }
+
+            is MainScreenIntent.FabExpanded -> {
+                _uiStateMainActivity.value = _uiStateMainActivity.value.copy(
+                    isFabExpanded = it.isExpanded
+                )
+            }
         }
     }
 
@@ -378,39 +416,34 @@ class MatchupViewModel : ViewModel(), KoinScopeComponent {
         allDefinedChampions = matchupRepository.getAllChampions()
         allChampions = championInfoRepository.getAllChampions()
         allMatchups = matchupRepository.getAllMatchups()
+        currentChampion = allDefinedChampions.firstOrNull()
     }
 
 
     // Screen State Flows
-    private val _uiStateMainActivity = MutableStateFlow<MainActivityUIState>(
+    private val _uiStateMainActivity = MutableStateFlow(
         MAIN_ACTIVITY_STATE
     )
     val uiStateMainActivity: StateFlow<MainActivityUIState>
         get() = _uiStateMainActivity
 
 
-    private val _uiStateMainScreen = MutableStateFlow<MainScreenUiState>(
+    private val _uiStateMainScreen: MutableStateFlow<MainScreenUIState> = MutableStateFlow(
         MAIN_SCREEN_INIT_STATE
     )
-    val uiStateMainScreen: StateFlow<MainScreenUiState>
+    val uiStateMainScreen: StateFlow<MainScreenUIState>
         get() = _uiStateMainScreen
 
-    private val _uiStateAddChampionScreen = MutableStateFlow<AddChampionUiState>(
-        ADD_CHAMP_INIT_STATE
-    )
-    val uiStateAddChampionScreen: StateFlow<AddChampionUiState>
-        get() = _uiStateAddChampionScreen
-
-    private val _uiStateAddMatchupScreen = MutableStateFlow<AddMatchupUiState>(
+    private val _uiStateAddMatchupScreen = MutableStateFlow(
         ADD_MATCHUP_INIT_STATE
     )
     val uiStateAddMatchupScreen: StateFlow<AddMatchupUiState>
         get() = _uiStateAddMatchupScreen
 
-    private val _uiStateMatchupScreen = MutableStateFlow<MatchupScreenUiState>(
+    private val _uiStateMatchupScreen = MutableStateFlow(
         MATCHUP_SCREEN_INIT_STATE
     )
-    val uiStateMatchupScreen: StateFlow<MatchupScreenUiState>
+    val uiStateMatchupScreen: StateFlow<MatchupScreenUIState>
         get() = _uiStateMatchupScreen
 
     override fun onCleared() {

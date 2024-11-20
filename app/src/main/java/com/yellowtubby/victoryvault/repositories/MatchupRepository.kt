@@ -6,7 +6,6 @@ import com.yellowtubby.victoryvault.ui.model.Matchup
 import com.yellowtubby.victoryvault.ui.model.Role
 
 interface MatchupRepository {
-    suspend fun selectChampion(championInfoRepository: ChampionInfoRepository)
     suspend fun getAllChampions(): List<Champion>
     suspend fun getAllMatchups(): List<Matchup>
     suspend fun addMatchup(matchup: Matchup)

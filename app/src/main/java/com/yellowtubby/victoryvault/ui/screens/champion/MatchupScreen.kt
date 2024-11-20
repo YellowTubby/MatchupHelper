@@ -93,9 +93,6 @@ fun MatchupScreen(
             ItemBuildSection()
     }
 }
-
-
-
 @Composable
 fun ItemBuildSection() {
     Column(
@@ -111,7 +108,7 @@ fun ItemBuildSection() {
 
 @Composable
 fun TipsSection(mainViewModel: MatchupViewModel) {
-    val uiState: MatchupScreenUiState by mainViewModel.uiStateMatchupScreen.collectAsState()
+    val uiState: MatchupScreenUIState by mainViewModel.uiStateMatchupScreen.collectAsState()
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -143,7 +140,7 @@ fun buildIconURIFromTypeAndChampion(abilityType: AbilityType, name: String): Str
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WinrateSection(mainViewModel: MatchupViewModel, scope: CoroutineScope) {
-    val uiState: MatchupScreenUiState by mainViewModel.uiStateMatchupScreen.collectAsState()
+    val uiState: MatchupScreenUIState by mainViewModel.uiStateMatchupScreen.collectAsState()
     val options = listOf("Win", "Loss")
     Column(
         modifier = Modifier
@@ -237,7 +234,7 @@ fun calculateProgress(matchup: Matchup): Float {
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun MatchupImage(mainViewModel: MatchupViewModel) {
-    val uiState: MatchupScreenUiState by mainViewModel.uiStateMatchupScreen.collectAsState()
+    val uiState: MatchupScreenUIState by mainViewModel.uiStateMatchupScreen.collectAsState()
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
