@@ -27,18 +27,22 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.yellowtubby.victoryvault.R
-import com.yellowtubby.victoryvault.ui.screens.ApplicationIntent
-import com.yellowtubby.victoryvault.ui.screens.BACK_BUTTON_STRING
-import com.yellowtubby.victoryvault.ui.screens.MENU_BUTTON_STRING
-import com.yellowtubby.victoryvault.ui.screens.MENU_DELETE_STRING
-import com.yellowtubby.victoryvault.ui.screens.MENU_EDIT_STRING
-import com.yellowtubby.victoryvault.ui.screens.MainActivityUIState
-import com.yellowtubby.victoryvault.ui.screens.MatchupViewModel
+import com.yellowtubby.victoryvault.ui.ApplicationIntent
+import com.yellowtubby.victoryvault.ui.BACK_BUTTON_STRING
+import com.yellowtubby.victoryvault.ui.MENU_BUTTON_STRING
+import com.yellowtubby.victoryvault.ui.MENU_DELETE_STRING
+import com.yellowtubby.victoryvault.ui.MENU_EDIT_STRING
+import com.yellowtubby.victoryvault.ui.MainActivityIntent
+import com.yellowtubby.victoryvault.ui.MainActivityUIState
+import com.yellowtubby.victoryvault.ui.MainActivityViewModel
+import com.yellowtubby.victoryvault.ui.screens.matchup.MatchupViewModel
 import com.yellowtubby.victoryvault.ui.screens.Route
-import com.yellowtubby.victoryvault.ui.screens.matchup.MainScreenIntent
-import com.yellowtubby.victoryvault.ui.screens.matchup.MainScreenUIState
+import com.yellowtubby.victoryvault.ui.screens.main.MainScreenIntent
+import com.yellowtubby.victoryvault.ui.screens.main.MainScreenUIState
+import com.yellowtubby.victoryvault.ui.screens.main.MainScreenViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 fun getIntentBasedOnNavController(actionString: String,
                                   navController: NavController,
@@ -72,12 +76,14 @@ fun getIntentBasedOnNavController(actionString: String,
 @Composable
 fun MatchTopBar(
     scope: CoroutineScope,
-    mainViewModel: MatchupViewModel,
+    mainViewModel: MainActivityViewModel,
     navController: NavController,
     activity: Activity? = LocalContext.current as Activity
 ) {
-    val uiState by mainViewModel.uiStateMainActivity.collectAsState()
-    val uiStateForSelectedMatchups = mainViewModel.uiStateMainScreen.collectAsState()
+    val mainActivityViewModel = koinViewModel<MainActivityViewModel>()
+    val mainScreenViewModel = koinViewModel<MainScreenViewModel>()
+    val uiState by mainViewModel.uiState.collectAsState()
+    val uiStateForSelectedMatchups = mainScreenViewModel.uiState.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     val leftActionList = listOf(BACK_BUTTON_STRING)
     val rightActionList = getActionsBasedOnStateAndDestination(uiState, navController)
@@ -109,14 +115,14 @@ fun MatchTopBar(
                         IconButton(onClick = {
                             if (uiState.isInMultiSelect) {
                                 scope.launch {
-                                    mainViewModel.intentChannel.trySend(
+                                    mainScreenViewModel.emitIntent(
                                         MainScreenIntent.StartMultiSelectChampion(false)
                                     )
                                 }
                             } else {
                                 scope.launch {
-                                    mainViewModel.intentChannel.trySend(
-                                        MainScreenIntent.NavigatedBottomBar(1)
+                                    mainViewModel.emitIntent(
+                                        MainActivityIntent.NavigatedBottomBar(1)
                                     )
                                 }
                                 if(navController.currentDestination?.route == Route.Home.route || !navController.popBackStack()){
@@ -139,7 +145,7 @@ fun MatchTopBar(
             rightActionList.forEach {
                 val onClickCallback : () -> Unit = {
                     scope.launch {
-                        mainViewModel.intentChannel.trySend(
+                        mainScreenViewModel.emitIntent(
                             getIntentBasedOnNavController(it, navController, uiState, uiStateForSelectedMatchups.value)
                         )
                     }

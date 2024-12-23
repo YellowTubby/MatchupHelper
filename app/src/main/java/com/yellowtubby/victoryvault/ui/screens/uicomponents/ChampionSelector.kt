@@ -29,26 +29,29 @@ import com.yellowtubby.victoryvault.ui.model.Champion
 @Composable
 fun ChampionSelector(
     championList: List<Champion>,
-    initialChampion: Champion? = championList[0],
+    initialChampion: Champion?,
     onSelected: (Champion) -> Unit,
 ) {
     val expanded = remember { mutableStateOf(false) }
-    val selectedIndex = remember { mutableIntStateOf(championList.indexOf(initialChampion)) }
-    Box(modifier = Modifier.padding(8.dp), contentAlignment = Alignment.Center) {
-        if(championList.isNotEmpty()){
-            ChampionListItem(
-                championList[selectedIndex.intValue]
-            ) {
-                expanded.value = true
+    initialChampion?.let {
+        val selectedIndex = remember { mutableIntStateOf(championList.indexOf(it)) }
+        Box(modifier = Modifier.padding(8.dp), contentAlignment = Alignment.Center) {
+            if(championList.isNotEmpty()){
+                ChampionListItem(
+                    championList[selectedIndex.intValue]
+                ) {
+                    expanded.value = true
+                }
             }
+            ChampionDropdown(
+                championList,
+                onSelected,
+                expanded,
+                selectedIndex,
+            )
         }
-        ChampionDropdown(
-            championList,
-            onSelected,
-            expanded,
-            selectedIndex,
-        )
     }
+
 }
 
 

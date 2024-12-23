@@ -1,12 +1,9 @@
-package com.yellowtubby.victoryvault.ui.screens.champion
+package com.yellowtubby.victoryvault.ui.screens.matchup
 
 import android.animation.ArgbEvaluator
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.ScrollableState
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,14 +19,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
@@ -39,6 +38,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,6 +48,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -57,40 +59,45 @@ import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.yellowtubby.victoryvault.R
 import com.yellowtubby.victoryvault.ui.model.Ability
-import com.yellowtubby.victoryvault.ui.model.AbilityType
-import com.yellowtubby.victoryvault.ui.model.DamageModifier
 import com.yellowtubby.victoryvault.ui.model.DamageType
 import com.yellowtubby.victoryvault.ui.model.Matchup
-import com.yellowtubby.victoryvault.ui.screens.MatchupViewModel
 import com.yellowtubby.victoryvault.ui.screens.getIconPainerResource
+import com.yellowtubby.victoryvault.ui.screens.uicomponents.TipItem
+import com.yellowtubby.victoryvault.ui.screens.uicomponents.TitleTextComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 
 @Composable
 fun MatchupScreen(
-    mainViewModel: MatchupViewModel,
     scope: CoroutineScope
 ) {
-    val scrollState = rememberScrollState()
+    val mainMatchupViewModel = koinViewModel<MatchupViewModel>()
+    val scrollStateTips = rememberScrollState()
+    val scrollStateLayout = rememberScrollState()
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
-            .scrollable(
-                state = scrollState,
-                orientation = Orientation.Vertical
-            ),
+            .padding(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
-            MatchupImage(mainViewModel)
-            Spacer(modifier = Modifier.height(16.dp))
-            WinrateSection(mainViewModel,scope)
-            Spacer(modifier = Modifier.height(16.dp))
-            TipsSection(mainViewModel)
+        MatchupImage(mainMatchupViewModel)
+        Spacer(modifier = Modifier.height(16.dp))
+        WinrateSection(mainMatchupViewModel,scope)
+        Spacer(modifier = Modifier.height(16.dp))
+        Column(modifier = Modifier.height(1200.dp).verticalScroll(state = scrollStateLayout)) {
+            Column (modifier = Modifier.border(width = 2.dp, MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(16.dp))) {
+                TitleTextComponent(AnnotatedString("Tips"))
+                Column(Modifier.padding(8.dp).height(300.dp).verticalScroll(state = scrollStateTips)) {
+                    TipsSection(mainMatchupViewModel)
+                }
+            }
             Spacer(modifier = Modifier.height(16.dp))
             ItemBuildSection()
+        }
     }
 }
 @Composable
@@ -102,45 +109,45 @@ fun ItemBuildSection() {
             .clip(RoundedCornerShape(16.dp))
             .border(2.dp, MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(16.dp))
     ) {
-        Text(modifier = Modifier.fillMaxSize(), text = "Item Build")
+        TitleTextComponent(AnnotatedString("Item Section"))
+        ItemBuildGrid()
     }
+}
+
+@Composable
+fun ItemBuildGrid() {
+    Text(modifier = Modifier.fillMaxSize(), text = "Item Build")
 }
 
 @Composable
 fun TipsSection(mainViewModel: MatchupViewModel) {
-    val uiState: MatchupScreenUIState by mainViewModel.uiStateMatchupScreen.collectAsState()
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .clip(RoundedCornerShape(16.dp))
-            .border(2.dp, MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(16.dp))
+    val uiState by mainViewModel.uiState.collectAsState()
+    val tips by remember { mutableStateOf(mutableListOf(
+        "Position carefully to avoid skill shots",
+        "Use your ultimate at key team fight moments",
+        "Watch your mana consumption"
+    )) }
+    for ( i in 1..100){
+        tips.add("test$i")
+    }
+    LazyColumn(
+        modifier = Modifier.height(300.dp).padding(8.dp),
+        verticalArrangement = Arrangement.Center,
     ) {
-        AbilityType.entries.forEach { abilityType ->
-            AbilityWithText(
-                ability = Ability(
-                    abilityName = "Bandage Toss",
-                    championName = uiState.matchup.enemy.name,
-                    iconUri = buildIconURIFromTypeAndChampion(abilityType, uiState.matchup.enemy.name),
-                    type = abilityType,
-                    cooldownList = listOf("5", "7", "10", "15", "20"),
-                    damageOrShieldList = listOf("50", "80", "100", "120", "150"),
-                    modifier = DamageModifier(DamageType.AP, 60)
-                )
+        itemsIndexed(tips) { index, tip ->
+            TipItem(
+                tip = tip,
+                onDelete = { tips.removeAt(index) }
             )
-            HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.surfaceVariant)
         }
     }
 }
 
-fun buildIconURIFromTypeAndChampion(abilityType: AbilityType, name: String): String {
-    return "https://ddragon.leagueoflegends.com/cdn/14.17.1/img/passive/Anivia_P.png"
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WinrateSection(mainViewModel: MatchupViewModel, scope: CoroutineScope) {
-    val uiState: MatchupScreenUIState by mainViewModel.uiStateMatchupScreen.collectAsState()
+    val uiState: MatchupScreenUIState by mainViewModel.uiState.collectAsState()
     val options = listOf("Win", "Loss")
     Column(
         modifier = Modifier
@@ -158,7 +165,7 @@ fun WinrateSection(mainViewModel: MatchupViewModel, scope: CoroutineScope) {
         SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
             options.forEachIndexed { index, label ->
                 SegmentedButton(
-                    shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
+                    shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size, baseShape = RoundedCornerShape(16.dp)),
                     icon = {
                         Icon(
                             imageVector = if (index == 0) Icons.Rounded.Add else Icons.Rounded.Clear,
@@ -168,7 +175,7 @@ fun WinrateSection(mainViewModel: MatchupViewModel, scope: CoroutineScope) {
                     },
                     onClick = {
                         scope.launch {
-                            mainViewModel.intentChannel.trySend(
+                            mainViewModel.emitIntent(
                                 MatchupScreenIntent.WinLossChanged(index == 0)
                             )
                         }
@@ -234,7 +241,7 @@ fun calculateProgress(matchup: Matchup): Float {
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun MatchupImage(mainViewModel: MatchupViewModel) {
-    val uiState: MatchupScreenUIState by mainViewModel.uiStateMatchupScreen.collectAsState()
+    val uiState: MatchupScreenUIState by mainViewModel.uiState.collectAsState()
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top

@@ -1,4 +1,4 @@
-package com.yellowtubby.victoryvault.ui.screens
+package com.yellowtubby.victoryvault.ui
 
 import com.yellowtubby.victoryvault.ui.screens.uicomponents.SnackbarMessage
 
@@ -18,5 +18,5 @@ data class MainActivityUIState(
     val isFabExpanded: Boolean = false,
     val isBottomBarVisible: Boolean = true,
     override val snackBarMessage: Pair<Boolean, SnackbarMessage> = Pair(false,SnackbarMessage()),
-    override val loading: Boolean = false
+    val loading: Boolean = false
 ) : ApplicationUIState()

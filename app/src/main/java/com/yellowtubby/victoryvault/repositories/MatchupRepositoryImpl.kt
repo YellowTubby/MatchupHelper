@@ -1,5 +1,6 @@
 package com.yellowtubby.victoryvault.repositories
 
+import android.util.Log
 import com.yellowtubby.victoryvault.room.AbilityEntity
 import com.yellowtubby.victoryvault.room.ChampionEntity
 import com.yellowtubby.victoryvault.room.LIST_DELIMITER

@@ -13,15 +13,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavController
 import com.yellowtubby.victoryvault.R
-import com.yellowtubby.victoryvault.ui.screens.MatchupViewModel
+import com.yellowtubby.victoryvault.ui.MainActivityIntent
+import com.yellowtubby.victoryvault.ui.MainActivityViewModel
+import com.yellowtubby.victoryvault.ui.screens.matchup.MatchupViewModel
 import com.yellowtubby.victoryvault.ui.screens.Route
-import com.yellowtubby.victoryvault.ui.screens.matchup.MainScreenIntent
+import com.yellowtubby.victoryvault.ui.screens.main.MainScreenIntent
 
 data class BottomNavItem(val route: String,
                          val iconSelected: @Composable () -> Unit,
@@ -49,7 +48,7 @@ internal val navList = listOf(
 @Composable
 fun MatchBottomNavigation(
     navController: NavController,
-    mainViewModel: MatchupViewModel
+    mainViewModel: MainActivityViewModel
 ) {
     TabView(navList,navController,mainViewModel)
 }
@@ -62,9 +61,9 @@ fun MatchBottomNavigation(
 fun TabView(
     tabBarItems: List<BottomNavItem>,
     navController: NavController,
-    viewModel: MatchupViewModel
+    viewModel: MainActivityViewModel
 ) {
-    val uiState by viewModel.uiStateMainActivity.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
     if(uiState.isBottomBarVisible){
         NavigationBar {
             // looping over each tab to generate the views and navigation for each item
@@ -79,8 +78,8 @@ fun TabView(
                                 }
                             }
                         }
-                        viewModel.intentChannel.trySend(
-                            MainScreenIntent.NavigatedBottomBar(index)
+                        viewModel.emitIntent(
+                            MainActivityIntent.NavigatedBottomBar(index)
                         )
                     },
                     icon = {

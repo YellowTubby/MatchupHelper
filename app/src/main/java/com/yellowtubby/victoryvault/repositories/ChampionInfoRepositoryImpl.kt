@@ -1,5 +1,6 @@
 package com.yellowtubby.victoryvault.repositories
 
+import android.util.Log
 import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.intl.Locale
 import com.yellowtubby.victoryvault.MatchUpApplication

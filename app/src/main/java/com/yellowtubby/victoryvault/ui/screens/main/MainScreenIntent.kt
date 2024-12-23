@@ -1,10 +1,10 @@
-package com.yellowtubby.victoryvault.ui.screens.matchup
+package com.yellowtubby.victoryvault.ui.screens.main
 
 import com.yellowtubby.victoryvault.ui.model.MatchupFilter
 import com.yellowtubby.victoryvault.ui.model.Champion
 import com.yellowtubby.victoryvault.ui.model.Matchup
 import com.yellowtubby.victoryvault.ui.model.Role
-import com.yellowtubby.victoryvault.ui.screens.ApplicationIntent
+import com.yellowtubby.victoryvault.ui.ApplicationIntent
 
 sealed class MainScreenIntent : ApplicationIntent() {
     data class MultiSelectMatchups(val matchup: Matchup) : MainScreenIntent()
@@ -15,9 +15,8 @@ sealed class MainScreenIntent : ApplicationIntent() {
     data class FilterListChanged(val filter: MatchupFilter) : MainScreenIntent()
     data class RoleChanged(val role: Role): MainScreenIntent()
     data class SelectedMatchup(val matchup: Matchup) : MainScreenIntent()
-    data class NavigatedBottomBar(val selectedIndex: Int) : MainScreenIntent()
-    data class LoadMatchupInfo(val matchup: Matchup) : MainScreenIntent()
-    data class ShowBottomBar(val shouldShow: Boolean) : MainScreenIntent()
+    data class AddChampion(val champion: Champion) : MainScreenIntent()
+    data class CurrentChampionMatchupChanged(val matchupList: List<Matchup>) : MainScreenIntent()
     data object LoadLocalData: MainScreenIntent()
-    data class FabExpanded(val isExpanded: Boolean): MainScreenIntent()
+    data object ErrorClear: MainScreenIntent()
 }

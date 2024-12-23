@@ -1,10 +1,10 @@
-package com.yellowtubby.victoryvault.ui.screens.matchup
+package com.yellowtubby.victoryvault.ui.screens.main
 
 import com.yellowtubby.victoryvault.ui.model.MatchupFilter
 import com.yellowtubby.victoryvault.ui.model.Champion
 import com.yellowtubby.victoryvault.ui.model.Matchup
 import com.yellowtubby.victoryvault.ui.model.Role
-import com.yellowtubby.victoryvault.ui.screens.ApplicationUIState
+import com.yellowtubby.victoryvault.ui.ApplicationUIState
 import com.yellowtubby.victoryvault.ui.screens.uicomponents.SnackbarMessage
 
 
@@ -15,6 +15,7 @@ val MAIN_SCREEN_INIT_STATE : MainScreenUIState = MainScreenUIState(
     isInMultiSelect = false,
     selectedMatchups = emptyList(),
     currentRole = null,
+    allChampions = emptyList(),
     filterList = emptyList()
 )
 data class MainScreenUIState(
@@ -24,10 +25,10 @@ data class MainScreenUIState(
     val matchupsForCurrentChampion: List<Matchup>,
     val isInMultiSelect : Boolean,
     val selectedMatchups: List<Matchup>,
+    val allChampions: List<Champion>,
     val filterList : List<MatchupFilter>,
     val textQuery : String = "",
     override val snackBarMessage: Pair<Boolean, SnackbarMessage> = Pair(false,SnackbarMessage()),
-    override val loading: Boolean = false,
 ) : ApplicationUIState()
 
 

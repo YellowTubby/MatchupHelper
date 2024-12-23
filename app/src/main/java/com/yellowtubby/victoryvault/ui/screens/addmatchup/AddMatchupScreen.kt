@@ -1,4 +1,4 @@
-package com.yellowtubby.victoryvault.ui.screens.add
+package com.yellowtubby.victoryvault.ui.screens.addmatchup
 
 import android.animation.ArgbEvaluator
 import androidx.compose.foundation.border
@@ -40,22 +40,23 @@ import com.bumptech.glide.integration.compose.GlideImage
 import com.yellowtubby.victoryvault.R
 import com.yellowtubby.victoryvault.ui.model.Matchup
 import com.yellowtubby.victoryvault.ui.screens.uicomponents.ChampionSelector
-import com.yellowtubby.victoryvault.ui.screens.MatchupViewModel
+import com.yellowtubby.victoryvault.ui.screens.matchup.MatchupViewModel
 import com.yellowtubby.victoryvault.ui.screens.Route
 import com.yellowtubby.victoryvault.ui.screens.getIconPainerResource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun AddMatchupScreen(
-    mainViewModel: MatchupViewModel,
     scope: CoroutineScope,
     navController : NavController
 ) {
+    val addMatchupViewModel = koinViewModel<AddMatchupViewModel>()
     val statusBarHeight = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 90.dp
-    val uiState: AddMatchupUiState by mainViewModel.uiStateAddMatchupScreen.collectAsState()
+    val uiState: AddMatchupUiState by addMatchupViewModel.uiState.collectAsState()
     val champion = uiState.currentChampion
 
     Column(
@@ -68,7 +69,7 @@ fun AddMatchupScreen(
             uiState.allChampions,
             uiState.currentChampion
         ) {
-            mainViewModel.intentChannel.trySend(
+            addMatchupViewModel.emitIntent(
                 AddMatchupIntent.SelectedChampion(it)
             )
         }
@@ -128,7 +129,7 @@ fun AddMatchupScreen(
 
         Button(onClick = {
             scope.launch {
-                mainViewModel.intentChannel.trySend(
+                addMatchupViewModel.emitIntent(
                     AddMatchupIntent.AddMatchup(
                         Matchup(
                             orig = uiState.currentChampion!!,

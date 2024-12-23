@@ -30,23 +30,24 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
-import com.yellowtubby.victoryvault.ui.screens.MatchupViewModel
+import com.yellowtubby.victoryvault.ui.screens.matchup.MatchupViewModel
 import com.yellowtubby.victoryvault.ui.model.Matchup
-import com.yellowtubby.victoryvault.ui.screens.matchup.MainScreenIntent
-import com.yellowtubby.victoryvault.ui.screens.matchup.MainScreenUIState
+import com.yellowtubby.victoryvault.ui.screens.main.MainScreenIntent
+import com.yellowtubby.victoryvault.ui.screens.main.MainScreenUIState
+import com.yellowtubby.victoryvault.ui.screens.main.MainScreenViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun MatchupCard(
-    viewModel: MatchupViewModel,
+    viewModel: MainScreenViewModel,
     scope : CoroutineScope,
     matchup: Matchup,
     difficulty: Int,
     onClick: () -> Unit
 ) {
-    val uiState : MainScreenUIState by viewModel.uiStateMainScreen.collectAsState()
+    val uiState : MainScreenUIState by viewModel.uiState.collectAsState()
     var isSelected by remember { mutableStateOf(false) }
     Card(
         modifier = Modifier
@@ -62,12 +63,11 @@ fun MatchupCard(
                     onLongPress = {
                         isSelected = !isSelected
                         scope.launch {
-                            viewModel.intentChannel
-                                .trySend(
+                            viewModel.emitIntent(
                                     MainScreenIntent.StartMultiSelectChampion(true)
                                 )
                                 .also {
-                                    viewModel.intentChannel.trySend(
+                                    viewModel.emitIntent(
                                         MainScreenIntent.MultiSelectMatchups(matchup)
                                     )
                                 }

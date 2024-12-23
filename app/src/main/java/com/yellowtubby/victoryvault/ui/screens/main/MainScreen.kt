@@ -1,4 +1,4 @@
-package com.yellowtubby.victoryvault.ui.screens.matchup
+package com.yellowtubby.victoryvault.ui.screens.main
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -29,6 +29,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,18 +40,23 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.yellowtubby.victoryvault.R
 import com.yellowtubby.victoryvault.ui.screens.uicomponents.ChampionSelector
-import com.yellowtubby.victoryvault.ui.screens.MatchupViewModel
 import com.yellowtubby.victoryvault.ui.screens.uicomponents.MatchupCard
 import com.yellowtubby.victoryvault.ui.screens.getIconPainerResource
 import com.yellowtubby.victoryvault.ui.model.Role
-import com.yellowtubby.victoryvault.ui.screens.ApplicationIntent
+import com.yellowtubby.victoryvault.ui.ApplicationIntent
+import com.yellowtubby.victoryvault.ui.MainActivityViewModel
+import com.yellowtubby.victoryvault.ui.model.Champion
 import com.yellowtubby.victoryvault.ui.screens.Route
+import com.yellowtubby.victoryvault.ui.screens.matchup.MatchupScreenIntent
+import com.yellowtubby.victoryvault.ui.screens.matchup.MatchupViewModel
+import com.yellowtubby.victoryvault.ui.screens.uicomponents.ChampionDropdown
 import com.yellowtubby.victoryvault.ui.screens.uicomponents.SnackBarType
 import com.yellowtubby.victoryvault.ui.screens.uicomponents.SnackbarManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,10 +64,10 @@ fun MainScreen(
     navController: NavController,
     scope: CoroutineScope,
     innerPadding: PaddingValues,
-    mainViewModel: MatchupViewModel,
     snackbarHostState: SnackbarHostState
 ) {
-    val uiState: MainScreenUIState by mainViewModel.uiStateMainScreen.collectAsState()
+    val mainScreenViewModel = koinViewModel<MainScreenViewModel>()
+    val uiState: MainScreenUIState by mainScreenViewModel.uiState.collectAsState()
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -87,7 +94,10 @@ fun MainScreen(
                             )
                         }
                     }
-                    val clearingError = async { mainViewModel.intentChannel.trySend(ApplicationIntent.ErrorClear) }
+                    val clearingError = async {
+                        mainScreenViewModel.emitIntent(
+                        MainScreenIntent.ErrorClear)
+                    }
                     awaitAll(showingSnackBar,clearingError)
                 }
             }
@@ -99,21 +109,21 @@ fun MainScreen(
             ) {
                 champion ->
                 scope.launch {
-                    mainViewModel.intentChannel.trySend(
+                    mainScreenViewModel.emitIntent(
                         MainScreenIntent.SelectChampion(champion)
                     )
                 }
             }
             RoleSegmentedButton(
                 uiState,
-                mainViewModel = mainViewModel,
+                mainViewModel = mainScreenViewModel,
                 scope
             )
             Spacer(modifier = Modifier.size(8.dp))
 
             ChampionFilter(
                 scope,
-                mainViewModel,
+                mainScreenViewModel,
             )
             var filteredList = uiState.matchupsForCurrentChampion.sortedBy { it.enemy.name }
             uiState.filterList.forEach {
@@ -124,24 +134,25 @@ fun MainScreen(
                 it.enemy.name.lowercase().contains(uiState.textQuery.lowercase())
             }
             if(filteredList.isNotEmpty()) {
+                val matchupViewModel = koinViewModel<MatchupViewModel>()
                 LazyVerticalGrid(
                     modifier = Modifier.padding(8.dp),
                     columns = GridCells.Fixed(3)
                 ) {
                     items(filteredList) {
                         MatchupCard(
-                            mainViewModel, scope = scope, it, it.difficulty
+                            mainScreenViewModel, scope = scope, it, it.difficulty
                         ) {
                             if (uiState.isInMultiSelect) {
                                 scope.launch {
-                                    mainViewModel.intentChannel.trySend(
+                                    mainScreenViewModel.emitIntent(
                                         MainScreenIntent.MultiSelectMatchups(it)
                                     )
                                 }
                             } else {
                                 scope.launch {
-                                    mainViewModel.intentChannel.trySend(
-                                        MainScreenIntent.LoadMatchupInfo(it)
+                                    matchupViewModel.emitIntent(
+                                        MatchupScreenIntent.LoadMatchupInfo(it, it.enemy)
                                     )
                                     navController.navigate(Route.MatchupInfo.route) {
                                         popUpTo(Route.Home.route) {
@@ -172,33 +183,41 @@ fun MainScreen(
                 }
             }
         }
-        if(uiState.currentChampion == null){
+
+        if(uiState.definedChampion.isEmpty()){
+            val selectedChampion = remember { mutableStateOf("") }
             Text(
                 modifier = Modifier.padding(16.dp),
                 text = "You currently have no selected champions, please add a new champion",
                 textAlign = TextAlign.Center
 
             )
+            ChampionSelector(
+                uiState.allChampions,
+                uiState.currentChampion
+            ) {
+                selectedChampion.value = it.name
+            }
             Spacer(modifier = Modifier.size(8.dp))
             Button(
                 onClick = {
-                    navController.navigate("addChampion")
+                    mainScreenViewModel.emitIntent(
+                        MainScreenIntent.AddChampion(Champion(selectedChampion.value))
+                    )
                 }
             ) {
                 Text(text = "Add Champion")
             }
         }
-
-
     }
 }
 
 @Composable
 fun ChampionFilter(
     scope: CoroutineScope,
-    mainViewModel: MatchupViewModel
+    mainViewModel: MainScreenViewModel
 ) {
-    val uiState: MainScreenUIState by mainViewModel.uiStateMainScreen.collectAsState()
+    val uiState: MainScreenUIState by mainViewModel.uiState.collectAsState()
     TextField(
         modifier = Modifier
             .fillMaxWidth()
@@ -207,7 +226,7 @@ fun ChampionFilter(
         value = uiState.textQuery,
         onValueChange = { str: String ->
             scope.launch {
-                mainViewModel.intentChannel.trySend(
+                mainViewModel.emitIntent(
                     MainScreenIntent.TextFilterChanged(filter = str)
                 )
             }
@@ -226,7 +245,7 @@ fun ChampionFilter(
 @Composable
 fun RoleSegmentedButton(
     uiState: MainScreenUIState,
-    mainViewModel: MatchupViewModel,
+    mainViewModel: MainScreenViewModel,
     scope: CoroutineScope
 ) {
     val options = listOf(Role.TOP, Role.JUNGLE, Role.MID, Role.BOTTOM, Role.SUPPORT)
@@ -245,7 +264,7 @@ fun RoleSegmentedButton(
                 },
                 onCheckedChange = {
                     scope.launch {
-                        mainViewModel.intentChannel.trySend(
+                        mainViewModel.emitIntent(
                             MainScreenIntent.RoleChanged(options[index])
                         )
                     }

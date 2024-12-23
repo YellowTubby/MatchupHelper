@@ -16,27 +16,30 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.yellowtubby.victoryvault.ui.screens.MatchupViewModel
+import com.yellowtubby.victoryvault.ui.MainActivityIntent
+import com.yellowtubby.victoryvault.ui.MainActivityViewModel
 import com.yellowtubby.victoryvault.ui.screens.Route
-import com.yellowtubby.victoryvault.ui.screens.add.AddChampionIntent
-import com.yellowtubby.victoryvault.ui.screens.matchup.MainScreenIntent
+import com.yellowtubby.victoryvault.ui.screens.main.MainScreenIntent
+import com.yellowtubby.victoryvault.ui.screens.main.MainScreenViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 @SuppressLint("RestrictedApi")
 @Composable
 fun MatchFab(
     scope : CoroutineScope,
-    mainViewModel: MatchupViewModel,
+    mainViewModel: MainActivityViewModel,
     navController: NavController
 ) {
-    val uiState by mainViewModel.uiStateMainActivity.collectAsState()
+    val mainScreenViewModel = koinViewModel<MainScreenViewModel>()
+    val uiState by mainViewModel.uiState.collectAsState()
+    val uiStateMainScreen by mainScreenViewModel.uiState.collectAsState()
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val expanded = remember { mutableStateOf(false) }
 
@@ -61,11 +64,11 @@ fun MatchFab(
                 Spacer(modifier = Modifier.height(16.dp))
                 if(expanded.value){
                     ChampionDropdown(
-                        mainViewModel.allChampions,
+                        uiStateMainScreen.allChampions,
                         {
                             scope.launch {
-                                mainViewModel.intentChannel.trySend(
-                                    AddChampionIntent.AddChampion(
+                                mainViewModel.emitIntent(
+                                    MainScreenIntent.AddChampion(
                                         champion = it
                                     )
                                 )
@@ -78,8 +81,8 @@ fun MatchFab(
             }
             ExtendedFloatingActionButton(
                 onClick = { scope.launch {
-                    mainViewModel.intentChannel.trySend(
-                        MainScreenIntent.FabExpanded(!uiState.isFabExpanded)
+                    mainViewModel.emitIntent(
+                        MainActivityIntent.FabExpandedStateChanged(!uiState.isFabExpanded)
                     )
                 } },
                 icon = { Icon(Icons.Filled.Add, contentDescription = "Add") },

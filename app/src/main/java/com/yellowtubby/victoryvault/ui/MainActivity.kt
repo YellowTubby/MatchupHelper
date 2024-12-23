@@ -18,6 +18,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -33,15 +34,15 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.compose.VictoryVaultTheme
-import com.yellowtubby.victoryvault.ui.screens.MainActivityUIState
 import com.yellowtubby.victoryvault.ui.screens.uicomponents.MatchFab
 import com.yellowtubby.victoryvault.ui.screens.uicomponents.MatchTopBar
-import com.yellowtubby.victoryvault.ui.screens.MatchupViewModel
+import com.yellowtubby.victoryvault.ui.screens.matchup.MatchupViewModel
 import com.yellowtubby.victoryvault.ui.screens.Route
-import com.yellowtubby.victoryvault.ui.screens.add.AddMatchupScreen
-import com.yellowtubby.victoryvault.ui.screens.champion.MatchupScreen
-import com.yellowtubby.victoryvault.ui.screens.matchup.MainScreenIntent
-import com.yellowtubby.victoryvault.ui.screens.matchup.MainScreen
+import com.yellowtubby.victoryvault.ui.screens.addmatchup.AddMatchupScreen
+import com.yellowtubby.victoryvault.ui.screens.matchup.MatchupScreen
+import com.yellowtubby.victoryvault.ui.screens.main.MainScreenIntent
+import com.yellowtubby.victoryvault.ui.screens.main.MainScreen
+import com.yellowtubby.victoryvault.ui.screens.main.MainScreenViewModel
 import com.yellowtubby.victoryvault.ui.screens.profile.ProfileScreen
 import com.yellowtubby.victoryvault.ui.screens.statistics.StatisticsScreen
 import com.yellowtubby.victoryvault.ui.screens.uicomponents.MatchBottomNavigation
@@ -62,14 +63,13 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun MainContent() {
-    val mainViewModel = koinViewModel<MatchupViewModel>()
+    val mainViewModel = koinViewModel<MainActivityViewModel>()
     val snackBarState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    LoadMainData(mainViewModel,snackBarState)
+    LoadMainData()
     VictoryVaultTheme {
         val navController = rememberNavController()
         Scaffold(
@@ -112,14 +112,12 @@ fun MainContent() {
                         innerPadding = innerPadding,
                         scope = scope,
                         navController = navController,
-                        mainViewModel = mainViewModel,
                         snackbarHostState = snackBarState
                     )
                 }
                 composable(Route.MatchupInfo.route) {
                     HandleBottomBarVisibility(mainViewModel, false)
                     MatchupScreen(
-                        mainViewModel,
                         scope
                     )
                 }
@@ -127,7 +125,6 @@ fun MainContent() {
                 composable(route = Route.AddMatchup.route) {
                     HandleBottomBarVisibility(mainViewModel, false)
                     AddMatchupScreen(
-                        mainViewModel = mainViewModel,
                         scope = scope,
                         navController = navController
                     )
@@ -147,19 +144,20 @@ fun MainContent() {
 }
 
 @Composable
-fun LoadMainData(mainViewModel: MatchupViewModel, snackbarHostState: SnackbarHostState) {
+fun LoadMainData() {
+    val mainScreenViewModel = koinViewModel<MainScreenViewModel>()
     LaunchedEffect(true) {
-        mainViewModel.intentChannel.trySend(
+        mainScreenViewModel.emitIntent(
             MainScreenIntent.LoadLocalData
         )
     }
 }
 
 @Composable
-fun HandleBottomBarVisibility(mainViewModel: MatchupViewModel, shouldBeVisibile : Boolean) {
+fun HandleBottomBarVisibility(mainViewModel: MainActivityViewModel, shouldBeVisibile : Boolean) {
     LaunchedEffect(true) {
-        mainViewModel.intentChannel.trySend(
-            MainScreenIntent.ShowBottomBar(shouldBeVisibile)
+        mainViewModel.emitIntent(
+            MainActivityIntent.BottomBarVisibilityChanged(isVisible = shouldBeVisibile)
         )
     }
 }
@@ -167,21 +165,23 @@ fun HandleBottomBarVisibility(mainViewModel: MatchupViewModel, shouldBeVisibile 
 
 @Composable
 fun MatchupProgressIndicator(
-    mainViewModel: MatchupViewModel
+    viewModel: MainActivityViewModel
 ) {
-    val uiState: MainActivityUIState by mainViewModel.uiStateMainActivity.collectAsState()
+    val uiState: MainActivityUIState by viewModel.uiState.collectAsState()
     if (uiState.loading) {
-        CircularProgressIndicator(
-            Modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.3f))
-                .clickable(
-                    indication = null,
-                    interactionSource = remember { MutableInteractionSource() },
-                    onClick = {}
-                )
-                .wrapContentSize(Alignment.Center)
-                .size(80.dp)
-        )
+        Surface(shadowElevation = 9.dp) {
+            CircularProgressIndicator(
+                Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.3f))
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() },
+                        onClick = {}
+                    )
+                    .wrapContentSize(Alignment.Center)
+                    .size(80.dp)
+            )
+        }
     }
 }

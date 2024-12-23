@@ -1,0 +1,10 @@
+package com.yellowtubby.victoryvault.ui
+
+sealed class MainActivityIntent : ApplicationIntent() {
+    data class UpdatedSelectedChampions(val championNumber: Int) : MainActivityIntent()
+    data class MultiSelectChanged(val isEnabled: Boolean) : MainActivityIntent()
+    data class LoadingStateChanged(val isLoading: Boolean) : MainActivityIntent()
+    data class NavigatedBottomBar(val selectedIndex : Int) : MainActivityIntent()
+    data class BottomBarVisibilityChanged(val isVisible: Boolean) : MainActivityIntent()
+    data class FabExpandedStateChanged(val isExpanded: Boolean ) : MainActivityIntent()
+}
