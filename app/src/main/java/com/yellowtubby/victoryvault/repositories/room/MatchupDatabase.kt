@@ -1,4 +1,4 @@
-package com.yellowtubby.victoryvault.room
+package com.yellowtubby.victoryvault.repositories.room
 
 import androidx.room.Database
 import androidx.room.RoomDatabase

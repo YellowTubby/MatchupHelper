@@ -58,10 +58,12 @@ import androidx.compose.ui.unit.dp
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.yellowtubby.victoryvault.R
-import com.yellowtubby.victoryvault.ui.model.Ability
-import com.yellowtubby.victoryvault.ui.model.DamageType
-import com.yellowtubby.victoryvault.ui.model.Matchup
+import com.yellowtubby.victoryvault.model.Ability
+import com.yellowtubby.victoryvault.model.DamageType
+import com.yellowtubby.victoryvault.model.Matchup
 import com.yellowtubby.victoryvault.ui.screens.getIconPainerResource
+import com.yellowtubby.victoryvault.ui.screens.main.MainScreenViewModel
+import com.yellowtubby.victoryvault.ui.screens.uicomponents.MatchupProgressIndicator
 import com.yellowtubby.victoryvault.ui.screens.uicomponents.TipItem
 import com.yellowtubby.victoryvault.ui.screens.uicomponents.TitleTextComponent
 import kotlinx.coroutines.CoroutineScope
@@ -76,27 +78,29 @@ fun MatchupScreen(
     val mainMatchupViewModel = koinViewModel<MatchupViewModel>()
     val scrollStateTips = rememberScrollState()
     val scrollStateLayout = rememberScrollState()
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
-    ) {
-        MatchupImage(mainMatchupViewModel)
-        Spacer(modifier = Modifier.height(16.dp))
-        WinrateSection(mainMatchupViewModel,scope)
-        Spacer(modifier = Modifier.height(16.dp))
-        Column(modifier = Modifier.height(1200.dp).verticalScroll(state = scrollStateLayout)) {
-            Column (modifier = Modifier.border(width = 2.dp, MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(16.dp))) {
-                TitleTextComponent(AnnotatedString("Tips"))
-                Column(Modifier.padding(8.dp).height(300.dp).verticalScroll(state = scrollStateTips)) {
-                    TipsSection(mainMatchupViewModel)
-                }
-            }
+    val uiState by mainMatchupViewModel.uiState.collectAsState()
+    MatchupProgressIndicator(uiState) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top
+        ) {
+            MatchupImage(uiState)
             Spacer(modifier = Modifier.height(16.dp))
-            ItemBuildSection()
+            WinrateSection(mainMatchupViewModel,scope)
+            Spacer(modifier = Modifier.height(16.dp))
+            Column(modifier = Modifier.height(1200.dp).verticalScroll(state = scrollStateLayout)) {
+                Column (modifier = Modifier.border(width = 2.dp, MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(16.dp))) {
+                    TitleTextComponent(AnnotatedString("Tips"))
+                    Column(Modifier.padding(8.dp).height(300.dp).verticalScroll(state = scrollStateTips)) {
+                        TipsSection(mainMatchupViewModel)
+                    }
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                ItemBuildSection()
+            }
         }
     }
 }
@@ -146,8 +150,8 @@ fun TipsSection(mainViewModel: MatchupViewModel) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun WinrateSection(mainViewModel: MatchupViewModel, scope: CoroutineScope) {
-    val uiState: MatchupScreenUIState by mainViewModel.uiState.collectAsState()
+fun WinrateSection(mainScreenViewModel: MatchupViewModel, scope: CoroutineScope) {
+    val uiState by mainScreenViewModel.uiState.collectAsState()
     val options = listOf("Win", "Loss")
     Column(
         modifier = Modifier
@@ -175,7 +179,7 @@ fun WinrateSection(mainViewModel: MatchupViewModel, scope: CoroutineScope) {
                     },
                     onClick = {
                         scope.launch {
-                            mainViewModel.emitIntent(
+                            mainScreenViewModel.emitIntent(
                                 MatchupScreenIntent.WinLossChanged(index == 0)
                             )
                         }
@@ -240,8 +244,7 @@ fun calculateProgress(matchup: Matchup): Float {
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun MatchupImage(mainViewModel: MatchupViewModel) {
-    val uiState: MatchupScreenUIState by mainViewModel.uiState.collectAsState()
+fun MatchupImage(uiState: MatchupScreenUIState) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top

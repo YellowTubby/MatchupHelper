@@ -5,7 +5,7 @@ import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.intl.Locale
 import com.yellowtubby.victoryvault.MatchUpApplication
 import com.yellowtubby.victoryvault.R
-import com.yellowtubby.victoryvault.ui.model.Champion
+import com.yellowtubby.victoryvault.model.Champion
 
 
 class ChampionInfoRepositoryImpl : ChampionInfoRepository {

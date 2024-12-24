@@ -1,6 +1,7 @@
 package com.yellowtubby.victoryvault.ui.screens.addmatchup
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.viewModelScope
 import com.yellowtubby.victoryvault.di.MatchupCoroutineDispatcher
 import com.yellowtubby.victoryvault.di.SharedFlowProvider
 import com.yellowtubby.victoryvault.general.BaseViewModel
@@ -10,6 +11,7 @@ import com.yellowtubby.victoryvault.ui.screens.main.MainScreenIntent
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.createScope
 import org.koin.core.scope.Scope
@@ -18,10 +20,17 @@ class AddMatchupViewModel(
     sharedFlowProvider: SharedFlowProvider,
     coroutineDispatcher: MatchupCoroutineDispatcher
 )
-    : BaseViewModel(sharedFlowProvider,coroutineDispatcher) {
+    : BaseViewModel<AddMatchupUiState>(sharedFlowProvider,coroutineDispatcher) {
+    override val _uiState: MutableStateFlow<AddMatchupUiState> = MutableStateFlow(
+        ADD_MATCHUP_INIT_STATE
+    )
 
     init {
-        collectSharedFlow()
+        viewModelScope.launch {
+            launch {
+                collectSharedFlow()
+            }
+        }
     }
 
     override suspend fun handleIntent(intent: ApplicationIntent) {
@@ -48,8 +57,8 @@ class AddMatchupViewModel(
             }
 
             is AddMatchupIntent.AddMatchup -> {
-                _intentFlow.emit(
-                    MainActivityIntent.LoadingStateChanged(isLoading = true)
+                _uiState.value = _uiState.value.copy(
+                    loading = true
                 )
                 withContext(coroutineDispatcher.io) {
                     val addMatch = async { matchupRepository.addMatchup(intent.matchup) }
@@ -59,8 +68,8 @@ class AddMatchupViewModel(
                         _intentFlow.emit(
                             MainScreenIntent.CurrentChampionMatchupChanged(matchups.value)
                         )
-                        _intentFlow.emit(
-                            MainActivityIntent.LoadingStateChanged(isLoading = false)
+                        _uiState.value = _uiState.value.copy(
+                            loading = false
                         )
                     }
                 }
@@ -78,11 +87,5 @@ class AddMatchupViewModel(
         get() = { it is AddMatchupIntent }
 
 
-    private val _uiState: MutableStateFlow<AddMatchupUiState> = MutableStateFlow(
-        ADD_MATCHUP_INIT_STATE
-    )
-
-    val uiState: StateFlow<AddMatchupUiState>
-        get() = _uiState
 
 }

@@ -1,8 +1,8 @@
-package com.yellowtubby.victoryvault.room
+package com.yellowtubby.victoryvault.repositories.room
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
-import com.yellowtubby.victoryvault.ui.model.Role
+import com.yellowtubby.victoryvault.model.Role
 
 @Entity(
     primaryKeys = ["champion_name","champion_enemy","role"]

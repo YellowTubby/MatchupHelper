@@ -1,25 +1,22 @@
 package com.yellowtubby.victoryvault.ui
 
+import androidx.lifecycle.viewModelScope
 import com.yellowtubby.victoryvault.di.MatchupCoroutineDispatcher
 import com.yellowtubby.victoryvault.di.SharedFlowProvider
 import com.yellowtubby.victoryvault.general.BaseViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 class MainActivityViewModel(
     sharedFlowProvider: SharedFlowProvider,
     coroutineDispatcher: MatchupCoroutineDispatcher
-) : BaseViewModel(sharedFlowProvider, coroutineDispatcher) {
+) : BaseViewModel<MainActivityUIState>(sharedFlowProvider, coroutineDispatcher) {
+    override val _uiState: MutableStateFlow<MainActivityUIState> = MutableStateFlow(
+        MAIN_ACTIVITY_STATE
+    )
 
     override suspend fun handleIntent(intent: ApplicationIntent) {
         when(intent){
-
-            is MainActivityIntent.LoadingStateChanged -> {
-                _uiState.value = _uiState.value.copy(
-                    loading = intent.isLoading
-                )
-            }
-
             is MainActivityIntent.UpdatedSelectedChampions -> {
                 _uiState.value = _uiState.value.copy(
                     selectedAmount = intent.championNumber
@@ -27,7 +24,7 @@ class MainActivityViewModel(
             }
             is MainActivityIntent.MultiSelectChanged -> {
                 _uiState.value = _uiState.value.copy(
-                    isInMultiSelect = intent.isEnabled,
+                    multiSelectEnabled = intent.isEnabled,
                     selectedAmount = if (!intent.isEnabled) 0 else _uiState.value.selectedAmount
                 )
             }
@@ -54,17 +51,15 @@ class MainActivityViewModel(
     }
 
     init {
-        collectSharedFlow()
+        viewModelScope.launch {
+            launch {
+                collectSharedFlow()
+            }
+        }
     }
 
     override val filterFunction: (ApplicationIntent) -> Boolean
         get() = { it is MainActivityIntent }
 
-    private val _uiState: MutableStateFlow<MainActivityUIState> = MutableStateFlow(
-        MAIN_ACTIVITY_STATE
-    )
-
-    val uiState: StateFlow<MainActivityUIState>
-        get() = _uiState
 
 }

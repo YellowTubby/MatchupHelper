@@ -1,14 +1,16 @@
 package com.yellowtubby.victoryvault.ui.screens.matchup
 
+import androidx.lifecycle.viewModelScope
 import com.yellowtubby.victoryvault.di.MatchupCoroutineDispatcher
 import com.yellowtubby.victoryvault.di.SharedFlowProvider
 import com.yellowtubby.victoryvault.general.BaseViewModel
 import com.yellowtubby.victoryvault.ui.ApplicationIntent
-import com.yellowtubby.victoryvault.ui.model.Matchup
+import com.yellowtubby.victoryvault.model.Matchup
 import com.yellowtubby.victoryvault.ui.MainActivityIntent
 import com.yellowtubby.victoryvault.ui.screens.uicomponents.SnackbarMessage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.createScope
 import org.koin.core.scope.Scope
@@ -16,10 +18,14 @@ import org.koin.core.scope.Scope
 class MatchupViewModel(
     sharedFlowProvider: SharedFlowProvider,
     coroutineDispatcher: MatchupCoroutineDispatcher
-) : BaseViewModel(sharedFlowProvider, coroutineDispatcher) {
+) : BaseViewModel<MatchupScreenUIState>(sharedFlowProvider, coroutineDispatcher) {
 
     init {
-        collectSharedFlow()
+        viewModelScope.launch {
+            launch {
+                collectSharedFlow()
+            }
+        }
     }
     override suspend fun handleIntent(intent: ApplicationIntent) {
         when (intent) {
@@ -53,16 +59,18 @@ class MatchupViewModel(
             }
 
             is MatchupScreenIntent.LoadMatchupInfo -> {
-                _intentFlow.emit(MainActivityIntent.LoadingStateChanged(isLoading = true))
+                _uiState.value = _uiState.value.copy(
+                    loading = true
+                )
                 withContext(coroutineDispatcher.io){
                     val filterMatchup = intent.matchup
                     _uiState.value = _uiState.value.copy(
                         matchup = matchupRepository.getAllMatchups().first {
                             it.enemy == filterMatchup.enemy && it.orig == filterMatchup.orig
-                        }
+                        },
+                        loading = false
                     )
                 }
-                _intentFlow.emit(MainActivityIntent.LoadingStateChanged(isLoading = false))
             }
 
             is MatchupScreenIntent.ErrorClear -> {
@@ -76,12 +84,9 @@ class MatchupViewModel(
     override val filterFunction: (ApplicationIntent) -> Boolean
         get() = { it is MatchupScreenIntent }
 
-    private val _uiState = MutableStateFlow(
+    override val _uiState = MutableStateFlow(
         MATCHUP_SCREEN_INIT_STATE
     )
-    val uiState: StateFlow<MatchupScreenUIState>
-        get() = _uiState
-
 
 
 

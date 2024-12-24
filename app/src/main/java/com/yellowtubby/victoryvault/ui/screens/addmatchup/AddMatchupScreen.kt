@@ -38,11 +38,12 @@ import androidx.navigation.NavController
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.yellowtubby.victoryvault.R
-import com.yellowtubby.victoryvault.ui.model.Matchup
+import com.yellowtubby.victoryvault.model.Matchup
 import com.yellowtubby.victoryvault.ui.screens.uicomponents.ChampionSelector
 import com.yellowtubby.victoryvault.ui.screens.matchup.MatchupViewModel
 import com.yellowtubby.victoryvault.ui.screens.Route
 import com.yellowtubby.victoryvault.ui.screens.getIconPainerResource
+import com.yellowtubby.victoryvault.ui.screens.uicomponents.MatchupProgressIndicator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -58,100 +59,101 @@ fun AddMatchupScreen(
     val statusBarHeight = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 90.dp
     val uiState: AddMatchupUiState by addMatchupViewModel.uiState.collectAsState()
     val champion = uiState.currentChampion
-
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
-    ) {
-        Spacer(Modifier.height(statusBarHeight))
-        ChampionSelector(
-            uiState.allChampions,
-            uiState.currentChampion
+    MatchupProgressIndicator(uiState) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top
         ) {
-            addMatchupViewModel.emitIntent(
-                AddMatchupIntent.SelectedChampion(it)
-            )
-        }
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-                .height(250.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .border(
-                    width = 1.dp,
-                    color = MaterialTheme.colorScheme.secondary,
-                    shape = RoundedCornerShape(16.dp)
-                ),
-            contentAlignment = Alignment.BottomCenter
-        ) {
-            uiState.selectedChampion?.let {
-                GlideImage(
-                    modifier = Modifier,
-                    contentScale = ContentScale.FillBounds,
-                    model = it.splashUri,
-                    contentDescription = "grid_icon_${uiState.currentChampion?.name}"
-                )
-            }
-            val shape = RoundedCornerShape(8.dp)
-            Box( modifier = Modifier
-                .align(alignment = Alignment.BottomStart)
-                .fillMaxSize(0.4f)
-                .padding(6.dp)
-                .clip(
-                    shape
-                )
-                .border(
-                    width = 1.dp,
-                    color = MaterialTheme.colorScheme.secondary,
-                    shape = shape
-                )) {
-                GlideImage(
-                    contentScale = ContentScale.FillBounds,
-                    model = champion?.splashUri, contentDescription = "grid_icon_${champion?.name}"
-                )
-                Icon(
-                    modifier = Modifier.align(alignment = Alignment.BottomEnd),
-                    painter = getIconPainerResource(uiState.currentRole),
-                    contentDescription = "role_icon_add"
-                )
-            }
-        }
-
-        val sliderPosition = remember { mutableFloatStateOf(0f) }
-        DifficultySlider(
-            Modifier.padding(24.dp),
-            sliderPosition.floatValue
-        ) {
-            sliderPosition.floatValue = it
-        }
-
-        Button(onClick = {
-            scope.launch {
+            Spacer(Modifier.height(statusBarHeight))
+            ChampionSelector(
+                uiState.allChampions,
+                uiState.currentChampion
+            ) {
                 addMatchupViewModel.emitIntent(
-                    AddMatchupIntent.AddMatchup(
-                        Matchup(
-                            orig = uiState.currentChampion!!,
-                            enemy = uiState.selectedChampion!!,
-                            role = uiState.currentRole!!,
-                            difficulty = sliderPosition.floatValue.toInt(),
-                            numWins = 0,
-                            numTotal = 0,
-                            description = ""
-                        )
-                    )
+                    AddMatchupIntent.SelectedChampion(it)
                 )
-                navController.navigate(route = Route.Home.route) {
-                    popUpTo(Route.Home.route){
-                        inclusive = true
-                    }
+            }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+                    .height(250.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.secondary,
+                        shape = RoundedCornerShape(16.dp)
+                    ),
+                contentAlignment = Alignment.BottomCenter
+            ) {
+                uiState.selectedChampion?.let {
+                    GlideImage(
+                        modifier = Modifier,
+                        contentScale = ContentScale.FillBounds,
+                        model = it.splashUri,
+                        contentDescription = "grid_icon_${uiState.currentChampion?.name}"
+                    )
+                }
+                val shape = RoundedCornerShape(8.dp)
+                Box( modifier = Modifier
+                    .align(alignment = Alignment.BottomStart)
+                    .fillMaxSize(0.4f)
+                    .padding(6.dp)
+                    .clip(
+                        shape
+                    )
+                    .border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.secondary,
+                        shape = shape
+                    )) {
+                    GlideImage(
+                        contentScale = ContentScale.FillBounds,
+                        model = champion?.splashUri, contentDescription = "grid_icon_${champion?.name}"
+                    )
+                    Icon(
+                        modifier = Modifier.align(alignment = Alignment.BottomEnd),
+                        painter = getIconPainerResource(uiState.currentRole),
+                        contentDescription = "role_icon_add"
+                    )
                 }
             }
-        }) {
-            Text(stringResource(R.string.add_matchup_string))
-        }
 
+            val sliderPosition = remember { mutableFloatStateOf(0f) }
+            DifficultySlider(
+                Modifier.padding(24.dp),
+                sliderPosition.floatValue
+            ) {
+                sliderPosition.floatValue = it
+            }
+
+            Button(onClick = {
+                scope.launch {
+                    addMatchupViewModel.emitIntent(
+                        AddMatchupIntent.AddMatchup(
+                            Matchup(
+                                orig = uiState.currentChampion!!,
+                                enemy = uiState.selectedChampion!!,
+                                role = uiState.currentRole!!,
+                                difficulty = sliderPosition.floatValue.toInt(),
+                                numWins = 0,
+                                numTotal = 0,
+                                description = ""
+                            )
+                        )
+                    )
+                    navController.navigate(route = Route.Home.route) {
+                        popUpTo(Route.Home.route){
+                            inclusive = true
+                        }
+                    }
+                }
+            }) {
+                Text(stringResource(R.string.add_matchup_string))
+            }
+
+        }
     }
 }
 

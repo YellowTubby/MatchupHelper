@@ -53,7 +53,7 @@ fun getIntentBasedOnNavController(actionString: String,
         Route.Home.route -> {
             when(actionString){
                 MENU_DELETE_STRING -> {
-                    if (mainScreenUiState.isInMultiSelect) {
+                    if (mainScreenUiState.multiSelectEnabled) {
                         MainScreenIntent.DeleteSelected(
                             screenUIState.selectedMatchups
                         )
@@ -89,11 +89,11 @@ fun MatchTopBar(
     val rightActionList = getActionsBasedOnStateAndDestination(uiState, navController)
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-            containerColor = if (uiState.isInMultiSelect) MaterialTheme.colorScheme.inversePrimary else MaterialTheme.colorScheme.primaryContainer,
+            containerColor = if (uiState.multiSelectEnabled) MaterialTheme.colorScheme.inversePrimary else MaterialTheme.colorScheme.primaryContainer,
             titleContentColor = MaterialTheme.colorScheme.primary,
         ),
         title = {
-            if (uiState.isInMultiSelect) {
+            if (uiState.multiSelectEnabled) {
                 Text(
                     style = MaterialTheme.typography.titleMedium,
                     text = "${uiState.selectedAmount} selected"
@@ -113,7 +113,7 @@ fun MatchTopBar(
                 when (it) {
                     BACK_BUTTON_STRING -> {
                         IconButton(onClick = {
-                            if (uiState.isInMultiSelect) {
+                            if (uiState.multiSelectEnabled) {
                                 scope.launch {
                                     mainScreenViewModel.emitIntent(
                                         MainScreenIntent.StartMultiSelectChampion(false)
@@ -185,7 +185,7 @@ fun MatchTopBar(
 fun getActionsBasedOnStateAndDestination(uiState : MainActivityUIState, navController: NavController): List<String> {
     return when(navController.currentDestination?.route){
         Route.Home.route -> {
-            if (uiState.isInMultiSelect) listOf(MENU_DELETE_STRING) else listOf(MENU_BUTTON_STRING)
+            if (uiState.multiSelectEnabled) listOf(MENU_DELETE_STRING) else listOf(MENU_BUTTON_STRING)
         }
 
         Route.MatchupInfo.route -> {

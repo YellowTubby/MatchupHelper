@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.yellowtubby.victoryvault.ui.screens.matchup.MatchupViewModel
-import com.yellowtubby.victoryvault.ui.model.Matchup
+import com.yellowtubby.victoryvault.model.Matchup
 import com.yellowtubby.victoryvault.ui.screens.main.MainScreenIntent
 import com.yellowtubby.victoryvault.ui.screens.main.MainScreenUIState
 import com.yellowtubby.victoryvault.ui.screens.main.MainScreenViewModel
@@ -55,7 +55,7 @@ fun MatchupCard(
             .pointerInput(Unit) {
                 detectTapGestures(
                     onTap = {
-                        if(uiState.isInMultiSelect){
+                        if(uiState.multiSelectEnabled){
                             isSelected = !isSelected
                         }
                         onClick()

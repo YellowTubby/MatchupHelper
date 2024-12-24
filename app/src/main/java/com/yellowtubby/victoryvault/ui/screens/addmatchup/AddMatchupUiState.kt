@@ -1,7 +1,7 @@
 package com.yellowtubby.victoryvault.ui.screens.addmatchup
 
-import com.yellowtubby.victoryvault.ui.model.Champion
-import com.yellowtubby.victoryvault.ui.model.Role
+import com.yellowtubby.victoryvault.model.Champion
+import com.yellowtubby.victoryvault.model.Role
 import com.yellowtubby.victoryvault.ui.ApplicationUIState
 import com.yellowtubby.victoryvault.ui.screens.uicomponents.SnackbarMessage
 
@@ -20,4 +20,6 @@ data class AddMatchupUiState(
     val selectedChampion: Champion?,
     val selectedDifficulty: Float,
     override val snackBarMessage: Pair<Boolean, SnackbarMessage> = Pair(false,SnackbarMessage()),
-) : ApplicationUIState()
+    override val loading: Boolean = false,
+    override val multiSelectEnabled: Boolean = false,
+    ) : ApplicationUIState()

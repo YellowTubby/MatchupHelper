@@ -13,7 +13,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.yellowtubby.victoryvault.R
-import com.yellowtubby.victoryvault.ui.model.Role
+import com.yellowtubby.victoryvault.model.Role
 
 
 @Composable

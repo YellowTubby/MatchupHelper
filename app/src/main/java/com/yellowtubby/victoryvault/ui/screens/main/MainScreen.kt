@@ -42,14 +42,15 @@ import com.yellowtubby.victoryvault.R
 import com.yellowtubby.victoryvault.ui.screens.uicomponents.ChampionSelector
 import com.yellowtubby.victoryvault.ui.screens.uicomponents.MatchupCard
 import com.yellowtubby.victoryvault.ui.screens.getIconPainerResource
-import com.yellowtubby.victoryvault.ui.model.Role
+import com.yellowtubby.victoryvault.model.Role
 import com.yellowtubby.victoryvault.ui.ApplicationIntent
 import com.yellowtubby.victoryvault.ui.MainActivityViewModel
-import com.yellowtubby.victoryvault.ui.model.Champion
+import com.yellowtubby.victoryvault.model.Champion
 import com.yellowtubby.victoryvault.ui.screens.Route
 import com.yellowtubby.victoryvault.ui.screens.matchup.MatchupScreenIntent
 import com.yellowtubby.victoryvault.ui.screens.matchup.MatchupViewModel
 import com.yellowtubby.victoryvault.ui.screens.uicomponents.ChampionDropdown
+import com.yellowtubby.victoryvault.ui.screens.uicomponents.MatchupProgressIndicator
 import com.yellowtubby.victoryvault.ui.screens.uicomponents.SnackBarType
 import com.yellowtubby.victoryvault.ui.screens.uicomponents.SnackbarManager
 import kotlinx.coroutines.CoroutineScope
@@ -58,7 +59,6 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
     navController: NavController,
@@ -68,145 +68,147 @@ fun MainScreen(
 ) {
     val mainScreenViewModel = koinViewModel<MainScreenViewModel>()
     val uiState: MainScreenUIState by mainScreenViewModel.uiState.collectAsState()
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(innerPadding),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = if(uiState.definedChampion.isNotEmpty()) Arrangement.Top else Arrangement.Center
-    ) {
-        LaunchedEffect(uiState.snackBarMessage) {
-            scope.launch {
-                if(uiState.snackBarMessage.first){
-                    val showingSnackBar = async {
-                        val snackbarManager = SnackbarManager(
-                            snackbarHostState, scope
-                        )
-                        when(uiState.snackBarMessage.second.type){
-                            SnackBarType.SUCCESS -> snackbarManager.showSuccessSnackbar(
-                                uiState.snackBarMessage.second.description
-                            )
-                            SnackBarType.ERROR -> snackbarManager.showErrorSnackbar(
-                                uiState.snackBarMessage.second.description
-                            )
-                            SnackBarType.INFO -> snackbarManager.showInfoSnackbar(
-                                uiState.snackBarMessage.second.description
-                            )
-                        }
-                    }
-                    val clearingError = async {
-                        mainScreenViewModel.emitIntent(
-                        MainScreenIntent.ErrorClear)
-                    }
-                    awaitAll(showingSnackBar,clearingError)
-                }
-            }
-        }
-        uiState.currentChampion?.let {
-            ChampionSelector(
-                uiState.definedChampion,
-                it
-            ) {
-                champion ->
+    MatchupProgressIndicator(uiState) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = if(uiState.definedChampion.isNotEmpty()) Arrangement.Top else Arrangement.Center
+        ) {
+            LaunchedEffect(uiState.snackBarMessage) {
                 scope.launch {
-                    mainScreenViewModel.emitIntent(
-                        MainScreenIntent.SelectChampion(champion)
-                    )
+                    if(uiState.snackBarMessage.first){
+                        val showingSnackBar = async {
+                            val snackbarManager = SnackbarManager(
+                                snackbarHostState, scope
+                            )
+                            when(uiState.snackBarMessage.second.type){
+                                SnackBarType.SUCCESS -> snackbarManager.showSuccessSnackbar(
+                                    uiState.snackBarMessage.second.description
+                                )
+                                SnackBarType.ERROR -> snackbarManager.showErrorSnackbar(
+                                    uiState.snackBarMessage.second.description
+                                )
+                                SnackBarType.INFO -> snackbarManager.showInfoSnackbar(
+                                    uiState.snackBarMessage.second.description
+                                )
+                            }
+                        }
+                        val clearingError = async {
+                            mainScreenViewModel.emitIntent(
+                                MainScreenIntent.ErrorClear)
+                        }
+                        awaitAll(showingSnackBar,clearingError)
+                    }
                 }
             }
-            RoleSegmentedButton(
-                uiState,
-                mainViewModel = mainScreenViewModel,
-                scope
-            )
-            Spacer(modifier = Modifier.size(8.dp))
-
-            ChampionFilter(
-                scope,
-                mainScreenViewModel,
-            )
-            var filteredList = uiState.matchupsForCurrentChampion.sortedBy { it.enemy.name }
-            uiState.filterList.forEach {
-                    filter ->
-                        filteredList = filteredList.filter(filter.filterFunction)
-            }
-            filteredList = filteredList.filter {
-                it.enemy.name.lowercase().contains(uiState.textQuery.lowercase())
-            }
-            if(filteredList.isNotEmpty()) {
-                val matchupViewModel = koinViewModel<MatchupViewModel>()
-                LazyVerticalGrid(
-                    modifier = Modifier.padding(8.dp),
-                    columns = GridCells.Fixed(3)
+            uiState.currentChampion?.let {
+                ChampionSelector(
+                    uiState.definedChampion,
+                    it
                 ) {
-                    items(filteredList) {
-                        MatchupCard(
-                            mainScreenViewModel, scope = scope, it, it.difficulty
-                        ) {
-                            if (uiState.isInMultiSelect) {
-                                scope.launch {
-                                    mainScreenViewModel.emitIntent(
-                                        MainScreenIntent.MultiSelectMatchups(it)
-                                    )
-                                }
-                            } else {
-                                scope.launch {
-                                    matchupViewModel.emitIntent(
-                                        MatchupScreenIntent.LoadMatchupInfo(it, it.enemy)
-                                    )
-                                    navController.navigate(Route.MatchupInfo.route) {
-                                        popUpTo(Route.Home.route) {
-                                            inclusive = false
+                        champion ->
+                    scope.launch {
+                        mainScreenViewModel.emitIntent(
+                            MainScreenIntent.SelectChampion(champion)
+                        )
+                    }
+                }
+                RoleSegmentedButton(
+                    uiState,
+                    mainViewModel = mainScreenViewModel,
+                    scope
+                )
+                Spacer(modifier = Modifier.size(8.dp))
+
+                ChampionFilter(
+                    scope,
+                    mainScreenViewModel,
+                )
+                var filteredList = uiState.matchupsForCurrentChampion.sortedBy { it.enemy.name }
+                uiState.filterList.forEach {
+                        filter ->
+                    filteredList = filteredList.filter(filter.filterFunction)
+                }
+                filteredList = filteredList.filter {
+                    it.enemy.name.lowercase().contains(uiState.textQuery.lowercase())
+                }
+                if(filteredList.isNotEmpty()) {
+                    val matchupViewModel = koinViewModel<MatchupViewModel>()
+                    LazyVerticalGrid(
+                        modifier = Modifier.padding(8.dp),
+                        columns = GridCells.Fixed(3)
+                    ) {
+                        items(filteredList) {
+                            MatchupCard(
+                                mainScreenViewModel, scope = scope, it, it.difficulty
+                            ) {
+                                if (uiState.multiSelectEnabled) {
+                                    scope.launch {
+                                        mainScreenViewModel.emitIntent(
+                                            MainScreenIntent.MultiSelectMatchups(it)
+                                        )
+                                    }
+                                } else {
+                                    scope.launch {
+                                        matchupViewModel.emitIntent(
+                                            MatchupScreenIntent.LoadMatchupInfo(it, it.enemy)
+                                        )
+                                        navController.navigate(Route.MatchupInfo.route) {
+                                            popUpTo(Route.Home.route) {
+                                                inclusive = false
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
                     }
-                }
-            } else {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ){
-                    Text(
-                        modifier = Modifier.padding(16.dp),
-                        text = stringResource(R.string.no_matchups),
-                        textAlign = TextAlign.Center
-                    )
-                    Button(onClick = {
-                        navController.navigate("addMatchup")
-                    }) {
-                        Text(text = stringResource(R.string.add_matchup_string))
+                } else {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ){
+                        Text(
+                            modifier = Modifier.padding(16.dp),
+                            text = stringResource(R.string.no_matchups),
+                            textAlign = TextAlign.Center
+                        )
+                        Button(onClick = {
+                            navController.navigate("addMatchup")
+                        }) {
+                            Text(text = stringResource(R.string.add_matchup_string))
+                        }
                     }
                 }
             }
-        }
 
-        if(uiState.definedChampion.isEmpty()){
-            val selectedChampion = remember { mutableStateOf("") }
-            Text(
-                modifier = Modifier.padding(16.dp),
-                text = "You currently have no selected champions, please add a new champion",
-                textAlign = TextAlign.Center
+            if(uiState.definedChampion.isEmpty()){
+                val selectedChampion = remember { mutableStateOf("") }
+                Text(
+                    modifier = Modifier.padding(16.dp),
+                    text = "You currently have no selected champions, please add a new champion",
+                    textAlign = TextAlign.Center
 
-            )
-            ChampionSelector(
-                uiState.allChampions,
-                uiState.currentChampion
-            ) {
-                selectedChampion.value = it.name
-            }
-            Spacer(modifier = Modifier.size(8.dp))
-            Button(
-                onClick = {
-                    mainScreenViewModel.emitIntent(
-                        MainScreenIntent.AddChampion(Champion(selectedChampion.value))
-                    )
+                )
+                ChampionSelector(
+                    uiState.allChampions,
+                    uiState.currentChampion
+                ) {
+                    selectedChampion.value = it.name
                 }
-            ) {
-                Text(text = "Add Champion")
+                Spacer(modifier = Modifier.size(8.dp))
+                Button(
+                    onClick = {
+                        mainScreenViewModel.emitIntent(
+                            MainScreenIntent.AddChampion(Champion(selectedChampion.value))
+                        )
+                    }
+                ) {
+                    Text(text = "Add Champion")
+                }
             }
         }
     }

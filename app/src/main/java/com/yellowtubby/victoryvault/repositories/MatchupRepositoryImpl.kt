@@ -1,15 +1,15 @@
 package com.yellowtubby.victoryvault.repositories
 
 import android.util.Log
-import com.yellowtubby.victoryvault.room.AbilityEntity
-import com.yellowtubby.victoryvault.room.ChampionEntity
-import com.yellowtubby.victoryvault.room.LIST_DELIMITER
-import com.yellowtubby.victoryvault.room.MatchupDatabase
-import com.yellowtubby.victoryvault.room.MatchupEntity
-import com.yellowtubby.victoryvault.ui.model.Ability
-import com.yellowtubby.victoryvault.ui.model.Champion
-import com.yellowtubby.victoryvault.ui.model.Matchup
-import com.yellowtubby.victoryvault.ui.model.Role
+import com.yellowtubby.victoryvault.repositories.room.AbilityEntity
+import com.yellowtubby.victoryvault.repositories.room.ChampionEntity
+import com.yellowtubby.victoryvault.repositories.room.LIST_DELIMITER
+import com.yellowtubby.victoryvault.repositories.room.MatchupDatabase
+import com.yellowtubby.victoryvault.repositories.room.MatchupEntity
+import com.yellowtubby.victoryvault.model.Ability
+import com.yellowtubby.victoryvault.model.Champion
+import com.yellowtubby.victoryvault.model.Matchup
+import com.yellowtubby.victoryvault.model.Role
 import org.koin.java.KoinJavaComponent.inject
 
 class MatchupRepositoryImpl : MatchupRepository {

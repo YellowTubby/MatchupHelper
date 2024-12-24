@@ -1,11 +1,11 @@
-package com.yellowtubby.victoryvault.room
+package com.yellowtubby.victoryvault.repositories.room
 
 import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.Relation
-import com.yellowtubby.victoryvault.ui.model.DamageModifier
+import com.yellowtubby.victoryvault.model.DamageModifier
 
 @Entity
 data class ChampionEntity(

@@ -34,6 +34,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.compose.VictoryVaultTheme
+import com.yellowtubby.victoryvault.general.BaseViewModel
 import com.yellowtubby.victoryvault.ui.screens.uicomponents.MatchFab
 import com.yellowtubby.victoryvault.ui.screens.uicomponents.MatchTopBar
 import com.yellowtubby.victoryvault.ui.screens.matchup.MatchupViewModel
@@ -47,6 +48,7 @@ import com.yellowtubby.victoryvault.ui.screens.profile.ProfileScreen
 import com.yellowtubby.victoryvault.ui.screens.statistics.StatisticsScreen
 import com.yellowtubby.victoryvault.ui.screens.uicomponents.MatchBottomNavigation
 import com.yellowtubby.victoryvault.ui.screens.uicomponents.MatchSnackBar
+import com.yellowtubby.victoryvault.ui.screens.uicomponents.MatchupProgressIndicator
 import com.yellowtubby.victoryvault.ui.screens.uicomponents.SnackBarType
 import org.koin.androidx.compose.koinViewModel
 
@@ -139,7 +141,6 @@ fun MainContent() {
                 }
             }
         }
-        MatchupProgressIndicator(mainViewModel)
     }
 }
 
@@ -163,25 +164,3 @@ fun HandleBottomBarVisibility(mainViewModel: MainActivityViewModel, shouldBeVisi
 }
 
 
-@Composable
-fun MatchupProgressIndicator(
-    viewModel: MainActivityViewModel
-) {
-    val uiState: MainActivityUIState by viewModel.uiState.collectAsState()
-    if (uiState.loading) {
-        Surface(shadowElevation = 9.dp) {
-            CircularProgressIndicator(
-                Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.3f))
-                    .clickable(
-                        indication = null,
-                        interactionSource = remember { MutableInteractionSource() },
-                        onClick = {}
-                    )
-                    .wrapContentSize(Alignment.Center)
-                    .size(80.dp)
-            )
-        }
-    }
-}

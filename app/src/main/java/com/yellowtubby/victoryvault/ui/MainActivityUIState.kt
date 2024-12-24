@@ -12,11 +12,11 @@ val MAIN_ACTIVITY_STATE = MainActivityUIState()
 
 
 data class MainActivityUIState(
-    val isInMultiSelect: Boolean = false,
     val selectedAmount: Int = 0,
     val selectedBottomBarIndex: Int = 1,
     val isFabExpanded: Boolean = false,
     val isBottomBarVisible: Boolean = true,
     override val snackBarMessage: Pair<Boolean, SnackbarMessage> = Pair(false,SnackbarMessage()),
-    val loading: Boolean = false
+    override val loading: Boolean = false,
+    override val multiSelectEnabled: Boolean = false,
 ) : ApplicationUIState()

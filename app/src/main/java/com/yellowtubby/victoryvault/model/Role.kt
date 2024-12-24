@@ -1,4 +1,4 @@
-package com.yellowtubby.victoryvault.ui.model
+package com.yellowtubby.victoryvault.model
 
 enum class Role {
     TOP,

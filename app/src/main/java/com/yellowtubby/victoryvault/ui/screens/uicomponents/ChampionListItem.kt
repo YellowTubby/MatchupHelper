@@ -24,7 +24,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
-import com.yellowtubby.victoryvault.ui.model.Champion
+import com.yellowtubby.victoryvault.model.Champion
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable

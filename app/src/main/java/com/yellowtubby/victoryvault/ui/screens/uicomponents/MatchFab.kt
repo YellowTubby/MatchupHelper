@@ -67,7 +67,7 @@ fun MatchFab(
                         uiStateMainScreen.allChampions,
                         {
                             scope.launch {
-                                mainViewModel.emitIntent(
+                                mainScreenViewModel.emitIntent(
                                     MainScreenIntent.AddChampion(
                                         champion = it
                                     )
@@ -80,7 +80,8 @@ fun MatchFab(
                 }
             }
             ExtendedFloatingActionButton(
-                onClick = { scope.launch {
+                onClick = {
+                    scope.launch {
                     mainViewModel.emitIntent(
                         MainActivityIntent.FabExpandedStateChanged(!uiState.isFabExpanded)
                     )
