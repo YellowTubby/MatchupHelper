@@ -1,28 +1,39 @@
 package com.yellowtubby.victoryvault.ui.screens.main
 
 import android.util.Log
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.yellowtubby.victoryvault.di.MatchupCoroutineDispatcher
 import com.yellowtubby.victoryvault.di.SharedFlowProvider
+import com.yellowtubby.victoryvault.domain.AddDefinedChampionUseCase
+import com.yellowtubby.victoryvault.domain.BaseDefinedChampionUseCase
 import com.yellowtubby.victoryvault.domain.GetAllChampionsUseCase
+import com.yellowtubby.victoryvault.domain.GetCurrentUserDataUseCase
+import com.yellowtubby.victoryvault.domain.GetDefinedChampionsUseCase
+import com.yellowtubby.victoryvault.domain.GetFilteredMatchupsUseCase
+import com.yellowtubby.victoryvault.domain.RemoveMatchUpsUseCase
+import com.yellowtubby.victoryvault.domain.UpdateCurrentMatchupUseCase
+import com.yellowtubby.victoryvault.domain.UpdateCurrentRoleUseCase
+import com.yellowtubby.victoryvault.domain.UpdateCurrentSelectedChampionUseCase
 import com.yellowtubby.victoryvault.general.BaseViewModel
+import com.yellowtubby.victoryvault.model.Champion
 import com.yellowtubby.victoryvault.ui.ApplicationIntent
 import com.yellowtubby.victoryvault.ui.MainActivityIntent
 import com.yellowtubby.victoryvault.model.FilterType
+import com.yellowtubby.victoryvault.model.Matchup
 import com.yellowtubby.victoryvault.model.MatchupFilter
 import com.yellowtubby.victoryvault.model.Role
-import com.yellowtubby.victoryvault.repositories.MatchupRepository
+import com.yellowtubby.victoryvault.model.UserData
 import com.yellowtubby.victoryvault.ui.screens.addmatchup.AddMatchupIntent
 import com.yellowtubby.victoryvault.ui.screens.uicomponents.SnackBarType
 import com.yellowtubby.victoryvault.ui.screens.uicomponents.SnackbarMessage
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.koin.core.qualifier.named
 import org.koin.java.KoinJavaComponent.inject
 
 class MainScreenViewModel(
@@ -33,8 +44,22 @@ class MainScreenViewModel(
     override val _uiState: MutableStateFlow<MainScreenUIState> = MutableStateFlow(
         MAIN_SCREEN_INIT_STATE
     )
-    protected val getAllChampionsUseCase: GetAllChampionsUseCase by inject(GetAllChampionsUseCase::class.java)
+    private val getAllChampionsUseCase: GetAllChampionsUseCase by inject(GetAllChampionsUseCase::class.java)
+    private val getDefinedChampionsUseCase: GetDefinedChampionsUseCase by inject(GetDefinedChampionsUseCase::class.java)
+    private val addChampionUseCase: BaseDefinedChampionUseCase by inject(BaseDefinedChampionUseCase::class.java, qualifier = named("add"))
+    private val deleteMatchupsUseCase: RemoveMatchUpsUseCase by inject(RemoveMatchUpsUseCase::class.java)
+    private val getAllMatchupsUseCase: GetFilteredMatchupsUseCase by inject(GetFilteredMatchupsUseCase::class.java)
+    private val getCurrentUserDataUseCase: GetCurrentUserDataUseCase by inject(GetCurrentUserDataUseCase::class.java)
+    private val updateCurrentRole: UpdateCurrentRoleUseCase by inject(UpdateCurrentRoleUseCase::class.java)
+    private val updateCurrentMatchup: UpdateCurrentMatchupUseCase by inject(UpdateCurrentMatchupUseCase::class.java)
+    private val updateCurrentSelectedChampion: UpdateCurrentSelectedChampionUseCase by inject(UpdateCurrentSelectedChampionUseCase::class.java)
 
+    data class ApplicationDataState(
+        val allChampions: List<Champion>,
+        val definedChampions: List<Champion>,
+        val allMatchups: List<Matchup>,
+        val userData: UserData
+    )
 
     init {
         viewModelScope.launch {
@@ -42,52 +67,56 @@ class MainScreenViewModel(
                 collectSharedFlow()
             }
             launch {
-                collectAllChampionUseCase()
+                combine(
+                    getAllChampionsUseCase(),
+                    getDefinedChampionsUseCase(),
+                    getAllMatchupsUseCase(),
+                    getCurrentUserDataUseCase()
+                ) {
+                    allChampions, allDefinedChampions, allMatchups, userData ->
+                    ApplicationDataState(allChampions,allDefinedChampions,allMatchups,userData)
+                }.collect {
+                    Log.d("SERJ", "GOT DATA: match - ${it.userData.currentMatchup.orig.name} - ${it.userData.currentMatchup.enemy.name}, role - ${it.userData.currentRole}, champion selected - ${it.userData.selectedChampion?.name}")
+                    handleCollectedData(it)
+                }
             }
         }
     }
 
-    private suspend fun collectAllChampionUseCase() {
-        getAllChampionsUseCase().collect {
-            val allChampions = it
-            val allDefinedChampions = matchupRepository.getAllChampions()
-            val allMatchups = matchupRepository.getAllMatchups()
-            val currentChampion = allDefinedChampions.firstOrNull()
+    private suspend fun handleCollectedData(
+        applicationDataState: ApplicationDataState
+    ) {
+        val allChampions = applicationDataState.allChampions
+        val currentChampion = if(applicationDataState.userData.selectedChampion.name == "NAN") applicationDataState.definedChampions.first() else applicationDataState.userData.selectedChampion
+        var role: Role? = null
+        val filterRole: MutableList<MatchupFilter> = mutableListOf()
 
-            var role: Role? = Role.TOP;
-            val filterRole: MutableList<MatchupFilter> = mutableListOf()
+        if (applicationDataState.allMatchups.isNotEmpty()) {
+            val roleGrouping = applicationDataState.allMatchups.groupingBy { it.role }
+            role = if(applicationDataState.userData.currentRole == Role.NAN) roleGrouping.eachCount().maxOf { it.key } else applicationDataState.userData.currentRole
+            filterRole.add(MatchupFilter(FilterType.ROLE) {
+                it.role == role
+            })
+        }
 
-            currentChampion?.let {
-                if (allMatchups.isNotEmpty()) {
-                    val roleGrouping = allMatchups.groupingBy { it.role }
-                    role = roleGrouping.eachCount().maxOf { it.key }
-                    filterRole.add(MatchupFilter(FilterType.ROLE) {
-                        it.role == role
-                    })
-                }
-            }
+        val currentFilters = _uiState.value.filterList + filterRole
+        var allMatchups : MutableList<Matchup> = mutableListOf()
+        allMatchups.addAll(applicationDataState.allMatchups.filter { it.orig.name == currentChampion.name })
 
-            val currentFilters = _uiState.value.filterList + filterRole
-            withContext(coroutineDispatcher.ui) {
-                _intentFlow.tryEmit(
-                    AddMatchupIntent.LocalDataChanged(
-                        allChampions,
-                        allChampions[0],
-                        currentChampion,
-                        role
-                    )
-                )
-                _uiState.value = _uiState.value.copy(
-                    definedChampion = allDefinedChampions,
-                    currentChampion = currentChampion,
-                    currentRole = role,
-                    filterList = currentFilters,
-                    matchupsForCurrentChampion = allMatchups.filter {
-                        it.orig == currentChampion
-                    },
-                    loading = false
-                )
-            }
+        currentFilters.forEach {
+            filter ->
+            allMatchups = allMatchups.filter{
+                filter.filterFunction(it)
+            }.toMutableList()
+        }
+        withContext(coroutineDispatcher.ui) {
+            _uiState.value = _uiState.value.copy(
+                definedChampion = applicationDataState.definedChampions,
+                currentChampion = if(currentChampion.name == "NAN") applicationDataState.definedChampions.first() else currentChampion,
+                currentRole = role,
+                matchupsForCurrentChampion = allMatchups,
+                loading = allChampions.isEmpty()
+            )
         }
     }
 
@@ -127,10 +156,7 @@ class MainScreenViewModel(
                     _uiState.value = _uiState.value.copy(
                         loading = true
                     )
-                    _uiState.value = _uiState.value.copy(
-                        currentChampion = intent.matchup.enemy,
-                        loading = false
-                    )
+                    updateCurrentMatchup(intent.matchup)
                 }
 
                 is MainScreenIntent.TextFilterChanged -> {
@@ -144,12 +170,12 @@ class MainScreenViewModel(
                     val currentChampion = _uiState.value.currentChampion
                     val currentRole = _uiState.value.currentRole
                     withContext(coroutineDispatcher.io) {
-                        matchupRepository.deleteMatchups(
-                            currentChampion!!.name,
+                        deleteMatchupsUseCase(
+                            currentChampion!!,
                             currentRole!!,
                             intent.selectedMatchupsToDelete
                         )
-                        val newMatchupList = matchupRepository.getAllMatchups()
+                        val newMatchupList = _uiState.value.matchupsForCurrentChampion
                         withContext(coroutineDispatcher.ui) {
                             _uiState.value = _uiState.value.copy(
                                 matchupsForCurrentChampion = newMatchupList,
@@ -170,44 +196,15 @@ class MainScreenViewModel(
                     _uiState.value = _uiState.value.copy(
                         loading = true
                     )
-                    val currentListWithoutRoleFilter =
-                        _uiState.value.filterList.filter {
-                            it.type != FilterType.ROLE
-                        }
-                    val filterList = mutableStateOf(
-                        currentListWithoutRoleFilter +
-                                MatchupFilter(FilterType.ROLE) { matchup ->
-                                    intent.role == matchup.role
-                                }
-                    )
-
-                    _intentFlow.tryEmit(AddMatchupIntent.RoleChanged(intent.role))
-
-                    _uiState.value = _uiState.value.copy(
-                        filterList = filterList.value,
-                        currentRole = intent.role,
-                        loading = false
-                    )
+                    updateCurrentRole(intent.role)
                 }
 
                 is MainScreenIntent.SelectChampion -> {
                     _uiState.value = _uiState.value.copy(
                         loading = true
                     )
-                    val currentChampion = intent.champion
                     withContext(coroutineDispatcher.io) {
-                        val matchupsForNewChamp =
-                            matchupRepository.getAllMatchups().filter { matchup ->
-                                matchup.orig == intent.champion
-                            }
-                        withContext(coroutineDispatcher.ui) {
-                            _intentFlow.emit(AddMatchupIntent.CurrentChampionChanged(currentChampion))
-                            _uiState.value = _uiState.value.copy(
-                                currentChampion = currentChampion,
-                                matchupsForCurrentChampion = matchupsForNewChamp,
-                                loading = false
-                            )
-                        }
+                        updateCurrentSelectedChampion(intent.champion)
                     }
                 }
 
@@ -221,12 +218,9 @@ class MainScreenViewModel(
                     )
                     if (!uiState.value.definedChampion.contains(intent.champion)) {
                         withContext(coroutineDispatcher.io) {
-                            matchupRepository.addChampion(intent.champion)
-                            val definedChampions = matchupRepository.getAllChampions()
+                            addChampionUseCase(intent.champion)
                             withContext(coroutineDispatcher.ui) {
                                 _uiState.value = _uiState.value.copy(
-                                    currentChampion = intent.champion,
-                                    definedChampion = definedChampions,
                                     snackBarMessage = Pair(
                                         true, SnackbarMessage(
                                             title = "Info",

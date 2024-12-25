@@ -24,7 +24,8 @@ fun getIconPainerResource(role: Role?) : Painter {
         Role.MID -> painterResource(R.drawable.mid_icon)
         Role.BOTTOM -> painterResource(R.drawable.bot_icon)
         Role.SUPPORT -> painterResource(R.drawable.support_icon)
-        null -> painterResource(R.drawable.logo)
+        Role.NAN -> painterResource(R.drawable.logo)
+        null -> TODO()
     }
 }
 

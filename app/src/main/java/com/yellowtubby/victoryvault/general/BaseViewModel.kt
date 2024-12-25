@@ -19,8 +19,6 @@ abstract class BaseViewModel<UIState : ApplicationUIState> constructor(
     private val sharedFlowProvider: SharedFlowProvider,
     protected val coroutineDispatcher: MatchupCoroutineDispatcher
 ): ViewModel() {
-    protected val matchupRepository: MatchupRepository by inject(MatchupRepository::class.java)
-
     protected val _intentFlow = sharedFlowProvider.getMutableSharedFlow()
     val intentFlow = sharedFlowProvider.getSharedFlow()
 

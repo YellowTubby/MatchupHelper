@@ -103,10 +103,10 @@ fun MainScreen(
                     }
                 }
             }
-            uiState.currentChampion?.let {
+            if(uiState.currentChampion.name != "NAN"){
                 ChampionSelector(
                     uiState.definedChampion,
-                    it
+                    uiState.currentChampion
                 ) {
                         champion ->
                     scope.launch {
@@ -153,11 +153,12 @@ fun MainScreen(
                                 } else {
                                     scope.launch {
                                         matchupViewModel.emitIntent(
-                                            MatchupScreenIntent.LoadMatchupInfo(it, it.enemy)
-                                        )
-                                        navController.navigate(Route.MatchupInfo.route) {
-                                            popUpTo(Route.Home.route) {
-                                                inclusive = false
+                                            MainScreenIntent.SelectedMatchup(it)
+                                        ).also {
+                                            navController.navigate(Route.MatchupInfo.route) {
+                                                popUpTo(Route.Home.route) {
+                                                    inclusive = false
+                                                }
                                             }
                                         }
                                     }
@@ -280,7 +281,8 @@ fun RoleSegmentedButton(
                         Role.MID -> "Mid"
                         Role.BOTTOM -> "Bottom"
                         Role.SUPPORT -> "Support"
-                })
+                        Role.NAN -> "NAN"
+                    })
             }
         }
     }

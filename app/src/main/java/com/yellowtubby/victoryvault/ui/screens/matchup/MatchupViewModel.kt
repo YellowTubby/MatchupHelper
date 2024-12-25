@@ -1,29 +1,44 @@
 package com.yellowtubby.victoryvault.ui.screens.matchup
 
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.yellowtubby.victoryvault.di.MatchupCoroutineDispatcher
 import com.yellowtubby.victoryvault.di.SharedFlowProvider
+import com.yellowtubby.victoryvault.domain.GetCurrentUserDataUseCase
+import com.yellowtubby.victoryvault.domain.UpdateMatchUpUseCase
 import com.yellowtubby.victoryvault.general.BaseViewModel
 import com.yellowtubby.victoryvault.ui.ApplicationIntent
-import com.yellowtubby.victoryvault.model.Matchup
-import com.yellowtubby.victoryvault.ui.MainActivityIntent
 import com.yellowtubby.victoryvault.ui.screens.uicomponents.SnackbarMessage
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.koin.core.component.createScope
-import org.koin.core.scope.Scope
+import org.koin.java.KoinJavaComponent.inject
 
 class MatchupViewModel(
     sharedFlowProvider: SharedFlowProvider,
     coroutineDispatcher: MatchupCoroutineDispatcher
 ) : BaseViewModel<MatchupScreenUIState>(sharedFlowProvider, coroutineDispatcher) {
 
+    protected val updateMatchUpUseCase: UpdateMatchUpUseCase by inject(UpdateMatchUpUseCase::class.java)
+    protected val getCurrentUserData: GetCurrentUserDataUseCase by inject(GetCurrentUserDataUseCase::class.java)
+
+    override val _uiState = MutableStateFlow(
+        MATCHUP_SCREEN_INIT_STATE
+    )
+
     init {
         viewModelScope.launch {
             launch {
                 collectSharedFlow()
+            }
+            launch {
+                getCurrentUserData().collect {
+                    Log.d("SERJ", "GOT DATA: match - ${it.currentMatchup.orig.name} - ${it.currentMatchup.enemy.name}, role - ${it.currentRole}, champion selected - ${it.selectedChampion?.name}")
+                    _uiState.value = _uiState.value.copy(
+                        matchup = it.currentMatchup,
+                        loading = false
+                    )
+                }
             }
         }
     }
@@ -31,46 +46,24 @@ class MatchupViewModel(
         when (intent) {
             is MatchupScreenIntent.WinLossChanged -> {
                 withContext(coroutineDispatcher.ui) {
-                    var prevMatch = _uiState.value.matchup
-                    prevMatch = prevMatch.copy(
-                        numTotal = prevMatch.numTotal + 1
-                    )
-                    if (intent.isWon) {
+                        var prevMatch = _uiState.value.matchup
                         prevMatch = prevMatch.copy(
-                            numWins = prevMatch.numWins + 1
+                            numTotal = prevMatch.numTotal + 1
                         )
-                    }
-                    withContext(coroutineDispatcher.io) {
-                        matchupRepository.updateMatchup(prevMatch)
-                    }
-                    withContext(coroutineDispatcher.io){
-                        val mutableList: MutableList<Matchup> = matchupRepository.getAllMatchups().toMutableList()
-                        mutableList.removeIf {
-                            it.orig == prevMatch.orig && it.enemy == prevMatch.enemy
+                        if (intent.isWon) {
+                            prevMatch = prevMatch.copy(
+                                numWins = prevMatch.numWins + 1
+                            )
                         }
-                        mutableList.add(prevMatch)
-                        _uiState.value = _uiState.value.copy(
-                            matchup = mutableList.first {
-                                prevMatch.orig == it.orig && prevMatch.enemy == it.enemy
-                            }
-                        )
-                    }
+                        withContext(coroutineDispatcher.io) {
+                            updateMatchUpUseCase(prevMatch)
+                        }
                 }
             }
 
             is MatchupScreenIntent.LoadMatchupInfo -> {
                 _uiState.value = _uiState.value.copy(
-                    loading = true
                 )
-                withContext(coroutineDispatcher.io){
-                    val filterMatchup = intent.matchup
-                    _uiState.value = _uiState.value.copy(
-                        matchup = matchupRepository.getAllMatchups().first {
-                            it.enemy == filterMatchup.enemy && it.orig == filterMatchup.orig
-                        },
-                        loading = false
-                    )
-                }
             }
 
             is MatchupScreenIntent.ErrorClear -> {
@@ -83,10 +76,6 @@ class MatchupViewModel(
 
     override val filterFunction: (ApplicationIntent) -> Boolean
         get() = { it is MatchupScreenIntent }
-
-    override val _uiState = MutableStateFlow(
-        MATCHUP_SCREEN_INIT_STATE
-    )
 
 
 

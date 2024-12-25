@@ -192,7 +192,7 @@ fun WinrateSection(mainScreenViewModel: MatchupViewModel, scope: CoroutineScope)
         }
         Text(
             modifier = Modifier.fillMaxWidth(),
-            text = stringResource(R.string.total_games) + uiState.matchup.numTotal.toString(),
+            text = stringResource(R.string.total_games) + uiState.matchup?.numTotal.toString(),
             textAlign = TextAlign.Center
         )
         // Canvas drawing for the progress indicator.

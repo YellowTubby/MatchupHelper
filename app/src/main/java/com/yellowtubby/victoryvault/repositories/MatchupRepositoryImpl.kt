@@ -10,11 +10,17 @@ import com.yellowtubby.victoryvault.model.Ability
 import com.yellowtubby.victoryvault.model.Champion
 import com.yellowtubby.victoryvault.model.Matchup
 import com.yellowtubby.victoryvault.model.Role
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flow
 import org.koin.java.KoinJavaComponent.inject
 
 class MatchupRepositoryImpl : MatchupRepository {
     val db: MatchupDatabase by inject(MatchupDatabase::class.java)
-
+    val definedChampionFlow : MutableStateFlow<List<Champion>> = MutableStateFlow(emptyList())
+    val matchupFlow : MutableStateFlow<List<Matchup>> = MutableStateFlow(emptyList())
 
     override suspend fun addChampion(champion: Champion) {
         db.matchupsDao().insertChampion(
@@ -50,16 +56,18 @@ class MatchupRepositoryImpl : MatchupRepository {
                 prevMatch.difficulty
             )
         )
+        getAllMatchups()
     }
 
-    override suspend fun getAllChampions(): List<Champion> {
-        return db.matchupsDao().getAllChampions().map {
+    override suspend fun getAllDefinedChampions(): Flow<List<Champion>> {
+        definedChampionFlow.value = db.matchupsDao().getAllChampions().map {
             Champion(it.champion_name)
         }
+        return definedChampionFlow.asStateFlow()
     }
 
-    override suspend fun getAllMatchups(): List<Matchup> {
-        return db.matchupsDao().getAllMatchups().map {
+    override suspend fun getAllMatchups(): Flow<List<Matchup>> {
+        matchupFlow.value = db.matchupsDao().getAllMatchups().map {
             Matchup(
                 orig = Champion(it.championName),
                 enemy = Champion(it.championEnemy),
@@ -70,6 +78,7 @@ class MatchupRepositoryImpl : MatchupRepository {
                 description = it.description
             )
         }
+        return matchupFlow
     }
 
     override suspend fun addMatchup(matchup: Matchup) {
@@ -84,6 +93,7 @@ class MatchupRepositoryImpl : MatchupRepository {
                 description = matchup.description
             )
         )
+        getAllMatchups()
     }
 
     override suspend fun deleteMatchups(champion : String, role : Role, matchups: List<Matchup>) {
@@ -92,5 +102,6 @@ class MatchupRepositoryImpl : MatchupRepository {
                 it.enemy.name
             }
         )
+        getAllMatchups()
     }
 }

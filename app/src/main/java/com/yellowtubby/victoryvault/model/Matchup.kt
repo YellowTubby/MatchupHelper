@@ -17,7 +17,7 @@ import java.io.StringReader
 data class Matchup(
     val orig : Champion = Champion("Aatrox"),
     val enemy : Champion = Champion("Aatrox"),
-    val role : Role = Role.MID,
+    val role : Role = Role.NAN,
     val description: String = "",
     val numWins: Int = 0,
     val numTotal: Int = 0,

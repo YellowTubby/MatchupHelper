@@ -5,7 +5,8 @@ enum class Role {
     JUNGLE,
     MID,
     BOTTOM,
-    SUPPORT
+    SUPPORT,
+    NAN
 }
 
 val roleToStringMap = mapOf(

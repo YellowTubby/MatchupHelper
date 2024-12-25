@@ -27,6 +27,7 @@ class MatchupTypeConverters() {
             Role.MID -> "Mid"
             Role.BOTTOM -> "Bottom"
             Role.SUPPORT -> "Support"
+            Role.NAN -> "NAN"
         }
     }
 
