@@ -1,17 +1,16 @@
 package com.yellowtubby.victoryvault.domain
 
+import com.yellowtubby.victoryvault.MatchUpApplication
 import com.yellowtubby.victoryvault.model.UserData
-import com.yellowtubby.victoryvault.repositories.MatchupRepository
 import com.yellowtubby.victoryvault.repositories.UserRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.combine
-import org.koin.java.KoinJavaComponent.inject
+import kotlinx.coroutines.launch
 
-class GetCurrentUserDataUseCase {
-    protected val userRepository: UserRepository by inject(UserRepository::class.java)
 
-    operator suspend fun invoke() : Flow<UserData>{
+class GetCurrentUserDataUseCase(
+    private val userRepository : UserRepository
+){
+    operator fun invoke() : Flow<UserData>{
         return userRepository.getCurrentUserData()
     }
 }

@@ -39,8 +39,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.yellowtubby.victoryvault.R
-import com.yellowtubby.victoryvault.ui.screens.uicomponents.ChampionSelector
-import com.yellowtubby.victoryvault.ui.screens.uicomponents.MatchupCard
+import com.yellowtubby.victoryvault.ui.uicomponents.ChampionSelector
+import com.yellowtubby.victoryvault.ui.uicomponents.MatchupCard
 import com.yellowtubby.victoryvault.ui.screens.getIconPainerResource
 import com.yellowtubby.victoryvault.model.Role
 import com.yellowtubby.victoryvault.ui.ApplicationIntent
@@ -49,10 +49,10 @@ import com.yellowtubby.victoryvault.model.Champion
 import com.yellowtubby.victoryvault.ui.screens.Route
 import com.yellowtubby.victoryvault.ui.screens.matchup.MatchupScreenIntent
 import com.yellowtubby.victoryvault.ui.screens.matchup.MatchupViewModel
-import com.yellowtubby.victoryvault.ui.screens.uicomponents.ChampionDropdown
-import com.yellowtubby.victoryvault.ui.screens.uicomponents.MatchupProgressIndicator
-import com.yellowtubby.victoryvault.ui.screens.uicomponents.SnackBarType
-import com.yellowtubby.victoryvault.ui.screens.uicomponents.SnackbarManager
+import com.yellowtubby.victoryvault.ui.uicomponents.ChampionDropdown
+import com.yellowtubby.victoryvault.ui.uicomponents.MatchupProgressIndicator
+import com.yellowtubby.victoryvault.ui.uicomponents.SnackBarType
+import com.yellowtubby.victoryvault.ui.uicomponents.SnackbarManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -152,7 +152,7 @@ fun MainScreen(
                                     }
                                 } else {
                                     scope.launch {
-                                        matchupViewModel.emitIntent(
+                                        mainScreenViewModel.emitIntent(
                                             MainScreenIntent.SelectedMatchup(it)
                                         ).also {
                                             navController.navigate(Route.MatchupInfo.route) {

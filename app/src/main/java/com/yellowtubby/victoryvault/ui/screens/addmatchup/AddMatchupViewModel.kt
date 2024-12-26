@@ -43,23 +43,21 @@ class AddMatchupViewModel(
 
     init {
         viewModelScope.launch {
-            launch {
                 collectSharedFlow()
             }
 
-            launch {
-                combine(
-                    getAllUserData(),
-                    getAllChampions()
-                ) {
-                    userData, champions ->  Pair(userData,champions)
-                }.collect {
-                    _uiState.value = _uiState.value.copy(
-                        currentRole = it.first.currentRole,
-                        currentChampion = it.first.selectedChampion,
-                        allChampions = it.second
-                    )
-                }
+        viewModelScope.launch {
+            combine(
+                getAllUserData(),
+                getAllChampions()
+            ) {
+                userData, champions ->  Pair(userData,champions)
+            }.collect {
+                _uiState.value = _uiState.value.copy(
+                    currentRole = it.first.currentRole,
+                    currentChampion = it.first.selectedChampion,
+                    allChampions = it.second
+                )
             }
         }
     }

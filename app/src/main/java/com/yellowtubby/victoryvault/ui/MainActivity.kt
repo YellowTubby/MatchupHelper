@@ -35,8 +35,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.compose.VictoryVaultTheme
 import com.yellowtubby.victoryvault.general.BaseViewModel
-import com.yellowtubby.victoryvault.ui.screens.uicomponents.MatchFab
-import com.yellowtubby.victoryvault.ui.screens.uicomponents.MatchTopBar
+import com.yellowtubby.victoryvault.ui.uicomponents.MatchFab
+import com.yellowtubby.victoryvault.ui.uicomponents.MatchTopBar
 import com.yellowtubby.victoryvault.ui.screens.matchup.MatchupViewModel
 import com.yellowtubby.victoryvault.ui.screens.Route
 import com.yellowtubby.victoryvault.ui.screens.addmatchup.AddMatchupScreen
@@ -46,10 +46,10 @@ import com.yellowtubby.victoryvault.ui.screens.main.MainScreen
 import com.yellowtubby.victoryvault.ui.screens.main.MainScreenViewModel
 import com.yellowtubby.victoryvault.ui.screens.profile.ProfileScreen
 import com.yellowtubby.victoryvault.ui.screens.statistics.StatisticsScreen
-import com.yellowtubby.victoryvault.ui.screens.uicomponents.MatchBottomNavigation
-import com.yellowtubby.victoryvault.ui.screens.uicomponents.MatchSnackBar
-import com.yellowtubby.victoryvault.ui.screens.uicomponents.MatchupProgressIndicator
-import com.yellowtubby.victoryvault.ui.screens.uicomponents.SnackBarType
+import com.yellowtubby.victoryvault.ui.uicomponents.MatchBottomNavigation
+import com.yellowtubby.victoryvault.ui.uicomponents.MatchSnackBar
+import com.yellowtubby.victoryvault.ui.uicomponents.MatchupProgressIndicator
+import com.yellowtubby.victoryvault.ui.uicomponents.SnackBarType
 import org.koin.androidx.compose.koinViewModel
 
 class MainActivity : ComponentActivity() {

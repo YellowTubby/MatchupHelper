@@ -1,4 +1,4 @@
-package com.yellowtubby.victoryvault.ui.screens.uicomponents
+package com.yellowtubby.victoryvault.ui.uicomponents
 
 import android.app.Activity
 import androidx.compose.foundation.Image

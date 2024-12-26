@@ -1,4 +1,4 @@
-package com.yellowtubby.victoryvault.ui.screens.uicomponents
+package com.yellowtubby.victoryvault.ui.uicomponents
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

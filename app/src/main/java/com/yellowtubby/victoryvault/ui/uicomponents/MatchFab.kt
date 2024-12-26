@@ -1,4 +1,4 @@
-package com.yellowtubby.victoryvault.ui.screens.uicomponents
+package com.yellowtubby.victoryvault.ui.uicomponents
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Column
@@ -47,7 +47,7 @@ fun MatchFab(
         Column(horizontalAlignment = Alignment.End) {
             if (uiState.isFabExpanded) {
                 ActionButtonWithLabel(
-                    icon = Icons.Filled.Face,
+                    icon = Icons.Filled.Add,
                     label = "Add Matchup",
                     onClick = {
                         navController.navigate(Route.AddMatchup.route)
@@ -55,7 +55,7 @@ fun MatchFab(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 ActionButtonWithLabel(
-                    icon = Icons.Filled.Face,
+                    icon = Icons.Filled.Add,
                     label = "Add Champion",
                     onClick = {
                         expanded.value = true

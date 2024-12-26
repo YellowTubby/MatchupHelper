@@ -1,6 +1,6 @@
 package com.yellowtubby.victoryvault.ui
 
-import com.yellowtubby.victoryvault.ui.screens.uicomponents.SnackbarMessage
+import com.yellowtubby.victoryvault.ui.uicomponents.SnackbarMessage
 
 
 const val BACK_BUTTON_STRING = "back"
@@ -16,7 +16,7 @@ data class MainActivityUIState(
     val selectedBottomBarIndex: Int = 1,
     val isFabExpanded: Boolean = false,
     val isBottomBarVisible: Boolean = true,
-    override val snackBarMessage: Pair<Boolean, SnackbarMessage> = Pair(false,SnackbarMessage()),
+    override val snackBarMessage: Pair<Boolean, SnackbarMessage> = Pair(false, SnackbarMessage()),
     override val loading: Boolean = false,
     override val multiSelectEnabled: Boolean = false,
 ) : ApplicationUIState()

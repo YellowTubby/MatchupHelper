@@ -29,6 +29,8 @@ import com.yellowtubby.victoryvault.ui.screens.addmatchup.AddMatchupViewModel
 import com.yellowtubby.victoryvault.ui.screens.main.MainScreenViewModel
 import com.yellowtubby.victoryvault.ui.screens.matchup.MatchupViewModel
 import org.koin.android.ext.koin.androidContext
+import org.koin.core.module.dsl.viewModel
+import org.koin.core.module.dsl.viewModelOf
 import org.koin.core.qualifier.named
 
 import org.koin.dsl.module
@@ -38,10 +40,10 @@ val matchUpModule = module {
     single<MatchupRepository> { MatchupRepositoryImpl() }
     single<ChampionInfoRepository> { ChampionInfoRepositoryImpl() }
     single<UserRepository> { UserRepositoryImpl() }
-    single<Gson> { GsonBuilder().setStrictness(Strictness.LENIENT).create() }
+
 
 //    Use cases
-    single<GetAllChampionsUseCase> { GetAllChampionsUseCase() }
+    single<GetAllChampionsUseCase> { GetAllChampionsUseCase(get()) }
     single<GetFilteredMatchupsUseCase> { GetFilteredMatchupsUseCase() }
     single<GetDefinedChampionsUseCase> { GetDefinedChampionsUseCase() }
     single<BaseDefinedChampionUseCase>(named("add")) { AddDefinedChampionUseCase() }
@@ -52,23 +54,25 @@ val matchUpModule = module {
     single<UpdateCurrentMatchupUseCase> { UpdateCurrentMatchupUseCase() }
     single<UpdateCurrentRoleUseCase> { UpdateCurrentRoleUseCase() }
     single<UpdateCurrentSelectedChampionUseCase> { UpdateCurrentSelectedChampionUseCase() }
-    single<GetCurrentUserDataUseCase> { GetCurrentUserDataUseCase() }
+    single<GetCurrentUserDataUseCase> { GetCurrentUserDataUseCase(get()) }
+    single<SharedFlowProvider> { SharedFlowProviderImpl() }
+    single<MatchupCoroutineDispatcher> { MatchupCoroutineDispatcherImpl() }
 
-
+    // 3rd Party
     single<MatchupDatabase> {
         Room.databaseBuilder(
             androidContext(),
             MatchupDatabase::class.java, "database-name"
         ).fallbackToDestructiveMigration().build()
     }
+    single<Gson> { GsonBuilder().setStrictness(Strictness.LENIENT).create() }
 
-    single<SharedFlowProvider> { SharedFlowProviderImpl() }
-    single<MatchupCoroutineDispatcher> { MatchupCoroutineDispatcherImpl() }
 
-    single { MatchupViewModel(get(),get()) }
-    single { MainActivityViewModel(get(),get()) }
-    single { MainScreenViewModel(get(),get()) }
-    single { AddMatchupViewModel(get(),get()) }
+//    View Models
+    viewModel { MatchupViewModel(get(),get()) }
+    viewModel { MainActivityViewModel(get(),get()) }
+    viewModel { MainScreenViewModel(get(),get(),get()) }
+    viewModel { AddMatchupViewModel(get(),get()) }
 
 
 }

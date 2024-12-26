@@ -8,8 +8,9 @@ import com.yellowtubby.victoryvault.domain.GetCurrentUserDataUseCase
 import com.yellowtubby.victoryvault.domain.UpdateMatchUpUseCase
 import com.yellowtubby.victoryvault.general.BaseViewModel
 import com.yellowtubby.victoryvault.ui.ApplicationIntent
-import com.yellowtubby.victoryvault.ui.screens.uicomponents.SnackbarMessage
+import com.yellowtubby.victoryvault.ui.uicomponents.SnackbarMessage
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.java.KoinJavaComponent.inject
@@ -28,17 +29,15 @@ class MatchupViewModel(
 
     init {
         viewModelScope.launch {
-            launch {
-                collectSharedFlow()
-            }
-            launch {
-                getCurrentUserData().collect {
-                    Log.d("SERJ", "GOT DATA: match - ${it.currentMatchup.orig.name} - ${it.currentMatchup.enemy.name}, role - ${it.currentRole}, champion selected - ${it.selectedChampion?.name}")
-                    _uiState.value = _uiState.value.copy(
-                        matchup = it.currentMatchup,
-                        loading = false
-                    )
-                }
+            collectSharedFlow()
+        }
+        viewModelScope.launch {
+            getCurrentUserData().collect {
+                Log.d("SERJ", "MATCH SCREEN DATA: match - ${it.currentMatchup.orig.name} - ${it.currentMatchup.enemy.name}, role - ${it.currentRole}, champion selected - ${it.selectedChampion?.name}")
+                _uiState.value = _uiState.value.copy(
+                    matchup = it.currentMatchup,
+                    loading = false
+                )
             }
         }
     }

@@ -39,11 +39,11 @@ import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.yellowtubby.victoryvault.R
 import com.yellowtubby.victoryvault.model.Matchup
-import com.yellowtubby.victoryvault.ui.screens.uicomponents.ChampionSelector
+import com.yellowtubby.victoryvault.ui.uicomponents.ChampionSelector
 import com.yellowtubby.victoryvault.ui.screens.matchup.MatchupViewModel
 import com.yellowtubby.victoryvault.ui.screens.Route
 import com.yellowtubby.victoryvault.ui.screens.getIconPainerResource
-import com.yellowtubby.victoryvault.ui.screens.uicomponents.MatchupProgressIndicator
+import com.yellowtubby.victoryvault.ui.uicomponents.MatchupProgressIndicator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel

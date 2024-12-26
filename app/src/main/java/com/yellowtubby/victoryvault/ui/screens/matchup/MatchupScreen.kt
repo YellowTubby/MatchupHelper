@@ -63,9 +63,9 @@ import com.yellowtubby.victoryvault.model.DamageType
 import com.yellowtubby.victoryvault.model.Matchup
 import com.yellowtubby.victoryvault.ui.screens.getIconPainerResource
 import com.yellowtubby.victoryvault.ui.screens.main.MainScreenViewModel
-import com.yellowtubby.victoryvault.ui.screens.uicomponents.MatchupProgressIndicator
-import com.yellowtubby.victoryvault.ui.screens.uicomponents.TipItem
-import com.yellowtubby.victoryvault.ui.screens.uicomponents.TitleTextComponent
+import com.yellowtubby.victoryvault.ui.uicomponents.MatchupProgressIndicator
+import com.yellowtubby.victoryvault.ui.uicomponents.TipItem
+import com.yellowtubby.victoryvault.ui.uicomponents.TitleTextComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
