@@ -11,4 +11,8 @@ data class Champion(val name: String, val iconUri: String, val splashUri: String
         splashUri = "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/$name" +"_0.jpg",
     )
 
+    companion object{
+        final val NAN = Champion()
+    }
+
 }

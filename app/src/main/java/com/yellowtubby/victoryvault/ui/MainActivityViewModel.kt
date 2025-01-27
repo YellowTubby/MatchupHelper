@@ -2,10 +2,15 @@ package com.yellowtubby.victoryvault.ui
 
 import androidx.lifecycle.viewModelScope
 import com.yellowtubby.victoryvault.di.MatchupCoroutineDispatcher
+import com.yellowtubby.victoryvault.di.ScopeProvider
 import com.yellowtubby.victoryvault.di.SharedFlowProvider
+import com.yellowtubby.victoryvault.domain.champions.ChampionListUseCase
 import com.yellowtubby.victoryvault.general.BaseViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import org.koin.core.qualifier.named
+import org.koin.java.KoinJavaComponent.inject
 
 class MainActivityViewModel(
     sharedFlowProvider: SharedFlowProvider,
@@ -14,6 +19,8 @@ class MainActivityViewModel(
     override val _uiState: MutableStateFlow<MainActivityUIState> = MutableStateFlow(
         MAIN_ACTIVITY_STATE
     )
+    private val getDefinedChampionsUseCase: ChampionListUseCase by inject(ChampionListUseCase::class.java, qualifier = named("defined"))
+
 
     override suspend fun handleIntent(intent: ApplicationIntent) {
         when(intent){
@@ -51,9 +58,17 @@ class MainActivityViewModel(
     }
 
     init {
-        viewModelScope.launch {
+        definedScope.launch(coroutineDispatcher.ui) {
             launch {
                 collectSharedFlow()
+            }
+
+            launch {
+                getDefinedChampionsUseCase().collect {
+                    _uiState.value = _uiState.value.copy(
+                        shouldShowFab = it.isNotEmpty()
+                    )
+                }
             }
         }
     }

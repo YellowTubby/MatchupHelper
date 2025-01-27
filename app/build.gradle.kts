@@ -50,6 +50,13 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
+    sourceSets {
+        getByName("test") {
+            java.srcDirs("src/test/kotlin")
+        }
+
+    }
 }
 
 dependencies {
@@ -85,6 +92,15 @@ dependencies {
 
 
     testImplementation(libs.junit)
+    testImplementation(libs.koin.test.junit4)
+    testImplementation(libs.koin.test.junit5)
+    testImplementation(libs.koin.test)
+    testImplementation(libs.turbine)
+    testImplementation(libs.mockk.android)
+    testImplementation(libs.mockk.agent)
+    testImplementation(libs.test.coroutines)
+
+
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

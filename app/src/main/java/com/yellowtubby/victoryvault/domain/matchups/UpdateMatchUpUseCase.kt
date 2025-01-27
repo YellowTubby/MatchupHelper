@@ -1,14 +1,12 @@
-package com.yellowtubby.victoryvault.domain
+package com.yellowtubby.victoryvault.domain.matchups
 
 import com.yellowtubby.victoryvault.model.Matchup
 import com.yellowtubby.victoryvault.repositories.MatchupRepository
-import kotlinx.coroutines.flow.Flow
 import org.koin.java.KoinJavaComponent.inject
 
-class GetFilteredMatchupsUseCase {
+class UpdateMatchUpUseCase {
     protected val matchupRepository: MatchupRepository by inject(MatchupRepository::class.java)
-
-    operator suspend fun invoke(): Flow<List<Matchup>> {
-        return matchupRepository.getAllMatchups()
+    suspend operator fun invoke(matchup: Matchup) {
+        matchupRepository.updateMatchup(matchup)
     }
 }

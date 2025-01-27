@@ -1,4 +1,4 @@
-package com.yellowtubby.victoryvault.domain
+package com.yellowtubby.victoryvault.domain.matchups
 
 import com.yellowtubby.victoryvault.model.Matchup
 import com.yellowtubby.victoryvault.repositories.MatchupRepository

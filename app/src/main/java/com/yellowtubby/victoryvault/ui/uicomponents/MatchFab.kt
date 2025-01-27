@@ -43,7 +43,7 @@ fun MatchFab(
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val expanded = remember { mutableStateOf(false) }
 
-    if(currentBackStackEntry?.destination?.route == Route.Home.route){
+    if(currentBackStackEntry?.destination?.route == Route.Home.route && uiState.shouldShowFab){
         Column(horizontalAlignment = Alignment.End) {
             if (uiState.isFabExpanded) {
                 ActionButtonWithLabel(

@@ -38,6 +38,7 @@ import androidx.navigation.NavController
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.yellowtubby.victoryvault.R
+import com.yellowtubby.victoryvault.model.Champion
 import com.yellowtubby.victoryvault.model.Matchup
 import com.yellowtubby.victoryvault.ui.uicomponents.ChampionSelector
 import com.yellowtubby.victoryvault.ui.screens.matchup.MatchupViewModel
@@ -68,7 +69,7 @@ fun AddMatchupScreen(
             Spacer(Modifier.height(statusBarHeight))
             ChampionSelector(
                 uiState.allChampions,
-                uiState.currentChampion
+                uiState.currentChampion ?: Champion.NAN
             ) {
                 addMatchupViewModel.emitIntent(
                     AddMatchupIntent.SelectedChampion(it)

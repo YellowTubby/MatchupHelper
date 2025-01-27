@@ -15,6 +15,7 @@ data class MainActivityUIState(
     val selectedAmount: Int = 0,
     val selectedBottomBarIndex: Int = 1,
     val isFabExpanded: Boolean = false,
+    val shouldShowFab: Boolean = false,
     val isBottomBarVisible: Boolean = true,
     override val snackBarMessage: Pair<Boolean, SnackbarMessage> = Pair(false, SnackbarMessage()),
     override val loading: Boolean = false,

@@ -12,6 +12,7 @@ interface MatchupRepository {
     suspend fun addMatchup(matchup: Matchup)
     suspend fun deleteMatchups(champion : String, role : Role, matchups: List<Matchup>)
     suspend fun addChampion(champion: Champion)
+    suspend fun updateChampion(champion: Champion)
     suspend fun addAbility(ability: Ability)
     suspend fun updateMatchup(prevMatch: Matchup)
 }

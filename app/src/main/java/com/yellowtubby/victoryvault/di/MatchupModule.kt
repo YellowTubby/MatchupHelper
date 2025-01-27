@@ -1,22 +1,26 @@
 package com.yellowtubby.victoryvault.di
 
+import androidx.lifecycle.ViewModel
 import androidx.room.Room
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.Strictness
-import com.yellowtubby.victoryvault.domain.AddDefinedChampionUseCase
-import com.yellowtubby.victoryvault.domain.AddMatchUpUseCase
-import com.yellowtubby.victoryvault.domain.BaseDefinedChampionUseCase
-import com.yellowtubby.victoryvault.domain.GetAllChampionsUseCase
-import com.yellowtubby.victoryvault.domain.GetCurrentUserDataUseCase
-import com.yellowtubby.victoryvault.domain.GetDefinedChampionsUseCase
-import com.yellowtubby.victoryvault.domain.GetFilteredMatchupsUseCase
-import com.yellowtubby.victoryvault.domain.RemoveDefinedChampionUseCase
-import com.yellowtubby.victoryvault.domain.RemoveMatchUpsUseCase
-import com.yellowtubby.victoryvault.domain.UpdateCurrentMatchupUseCase
-import com.yellowtubby.victoryvault.domain.UpdateCurrentRoleUseCase
-import com.yellowtubby.victoryvault.domain.UpdateCurrentSelectedChampionUseCase
-import com.yellowtubby.victoryvault.domain.UpdateMatchUpUseCase
+import com.yellowtubby.victoryvault.domain.champions.AddDefinedChampionUseCase
+import com.yellowtubby.victoryvault.domain.matchups.AddMatchUpUseCase
+import com.yellowtubby.victoryvault.domain.champions.BaseDefinedChampionUseCase
+import com.yellowtubby.victoryvault.domain.champions.ChampionListUseCase
+import com.yellowtubby.victoryvault.domain.champions.GetAllChampionsUseCase
+import com.yellowtubby.victoryvault.domain.userdata.GetCurrentUserDataUseCase
+import com.yellowtubby.victoryvault.domain.champions.GetDefinedChampionsUseCase
+import com.yellowtubby.victoryvault.domain.matchups.GetFilteredMatchupsUseCase
+import com.yellowtubby.victoryvault.domain.champions.RemoveDefinedChampionUseCase
+import com.yellowtubby.victoryvault.domain.matchups.MatchupListUseCase
+import com.yellowtubby.victoryvault.domain.matchups.RemoveMatchUpsUseCase
+import com.yellowtubby.victoryvault.domain.userdata.UpdateCurrentMatchupUseCase
+import com.yellowtubby.victoryvault.domain.userdata.UpdateCurrentRoleUseCase
+import com.yellowtubby.victoryvault.domain.userdata.UpdateCurrentSelectedChampionUseCase
+import com.yellowtubby.victoryvault.domain.matchups.UpdateMatchUpUseCase
+import com.yellowtubby.victoryvault.domain.userdata.UserDataUseCase
 import com.yellowtubby.victoryvault.repositories.ChampionInfoRepository
 import com.yellowtubby.victoryvault.repositories.ChampionInfoRepositoryImpl
 import com.yellowtubby.victoryvault.repositories.MatchupRepository
@@ -30,7 +34,6 @@ import com.yellowtubby.victoryvault.ui.screens.main.MainScreenViewModel
 import com.yellowtubby.victoryvault.ui.screens.matchup.MatchupViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
-import org.koin.core.module.dsl.viewModelOf
 import org.koin.core.qualifier.named
 
 import org.koin.dsl.module
@@ -42,21 +45,26 @@ val matchUpModule = module {
     single<UserRepository> { UserRepositoryImpl() }
 
 
+
 //    Use cases
-    single<GetAllChampionsUseCase> { GetAllChampionsUseCase(get()) }
-    single<GetFilteredMatchupsUseCase> { GetFilteredMatchupsUseCase() }
-    single<GetDefinedChampionsUseCase> { GetDefinedChampionsUseCase() }
+    single<ChampionListUseCase>(named("all")) { GetAllChampionsUseCase(get()) }
+    single<ChampionListUseCase>(named("defined")) { GetDefinedChampionsUseCase() }
+
+
+    single<MatchupListUseCase> { GetFilteredMatchupsUseCase() }
     single<BaseDefinedChampionUseCase>(named("add")) { AddDefinedChampionUseCase() }
     single<BaseDefinedChampionUseCase>(named("remove")) { RemoveDefinedChampionUseCase() }
+    single<UserDataUseCase> { GetCurrentUserDataUseCase(get()) }
     single<AddMatchUpUseCase> { AddMatchUpUseCase() }
     single<RemoveMatchUpsUseCase> { RemoveMatchUpsUseCase() }
     single<UpdateMatchUpUseCase> { UpdateMatchUpUseCase() }
     single<UpdateCurrentMatchupUseCase> { UpdateCurrentMatchupUseCase() }
     single<UpdateCurrentRoleUseCase> { UpdateCurrentRoleUseCase() }
     single<UpdateCurrentSelectedChampionUseCase> { UpdateCurrentSelectedChampionUseCase() }
-    single<GetCurrentUserDataUseCase> { GetCurrentUserDataUseCase(get()) }
     single<SharedFlowProvider> { SharedFlowProviderImpl() }
     single<MatchupCoroutineDispatcher> { MatchupCoroutineDispatcherImpl() }
+    single<ScopeProvider> { ScopeProviderImpl() }
+
 
     // 3rd Party
     single<MatchupDatabase> {
@@ -69,10 +77,17 @@ val matchUpModule = module {
 
 
 //    View Models
-    viewModel { MatchupViewModel(get(),get()) }
-    viewModel { MainActivityViewModel(get(),get()) }
-    viewModel { MainScreenViewModel(get(),get(),get()) }
-    viewModel { AddMatchupViewModel(get(),get()) }
+    single { MatchupViewModel(get(),get()) }
+    single { MainActivityViewModel(get(),get()) }
+    single { MainScreenViewModel(get(),get()) }
+    single { AddMatchupViewModel(get(),get()) }
+
+    scope<ViewModel> {
+        scoped { MatchupViewModel(get(),get()) } // Scoped to the ViewModel's lifecycle
+        scoped { MainActivityViewModel(get(),get()) } // Scoped to the ViewModel's lifecycle
+        scoped { MainScreenViewModel(get(),get()) } // Scoped to the ViewModel's lifecycle
+        scoped { AddMatchupViewModel(get(),get()) } // Scoped to the ViewModel's lifecycle
+    }
 
 
 }

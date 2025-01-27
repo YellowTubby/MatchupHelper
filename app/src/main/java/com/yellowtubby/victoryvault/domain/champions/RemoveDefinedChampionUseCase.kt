@@ -1,4 +1,4 @@
-package com.yellowtubby.victoryvault.domain
+package com.yellowtubby.victoryvault.domain.champions
 
 import com.yellowtubby.victoryvault.model.Champion
 

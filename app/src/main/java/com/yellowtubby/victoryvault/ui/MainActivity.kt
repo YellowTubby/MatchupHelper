@@ -71,7 +71,6 @@ fun MainContent() {
     val mainViewModel = koinViewModel<MainActivityViewModel>()
     val snackBarState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    LoadMainData()
     VictoryVaultTheme {
         val navController = rememberNavController()
         Scaffold(
@@ -141,16 +140,6 @@ fun MainContent() {
                 }
             }
         }
-    }
-}
-
-@Composable
-fun LoadMainData() {
-    val mainScreenViewModel = koinViewModel<MainScreenViewModel>()
-    LaunchedEffect(true) {
-        mainScreenViewModel.emitIntent(
-            MainScreenIntent.LoadLocalData
-        )
     }
 }
 

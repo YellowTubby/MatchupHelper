@@ -1,16 +1,16 @@
 package com.yellowtubby.victoryvault.ui.screens.matchup
 
-import android.util.Log
-import androidx.lifecycle.viewModelScope
 import com.yellowtubby.victoryvault.di.MatchupCoroutineDispatcher
+import com.yellowtubby.victoryvault.di.ScopeProvider
 import com.yellowtubby.victoryvault.di.SharedFlowProvider
-import com.yellowtubby.victoryvault.domain.GetCurrentUserDataUseCase
-import com.yellowtubby.victoryvault.domain.UpdateMatchUpUseCase
+import com.yellowtubby.victoryvault.domain.userdata.GetCurrentUserDataUseCase
+import com.yellowtubby.victoryvault.domain.userdata.UpdateCurrentMatchupUseCase
+import com.yellowtubby.victoryvault.domain.matchups.UpdateMatchUpUseCase
+import com.yellowtubby.victoryvault.domain.userdata.UserDataUseCase
 import com.yellowtubby.victoryvault.general.BaseViewModel
 import com.yellowtubby.victoryvault.ui.ApplicationIntent
 import com.yellowtubby.victoryvault.ui.uicomponents.SnackbarMessage
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.java.KoinJavaComponent.inject
@@ -20,20 +20,22 @@ class MatchupViewModel(
     coroutineDispatcher: MatchupCoroutineDispatcher
 ) : BaseViewModel<MatchupScreenUIState>(sharedFlowProvider, coroutineDispatcher) {
 
-    protected val updateMatchUpUseCase: UpdateMatchUpUseCase by inject(UpdateMatchUpUseCase::class.java)
-    protected val getCurrentUserData: GetCurrentUserDataUseCase by inject(GetCurrentUserDataUseCase::class.java)
+    private val updateMatchUpUseCase: UpdateMatchUpUseCase by inject(UpdateMatchUpUseCase::class.java)
+    private val updateCurrentMatchupUseCase: UpdateCurrentMatchupUseCase by inject(
+        UpdateCurrentMatchupUseCase::class.java)
+    private val getCurrentUserData: UserDataUseCase by inject(UserDataUseCase::class.java)
 
     override val _uiState = MutableStateFlow(
         MATCHUP_SCREEN_INIT_STATE
     )
 
+
     init {
-        viewModelScope.launch {
+        definedScope.launch {
             collectSharedFlow()
         }
-        viewModelScope.launch {
+        definedScope.launch {
             getCurrentUserData().collect {
-                Log.d("SERJ", "MATCH SCREEN DATA: match - ${it.currentMatchup.orig.name} - ${it.currentMatchup.enemy.name}, role - ${it.currentRole}, champion selected - ${it.selectedChampion?.name}")
                 _uiState.value = _uiState.value.copy(
                     matchup = it.currentMatchup,
                     loading = false
@@ -41,22 +43,22 @@ class MatchupViewModel(
             }
         }
     }
+
     override suspend fun handleIntent(intent: ApplicationIntent) {
         when (intent) {
             is MatchupScreenIntent.WinLossChanged -> {
                 withContext(coroutineDispatcher.ui) {
-                        var prevMatch = _uiState.value.matchup
+                    var prevMatch = _uiState.value.matchup
+                    prevMatch = prevMatch.copy(
+                        numTotal = prevMatch.numTotal + 1
+                    )
+                    if (intent.isWon) {
                         prevMatch = prevMatch.copy(
-                            numTotal = prevMatch.numTotal + 1
+                            numWins = prevMatch.numWins + 1
                         )
-                        if (intent.isWon) {
-                            prevMatch = prevMatch.copy(
-                                numWins = prevMatch.numWins + 1
-                            )
-                        }
-                        withContext(coroutineDispatcher.io) {
-                            updateMatchUpUseCase(prevMatch)
-                        }
+                    }
+                    updateMatchUpUseCase(prevMatch)
+                    updateCurrentMatchupUseCase(prevMatch)
                 }
             }
 
@@ -75,7 +77,6 @@ class MatchupViewModel(
 
     override val filterFunction: (ApplicationIntent) -> Boolean
         get() = { it is MatchupScreenIntent }
-
 
 
 }

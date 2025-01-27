@@ -2,12 +2,9 @@ package com.yellowtubby.victoryvault
 
 import android.app.Application
 import com.yellowtubby.victoryvault.di.matchUpModule
-import com.yellowtubby.victoryvault.domain.GetAllChampionsUseCase
-import com.yellowtubby.victoryvault.domain.GetCurrentUserDataUseCase
+import com.yellowtubby.victoryvault.domain.champions.GetAllChampionsUseCase
+import com.yellowtubby.victoryvault.domain.userdata.GetCurrentUserDataUseCase
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.shareIn
-import kotlinx.coroutines.launch
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.GlobalContext.startKoin
 import org.koin.java.KoinJavaComponent.inject

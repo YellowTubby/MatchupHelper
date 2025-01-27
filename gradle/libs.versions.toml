@@ -17,6 +17,9 @@ ksp = "1.9.24-1.0.20"
 gson_ver = "2.11.0"
 splash_screen_ver = "1.0.1"
 foundationLayoutAndroid = "1.6.8"
+turbine="1.2.0"
+mockk="1.13.14"
+test-coroutines="1.9.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -36,6 +39,7 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 navigation-common = { module = "androidx.navigation:navigation-common-ktx", version.ref = "navigation" }
 navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigation" }
 navigation-ui = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "navigation" }
+koin-compose-navigation = { module = "io.insert-koin:koin-androidx-compose-navigation", version.ref = "koin-bom"}
 glide = {module = "com.github.bumptech.glide:glide", version.ref = "glide_ver"}
 glide-compose = {module = "com.github.bumptech.glide:compose", version.ref = "glide_compose_ver"}
 gson = {module = "com.google.code.gson:gson", version.ref = "gson_ver" }
@@ -44,7 +48,13 @@ koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin-bom" }
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin-bom"}
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin-bom"}
 koin-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koin-bom"}
-koin-compose-navigation = { module = "io.insert-koin:koin-androidx-compose-navigation", version.ref = "koin-bom"}
+koin-test = { module = "io.insert-koin:koin-test", version.ref = "koin-bom"}
+koin-test-junit4 = { module = "io.insert-koin:koin-test-junit4", version.ref = "koin-bom"}
+koin-test-junit5 = { module = "io.insert-koin:koin-test-junit5", version.ref = "koin-bom"}
+test-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "test-coroutines"}
+turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine"}
+mockk-android = { module = "io.mockk:mockk-android", version.ref = "mockk"}
+mockk-agent = { module = "io.mockk:mockk-agent", version.ref = "mockk"}
 
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room_version"}
 room-compiler-ktx = { module = "androidx.room:room-compiler", version.ref = "room_version"}

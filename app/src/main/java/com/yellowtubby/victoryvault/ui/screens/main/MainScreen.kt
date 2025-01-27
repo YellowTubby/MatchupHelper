@@ -1,5 +1,6 @@
 package com.yellowtubby.victoryvault.ui.screens.main
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -103,7 +104,7 @@ fun MainScreen(
                     }
                 }
             }
-            if(uiState.currentChampion.name != "NAN"){
+            if(uiState.currentChampion != Champion.NAN){
                 ChampionSelector(
                     uiState.definedChampion,
                     uiState.currentChampion
@@ -187,21 +188,21 @@ fun MainScreen(
             }
 
             if(uiState.definedChampion.isEmpty()){
-                val selectedChampion = remember { mutableStateOf("") }
+                val selectedChampion = remember { mutableStateOf(uiState.currentChampion.name) }
                 Text(
                     modifier = Modifier.padding(16.dp),
                     text = "You currently have no selected champions, please add a new champion",
                     textAlign = TextAlign.Center
-
                 )
                 ChampionSelector(
                     uiState.allChampions,
-                    uiState.currentChampion
+                    Champion(selectedChampion.value)
                 ) {
                     selectedChampion.value = it.name
                 }
                 Spacer(modifier = Modifier.size(8.dp))
                 Button(
+                    enabled = selectedChampion.value != "NAN",
                     onClick = {
                         mainScreenViewModel.emitIntent(
                             MainScreenIntent.AddChampion(Champion(selectedChampion.value))

@@ -1,11 +1,14 @@
-package com.yellowtubby.victoryvault.domain
+package com.yellowtubby.victoryvault.domain.champions
 
 import com.yellowtubby.victoryvault.model.Champion
 import com.yellowtubby.victoryvault.repositories.MatchupRepository
+import kotlinx.coroutines.flow.Flow
 import org.koin.java.KoinJavaComponent.inject
 
-
-abstract class BaseDefinedChampionUseCase {
+class GetDefinedChampionsUseCase : ChampionListUseCase {
     protected val matchupRepository: MatchupRepository by inject(MatchupRepository::class.java)
-    abstract suspend operator fun invoke(champion: Champion)
+
+
+    override suspend operator fun invoke(): Flow<List<Champion>> = matchupRepository.getAllDefinedChampions()
+
 }

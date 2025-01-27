@@ -30,6 +30,10 @@ class MatchupRepositoryImpl : MatchupRepository {
         )
     }
 
+    override suspend fun updateChampion(champion: Champion) {
+        definedChampionFlow.value += champion
+    }
+
     override suspend fun addAbility(ability: Ability) {
         db.matchupsDao().insertAbility(
             AbilityEntity(
@@ -78,7 +82,7 @@ class MatchupRepositoryImpl : MatchupRepository {
                 description = it.description
             )
         }
-        return matchupFlow
+        return matchupFlow.asStateFlow()
     }
 
     override suspend fun addMatchup(matchup: Matchup) {
