@@ -1,15 +1,9 @@
 package com.yellowtubby.victoryvault.ui.screens.main
 
-import android.util.Log
 import com.yellowtubby.victoryvault.di.MatchupCoroutineDispatcher
-import com.yellowtubby.victoryvault.di.ScopeProvider
 import com.yellowtubby.victoryvault.di.SharedFlowProvider
 import com.yellowtubby.victoryvault.domain.champions.BaseDefinedChampionUseCase
 import com.yellowtubby.victoryvault.domain.champions.ChampionListUseCase
-import com.yellowtubby.victoryvault.domain.champions.GetAllChampionsUseCase
-import com.yellowtubby.victoryvault.domain.userdata.GetCurrentUserDataUseCase
-import com.yellowtubby.victoryvault.domain.champions.GetDefinedChampionsUseCase
-import com.yellowtubby.victoryvault.domain.matchups.GetFilteredMatchupsUseCase
 import com.yellowtubby.victoryvault.domain.matchups.MatchupListUseCase
 import com.yellowtubby.victoryvault.domain.matchups.RemoveMatchUpsUseCase
 import com.yellowtubby.victoryvault.domain.userdata.UpdateCurrentMatchupUseCase
@@ -27,14 +21,13 @@ import com.yellowtubby.victoryvault.model.Role
 import com.yellowtubby.victoryvault.model.UserData
 import com.yellowtubby.victoryvault.ui.uicomponents.SnackBarType
 import com.yellowtubby.victoryvault.ui.uicomponents.SnackbarMessage
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.qualifier.named
 import org.koin.java.KoinJavaComponent.inject
+import timber.log.Timber
 
 class MainScreenViewModel(
     sharedFlowProvider: SharedFlowProvider,
@@ -44,6 +37,7 @@ class MainScreenViewModel(
     override val _uiState: MutableStateFlow<MainScreenUIState> = MutableStateFlow(
         MAIN_SCREEN_INIT_STATE
     )
+
     private val getAllChampionsUseCase: ChampionListUseCase by inject(ChampionListUseCase::class.java, qualifier = named("all"))
     private val getDefinedChampionsUseCase: ChampionListUseCase by inject(ChampionListUseCase::class.java, qualifier = named("defined"))
     private val addChampionUseCase: BaseDefinedChampionUseCase by inject(BaseDefinedChampionUseCase::class.java, qualifier = named("add"))
@@ -63,33 +57,40 @@ class MainScreenViewModel(
         val userData: UserData
     ) {
         override fun toString(): String {
-            return "ApplicationDataState(allChampions=${allChampions.size}, definedChampions=${definedChampions.map { 
+            return "ApplicationDataState(allChampions=${allChampions.size}\n, definedChampions=${definedChampions.map { 
                 it.name
-            }}, allMatchups=${allMatchups.map { 
-                "${it.orig} -> ${it.enemy}\n"
-            }}, userData=${"(${userData.currentMatchup.orig.name} -> ${userData.currentMatchup.enemy.name}, ${userData.currentRole}, ${userData.selectedChampion.name}"}))"
+            }}\n, allMatchups=\n${allMatchups.map { 
+                "${it.orig.name} -> ${it.enemy.name}\n"
+            }}\n, userData=$userData\n "
         }
     }
 
     init {
         definedScope.launch(coroutineDispatcher.ui) {
-            launch {
-                collectSharedFlow()
-            }
+            collectSharedFlow()
+        }
 
-            launch {
-                combine(
-                    getAllChampionsUseCase(),
-                    getDefinedChampionsUseCase(),
-                    getAllMatchupsUseCase(),
-                    getCurrentUserDataUseCase()
-                ) {
-                    allChampions, allDefinedChampions, allMatchups, userData ->
-                    Log.d("SERJ", "${ApplicationDataState(allChampions,allDefinedChampions,allMatchups,userData)}")
-                    ApplicationDataState(allChampions,allDefinedChampions,allMatchups,userData)
-                }.collect {
-                    handleCollectedData(it)
-                }
+        definedScope.launch {
+            combine(
+                getAllChampionsUseCase(),
+                getDefinedChampionsUseCase(),
+                getAllMatchupsUseCase(),
+                getCurrentUserDataUseCase()
+            ) { allChampions, allDefinedChampions, allMatchups, userData ->
+                Timber.d(
+                    "COLLECTED DATA: "+
+                    "${
+                        ApplicationDataState(
+                            allChampions,
+                            allDefinedChampions,
+                            allMatchups,
+                            userData
+                        )
+                    }"
+                )
+                ApplicationDataState(allChampions, allDefinedChampions, allMatchups, userData)
+            }.collect {
+                handleCollectedData(it)
             }
         }
     }
@@ -99,53 +100,46 @@ class MainScreenViewModel(
     ) {
         val allChampions = applicationDataState.allChampions
         val currentChampion = calculateCurrentChampion(applicationDataState)
-        var role: Role = Role.NAN
+        val role: Role = calculateAndUpdateCurrentRole(applicationDataState, currentChampion)
         val filterRole: MutableList<MatchupFilter> = mutableListOf()
 
-        if (applicationDataState.allMatchups.isNotEmpty()) {
-            val roleGrouping = applicationDataState.allMatchups.groupingBy { it.role }
-            role = if(applicationDataState.userData.currentRole == Role.NAN) roleGrouping.eachCount().maxOf { it.key } else applicationDataState.userData.currentRole
+        if(role != Role.NAN){
             filterRole.add(MatchupFilter(FilterType.ROLE) {
                 it.role == role
             })
         }
 
         val currentFilters = _uiState.value.filterList + filterRole
-        var allMatchups : MutableList<Matchup> = mutableListOf()
+        var displayedMatchups : MutableList<Matchup> = mutableListOf()
         if(currentChampion != Champion.NAN){
-            allMatchups.addAll(applicationDataState.allMatchups.filter { it.orig.name == currentChampion.name })
+            displayedMatchups.addAll(applicationDataState.allMatchups.filter { it.orig.name == currentChampion.name })
         }
 
         currentFilters.forEach {
             filter ->
-            allMatchups = allMatchups.filter{
+            displayedMatchups = displayedMatchups.filter{
                 filter.filterFunction(it)
             }.toMutableList()
         }
 
-        if(applicationDataState.userData.selectedChampion != Champion.NAN){
-            updateCurrentSelectedChampion(currentChampion)
-        }
-
-        if(applicationDataState.userData.currentRole != Role.NAN){
-            updateCurrentRole(role)
-        }
         withContext(coroutineDispatcher.ui) {
             _uiState.value = _uiState.value.copy(
                 definedChampion = applicationDataState.definedChampions,
                 allChampions = applicationDataState.allChampions,
                 currentChampion = currentChampion,
                 currentRole = role,
-                matchupsForCurrentChampion = allMatchups,
+                allMatchups = displayedMatchups,
                 loading = allChampions.isEmpty()
             )
         }
     }
 
-    private fun calculateCurrentChampion(applicationDataState: MainScreenViewModel.ApplicationDataState): Champion {
+    private suspend fun calculateCurrentChampion(applicationDataState: MainScreenViewModel.ApplicationDataState): Champion {
         return if(applicationDataState.userData.selectedChampion.name == "NAN") {
             if(applicationDataState.definedChampions.isNotEmpty()){
-                applicationDataState.definedChampions.first()
+                val currentChampion = applicationDataState.definedChampions.first()
+                updateCurrentSelectedChampion(currentChampion)
+                currentChampion
             } else {
                 Champion("NAN")
             }
@@ -187,9 +181,6 @@ class MainScreenViewModel(
                 is MainScreenIntent.FilterListChanged -> TODO()
 
                 is MainScreenIntent.SelectedMatchup -> {
-                    _uiState.value = _uiState.value.copy(
-                        loading = true
-                    )
                     updateCurrentMatchup(intent.matchup)
                 }
 
@@ -198,6 +189,7 @@ class MainScreenViewModel(
                         textQuery = intent.filter
                     )
                 }
+
 
                 is MainScreenIntent.DeleteSelected -> {
                     _uiState.value = _uiState.value.copy(loading = true)
@@ -281,7 +273,25 @@ class MainScreenViewModel(
             }
         }
 
-        override val filterFunction: (ApplicationIntent) -> Boolean
+    private suspend fun calculateAndUpdateCurrentRole(currentState: ApplicationDataState, currentChampion : Champion): Role {
+        if(currentChampion == Champion.NAN) {
+            return Role.NAN
+        }
+        if(currentState.userData.currentRole != Role.NAN){
+            return currentState.userData.currentRole
+        }
+        var currentRole = Role.TOP
+        val championMatchups = currentState.allMatchups.filter { it.orig.name == currentChampion.name }
+        if(championMatchups.isNotEmpty()){
+            val roleGrouping = currentState.allMatchups.groupingBy { it.role }
+            currentRole = roleGrouping.eachCount().maxOf { it.key }
+            updateCurrentRole(role = currentRole)
+        }
+
+        return currentRole
+    }
+
+    override val filterFunction: (ApplicationIntent) -> Boolean
         get() = { it is MainScreenIntent }
 
 

@@ -17,6 +17,5 @@ sealed class MainScreenIntent : ApplicationIntent() {
     data class SelectedMatchup(val matchup: Matchup) : MainScreenIntent()
     data class AddChampion(val champion: Champion) : MainScreenIntent()
     data class CurrentChampionMatchupChanged(val matchupList: List<Matchup>) : MainScreenIntent()
-    data object LoadLocalData: MainScreenIntent()
     data object ErrorClear: MainScreenIntent()
 }

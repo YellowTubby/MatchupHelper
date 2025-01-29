@@ -1,5 +1,6 @@
 package com.yellowtubby.victoryvault.ui.screens.matchup
 
+import android.util.Log
 import com.yellowtubby.victoryvault.di.MatchupCoroutineDispatcher
 import com.yellowtubby.victoryvault.di.ScopeProvider
 import com.yellowtubby.victoryvault.di.SharedFlowProvider
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.java.KoinJavaComponent.inject
+import timber.log.Timber
 
 class MatchupViewModel(
     sharedFlowProvider: SharedFlowProvider,
@@ -21,8 +23,7 @@ class MatchupViewModel(
 ) : BaseViewModel<MatchupScreenUIState>(sharedFlowProvider, coroutineDispatcher) {
 
     private val updateMatchUpUseCase: UpdateMatchUpUseCase by inject(UpdateMatchUpUseCase::class.java)
-    private val updateCurrentMatchupUseCase: UpdateCurrentMatchupUseCase by inject(
-        UpdateCurrentMatchupUseCase::class.java)
+    private val updateCurrentMatchupUseCase: UpdateCurrentMatchupUseCase by inject(UpdateCurrentMatchupUseCase::class.java)
     private val getCurrentUserData: UserDataUseCase by inject(UserDataUseCase::class.java)
 
     override val _uiState = MutableStateFlow(
@@ -30,12 +31,17 @@ class MatchupViewModel(
     )
 
 
+
     init {
+        Timber.d("INIT CALLED!")
         definedScope.launch {
             collectSharedFlow()
         }
         definedScope.launch {
             getCurrentUserData().collect {
+                Timber.d(
+                    "$it"
+                )
                 _uiState.value = _uiState.value.copy(
                     matchup = it.currentMatchup,
                     loading = false
@@ -43,6 +49,8 @@ class MatchupViewModel(
             }
         }
     }
+
+
 
     override suspend fun handleIntent(intent: ApplicationIntent) {
         when (intent) {

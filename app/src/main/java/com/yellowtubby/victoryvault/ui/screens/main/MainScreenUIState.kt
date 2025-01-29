@@ -11,7 +11,7 @@ import com.yellowtubby.victoryvault.ui.uicomponents.SnackbarMessage
 val MAIN_SCREEN_INIT_STATE : MainScreenUIState = MainScreenUIState(
     definedChampion = listOf(),
     currentChampion = Champion(),
-    matchupsForCurrentChampion = listOf(),
+    allMatchups = listOf(),
     selectedMatchups = emptyList(),
     currentRole = Role.NAN,
     allChampions = emptyList(),
@@ -22,7 +22,7 @@ data class MainScreenUIState(
     val definedChampion: List<Champion>,
     val currentChampion: Champion,
     val currentRole : Role,
-    val matchupsForCurrentChampion: List<Matchup>,
+    val allMatchups: List<Matchup>,
     val selectedMatchups: List<Matchup>,
     val allChampions: List<Champion>,
     val filterList : List<MatchupFilter>,

@@ -11,12 +11,16 @@ import com.yellowtubby.victoryvault.repositories.MatchupRepository
 import com.yellowtubby.victoryvault.ui.ApplicationIntent
 import com.yellowtubby.victoryvault.ui.ApplicationUIState
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import org.koin.java.KoinJavaComponent.getKoin
 import org.koin.java.KoinJavaComponent.inject
+import timber.log.Timber
 
 abstract class BaseViewModel<UIState : ApplicationUIState> constructor(
     private val sharedFlowProvider: SharedFlowProvider,
@@ -31,6 +35,7 @@ abstract class BaseViewModel<UIState : ApplicationUIState> constructor(
 
     abstract suspend fun handleIntent(intent: ApplicationIntent)
     abstract val filterFunction : (ApplicationIntent) -> Boolean
+    open val startFunction : () -> Unit = {}
     val uiState : StateFlow<UIState>
         get() = _uiState
 
@@ -38,18 +43,26 @@ abstract class BaseViewModel<UIState : ApplicationUIState> constructor(
 
     fun emitIntent(intent : ApplicationIntent){
         definedScope.launch(coroutineDispatcher.ui) {
-            Log.d("SERJ", "emitIntent: emitting ${intent.javaClass.simpleName}")
+            Timber.d("emitIntent: emitting ${intent.javaClass.simpleName} viewModel: ${javaClass.simpleName}")
             _intentFlow.emit(intent)
         }
     }
 
+
     protected suspend fun collectSharedFlow() {
-        Log.d("SERJ", "collectSharedFlow: COLLECTED BY: ${this.javaClass.simpleName}")
-        intentFlow.filter { filterFunction.invoke(it) }.collectLatest { intent ->
-            Log.d("SERJ", "Received event: $${intent.javaClass.simpleName}")
+        Timber.d("collectSharedFlow: COLLECTED BY: ${javaClass.simpleName}")
+        intentFlow
+            .filter { filterFunction.invoke(it) }
+            .onStart { startFunction() }
+            .collect { intent ->
+            Timber.d("Received event: $${intent.javaClass.simpleName} viewModel: ${javaClass.simpleName}")
             handleIntent(intent)
         }
     }
 
+    override fun onCleared() {
+        Timber.d("onCleared: ${javaClass.simpleName}")
+        super.onCleared()
+    }
 
 }

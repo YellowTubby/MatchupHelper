@@ -77,11 +77,10 @@ fun getIntentBasedOnNavController(actionString: String,
 fun MatchTopBar(
     scope: CoroutineScope,
     mainViewModel: MainActivityViewModel,
+    mainScreenViewModel: MainScreenViewModel,
     navController: NavController,
     activity: Activity? = LocalContext.current as Activity
 ) {
-    val mainActivityViewModel = koinViewModel<MainActivityViewModel>()
-    val mainScreenViewModel = koinViewModel<MainScreenViewModel>()
     val uiState by mainViewModel.uiState.collectAsState()
     val uiStateForSelectedMatchups = mainScreenViewModel.uiState.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())

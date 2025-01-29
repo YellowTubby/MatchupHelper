@@ -77,17 +77,10 @@ val matchUpModule = module {
 
 
 //    View Models
-    single { MatchupViewModel(get(),get()) }
-    single { MainActivityViewModel(get(),get()) }
-    single { MainScreenViewModel(get(),get()) }
-    single { AddMatchupViewModel(get(),get()) }
-
-    scope<ViewModel> {
-        scoped { MatchupViewModel(get(),get()) } // Scoped to the ViewModel's lifecycle
-        scoped { MainActivityViewModel(get(),get()) } // Scoped to the ViewModel's lifecycle
-        scoped { MainScreenViewModel(get(),get()) } // Scoped to the ViewModel's lifecycle
-        scoped { AddMatchupViewModel(get(),get()) } // Scoped to the ViewModel's lifecycle
-    }
+    viewModel { MatchupViewModel(get(), get()) }
+    viewModel { MainActivityViewModel(get(), get()) }
+    viewModel { MainScreenViewModel(get(), get()) }
+    viewModel { AddMatchupViewModel(get(), get()) }
 
 
 }

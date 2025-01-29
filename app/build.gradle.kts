@@ -41,6 +41,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.14"
@@ -88,6 +89,7 @@ dependencies {
     implementation(libs.room.ktx)
     implementation(libs.gson)
     implementation(libs.splash.screen)
+    implementation(libs.timber)
 
 
 

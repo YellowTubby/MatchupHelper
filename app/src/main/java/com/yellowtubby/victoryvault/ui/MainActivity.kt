@@ -69,6 +69,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainContent() {
     val mainViewModel = koinViewModel<MainActivityViewModel>()
+    val mainScreenViewModel = koinViewModel<MainScreenViewModel>()
     val snackBarState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     VictoryVaultTheme {
@@ -79,6 +80,7 @@ fun MainContent() {
                 MatchTopBar(
                     scope = scope,
                     mainViewModel = mainViewModel,
+                    mainScreenViewModel = mainScreenViewModel,
                     navController = navController,
                 )
             },
@@ -102,29 +104,31 @@ fun MainContent() {
                 MatchFab(
                     mainViewModel = mainViewModel,
                     navController = navController,
-                    scope = scope
+                    scope = scope,
+                    mainScreenViewModel = mainScreenViewModel
                 )
             }
         ) { innerPadding ->
             NavHost(navController = navController, startDestination = Route.Home.route) {
                 composable(Route.Home.route) {
-                    HandleBottomBarVisibility(mainViewModel, true)
+                    mainViewModel.emitIntent(MainActivityIntent.BottomBarVisibilityChanged(true))
                     MainScreen(
                         innerPadding = innerPadding,
                         scope = scope,
                         navController = navController,
-                        snackbarHostState = snackBarState
+                        snackbarHostState = snackBarState,
+                        mainScreenViewModel = mainScreenViewModel
                     )
                 }
                 composable(Route.MatchupInfo.route) {
-                    HandleBottomBarVisibility(mainViewModel, false)
+                    mainViewModel.emitIntent(MainActivityIntent.BottomBarVisibilityChanged(false))
                     MatchupScreen(
                         scope
                     )
                 }
 
                 composable(route = Route.AddMatchup.route) {
-                    HandleBottomBarVisibility(mainViewModel, false)
+                    mainViewModel.emitIntent(MainActivityIntent.BottomBarVisibilityChanged(false))
                     AddMatchupScreen(
                         scope = scope,
                         navController = navController
@@ -132,10 +136,12 @@ fun MainContent() {
                 }
 
                 composable(route = Route.MyProfile.route) {
+                    mainViewModel.emitIntent(MainActivityIntent.BottomBarVisibilityChanged(true))
                     ProfileScreen()
                 }
 
                 composable(route = Route.Statistics.route) {
+                    mainViewModel.emitIntent(MainActivityIntent.BottomBarVisibilityChanged(true))
                     StatisticsScreen()
                 }
             }
@@ -143,13 +149,5 @@ fun MainContent() {
     }
 }
 
-@Composable
-fun HandleBottomBarVisibility(mainViewModel: MainActivityViewModel, shouldBeVisibile : Boolean) {
-    LaunchedEffect(true) {
-        mainViewModel.emitIntent(
-            MainActivityIntent.BottomBarVisibilityChanged(isVisible = shouldBeVisibile)
-        )
-    }
-}
 
 

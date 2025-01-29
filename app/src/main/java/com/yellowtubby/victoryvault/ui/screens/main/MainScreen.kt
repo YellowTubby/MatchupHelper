@@ -1,6 +1,5 @@
 package com.yellowtubby.victoryvault.ui.screens.main
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -44,13 +43,9 @@ import com.yellowtubby.victoryvault.ui.uicomponents.ChampionSelector
 import com.yellowtubby.victoryvault.ui.uicomponents.MatchupCard
 import com.yellowtubby.victoryvault.ui.screens.getIconPainerResource
 import com.yellowtubby.victoryvault.model.Role
-import com.yellowtubby.victoryvault.ui.ApplicationIntent
-import com.yellowtubby.victoryvault.ui.MainActivityViewModel
 import com.yellowtubby.victoryvault.model.Champion
 import com.yellowtubby.victoryvault.ui.screens.Route
-import com.yellowtubby.victoryvault.ui.screens.matchup.MatchupScreenIntent
 import com.yellowtubby.victoryvault.ui.screens.matchup.MatchupViewModel
-import com.yellowtubby.victoryvault.ui.uicomponents.ChampionDropdown
 import com.yellowtubby.victoryvault.ui.uicomponents.MatchupProgressIndicator
 import com.yellowtubby.victoryvault.ui.uicomponents.SnackBarType
 import com.yellowtubby.victoryvault.ui.uicomponents.SnackbarManager
@@ -59,15 +54,16 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import timber.log.Timber
 
 @Composable
 fun MainScreen(
     navController: NavController,
+    mainScreenViewModel: MainScreenViewModel,
     scope: CoroutineScope,
     innerPadding: PaddingValues,
     snackbarHostState: SnackbarHostState
 ) {
-    val mainScreenViewModel = koinViewModel<MainScreenViewModel>()
     val uiState: MainScreenUIState by mainScreenViewModel.uiState.collectAsState()
     MatchupProgressIndicator(uiState) {
         Column(
@@ -127,7 +123,7 @@ fun MainScreen(
                     scope,
                     mainScreenViewModel,
                 )
-                var filteredList = uiState.matchupsForCurrentChampion.sortedBy { it.enemy.name }
+                var filteredList = uiState.allMatchups.sortedBy { it.enemy.name }
                 uiState.filterList.forEach {
                         filter ->
                     filteredList = filteredList.filter(filter.filterFunction)
@@ -136,7 +132,6 @@ fun MainScreen(
                     it.enemy.name.lowercase().contains(uiState.textQuery.lowercase())
                 }
                 if(filteredList.isNotEmpty()) {
-                    val matchupViewModel = koinViewModel<MatchupViewModel>()
                     LazyVerticalGrid(
                         modifier = Modifier.padding(8.dp),
                         columns = GridCells.Fixed(3)

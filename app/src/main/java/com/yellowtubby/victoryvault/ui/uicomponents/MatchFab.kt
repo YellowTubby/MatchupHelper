@@ -35,9 +35,9 @@ import org.koin.androidx.compose.koinViewModel
 fun MatchFab(
     scope : CoroutineScope,
     mainViewModel: MainActivityViewModel,
+    mainScreenViewModel: MainScreenViewModel,
     navController: NavController
 ) {
-    val mainScreenViewModel = koinViewModel<MainScreenViewModel>()
     val uiState by mainViewModel.uiState.collectAsState()
     val uiStateMainScreen by mainScreenViewModel.uiState.collectAsState()
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
