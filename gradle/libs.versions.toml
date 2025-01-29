@@ -20,6 +20,7 @@ foundationLayoutAndroid = "1.6.8"
 turbine="1.2.0"
 mockk="1.13.14"
 test-coroutines="1.9.0"
+timber_ver = "5.0.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -61,6 +62,7 @@ room-compiler-ktx = { module = "androidx.room:room-compiler", version.ref = "roo
 room-ktx = { module = "androidx.room:room-ktx", version.ref = "room_version"}
 
 splash-screen = { module = "androidx.core:core-splashscreen", version.ref = "splash_screen_ver"}
+timber = {module = "com.jakewharton.timber:timber", version.ref = "timber_ver"}
 androidx-foundation-layout-android = { group = "androidx.compose.foundation", name = "foundation-layout-android", version.ref = "foundationLayoutAndroid" }
 
 
