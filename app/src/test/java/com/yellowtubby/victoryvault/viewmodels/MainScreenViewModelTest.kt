@@ -28,7 +28,7 @@ class MainScreenViewModelTest : KoinTest, ViewModelTest<
 
     @Before
     fun setup() {
-        mainViewModel = MainScreenViewModel(get(),get(),get())
+        mainViewModel = MainScreenViewModel()
     }
 
     @Test
@@ -40,11 +40,9 @@ class MainScreenViewModelTest : KoinTest, ViewModelTest<
     fun mainScreenViewModelTest_AddChampion_ExpectedStateEmitted(){
 
         val testedChampion = Champion("Ahri")
-
         val useCaseMock = declareMock<AddDefinedChampionUseCase>()
         val getCaseMock = declareMock<GetDefinedChampionsUseCase>()
         coEvery { useCaseMock.invoke(any()) }.coAnswers {
-            println("CALLED2!")
             getCaseMock()
         }
         coEvery { getCaseMock.invoke() }.coAnswers {

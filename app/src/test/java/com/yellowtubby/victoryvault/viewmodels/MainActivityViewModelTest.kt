@@ -22,7 +22,7 @@ class MainActivityViewModelTest : KoinTest, ViewModelTest<
 
     @Before
     fun setup() {
-         mainViewModel = MainActivityViewModel(get(),get())
+         mainViewModel = MainActivityViewModel()
     }
 
     @Test

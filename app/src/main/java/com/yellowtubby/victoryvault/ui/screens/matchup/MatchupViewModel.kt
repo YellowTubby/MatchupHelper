@@ -17,10 +17,7 @@ import kotlinx.coroutines.withContext
 import org.koin.java.KoinJavaComponent.inject
 import timber.log.Timber
 
-class MatchupViewModel(
-    sharedFlowProvider: SharedFlowProvider,
-    coroutineDispatcher: MatchupCoroutineDispatcher
-) : BaseViewModel<MatchupScreenUIState>(sharedFlowProvider, coroutineDispatcher) {
+class MatchupViewModel: BaseViewModel<MatchupScreenUIState>() {
 
     private val updateMatchUpUseCase: UpdateMatchUpUseCase by inject(UpdateMatchUpUseCase::class.java)
     private val updateCurrentMatchupUseCase: UpdateCurrentMatchupUseCase by inject(UpdateCurrentMatchupUseCase::class.java)

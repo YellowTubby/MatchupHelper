@@ -15,7 +15,7 @@ class SharedFlowProviderImpl : SharedFlowProvider {
         onBufferOverflow = BufferOverflow.DROP_LATEST)
 
     override fun getSharedFlow(): Flow<ApplicationIntent> {
-        return sharedFlow.asSharedFlow()
+        return sharedFlow
     }
 
     override fun getMutableSharedFlow() : MutableSharedFlow<ApplicationIntent> {

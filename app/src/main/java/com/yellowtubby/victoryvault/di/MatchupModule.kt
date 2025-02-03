@@ -77,10 +77,10 @@ val matchUpModule = module {
 
 
 //    View Models
-    viewModel { MatchupViewModel(get(), get()) }
-    viewModel { MainActivityViewModel(get(), get()) }
-    viewModel { MainScreenViewModel(get(), get()) }
-    viewModel { AddMatchupViewModel(get(), get()) }
+    viewModel { MatchupViewModel() }
+    viewModel { MainActivityViewModel() }
+    viewModel { MainScreenViewModel() }
+    viewModel { AddMatchupViewModel() }
 
 
 }

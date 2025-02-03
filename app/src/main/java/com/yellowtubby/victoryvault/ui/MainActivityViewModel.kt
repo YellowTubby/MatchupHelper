@@ -12,10 +12,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.qualifier.named
 import org.koin.java.KoinJavaComponent.inject
 
-class MainActivityViewModel(
-    sharedFlowProvider: SharedFlowProvider,
-    coroutineDispatcher: MatchupCoroutineDispatcher
-) : BaseViewModel<MainActivityUIState>(sharedFlowProvider, coroutineDispatcher) {
+class MainActivityViewModel : BaseViewModel<MainActivityUIState>() {
     override val _uiState: MutableStateFlow<MainActivityUIState> = MutableStateFlow(
         MAIN_ACTIVITY_STATE
     )
@@ -58,19 +55,19 @@ class MainActivityViewModel(
     }
 
     init {
-        definedScope.launch(coroutineDispatcher.ui) {
-            launch {
-                collectSharedFlow()
-            }
+        println("🟢 Before subscribing, collectors count: ${_intentFlow.subscriptionCount.value}")
+        definedScope.launch {
+            collectSharedFlow()
+        }
 
-            launch {
-                getDefinedChampionsUseCase().collect {
-                    _uiState.value = _uiState.value.copy(
-                        shouldShowFab = it.isNotEmpty()
-                    )
-                }
+        definedScope.launch {
+            getDefinedChampionsUseCase().collect {
+                _uiState.value = _uiState.value.copy(
+                    shouldShowFab = it.isNotEmpty()
+                )
             }
         }
+        println("🟢 After subscribing, collectors count: ${_intentFlow.subscriptionCount.value}")
     }
 
     override val filterFunction: (ApplicationIntent) -> Boolean

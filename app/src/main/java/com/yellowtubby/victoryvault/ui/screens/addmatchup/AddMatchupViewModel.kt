@@ -17,11 +17,7 @@ import kotlinx.coroutines.withContext
 import org.koin.core.qualifier.named
 import org.koin.java.KoinJavaComponent.inject
 
-class AddMatchupViewModel(
-    sharedFlowProvider: SharedFlowProvider,
-    coroutineDispatcher: MatchupCoroutineDispatcher
-)
-    : BaseViewModel<AddMatchupUiState>(sharedFlowProvider,coroutineDispatcher) {
+class AddMatchupViewModel : BaseViewModel<AddMatchupUiState>() {
 
     override val _uiState: MutableStateFlow<AddMatchupUiState> = MutableStateFlow(
         ADD_MATCHUP_INIT_STATE

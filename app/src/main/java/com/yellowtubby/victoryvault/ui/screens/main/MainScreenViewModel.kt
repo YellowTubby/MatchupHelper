@@ -29,10 +29,7 @@ import org.koin.core.qualifier.named
 import org.koin.java.KoinJavaComponent.inject
 import timber.log.Timber
 
-class MainScreenViewModel(
-    sharedFlowProvider: SharedFlowProvider,
-    coroutineDispatcher: MatchupCoroutineDispatcher,
-) : BaseViewModel<MainScreenUIState>(sharedFlowProvider,coroutineDispatcher) {
+class MainScreenViewModel : BaseViewModel<MainScreenUIState>() {
 
     override val _uiState: MutableStateFlow<MainScreenUIState> = MutableStateFlow(
         MAIN_SCREEN_INIT_STATE

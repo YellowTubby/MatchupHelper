@@ -16,34 +16,38 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import org.koin.java.KoinJavaComponent.getKoin
 import org.koin.java.KoinJavaComponent.inject
 import timber.log.Timber
 
-abstract class BaseViewModel<UIState : ApplicationUIState> constructor(
-    private val sharedFlowProvider: SharedFlowProvider,
-    protected val coroutineDispatcher: MatchupCoroutineDispatcher
-): ViewModel() {
+abstract class BaseViewModel<UIState : ApplicationUIState> : ViewModel() {
 
-    private val coroutineScope: ScopeProvider by inject(ScopeProvider::class.java)
+    protected val sharedFlowProvider: SharedFlowProvider by inject(SharedFlowProvider::class.java)
+    protected val coroutineScope: ScopeProvider by inject(ScopeProvider::class.java)
+    protected val coroutineDispatcher: MatchupCoroutineDispatcher by inject(MatchupCoroutineDispatcher::class.java)
     protected val definedScope = coroutineScope.scope ?: viewModelScope
 
     protected val _intentFlow = sharedFlowProvider.getMutableSharedFlow()
     val intentFlow = sharedFlowProvider.getSharedFlow()
 
     abstract suspend fun handleIntent(intent: ApplicationIntent)
-    abstract val filterFunction : (ApplicationIntent) -> Boolean
-    open val startFunction : () -> Unit = {}
-    val uiState : StateFlow<UIState>
+    abstract val filterFunction: (ApplicationIntent) -> Boolean
+    open val startFunction: () -> Unit = {}
+    val uiState: StateFlow<UIState>
         get() = _uiState
 
-    abstract protected val _uiState : MutableStateFlow<UIState>
+    abstract protected val _uiState: MutableStateFlow<UIState>
 
-    fun emitIntent(intent : ApplicationIntent){
+    fun emitIntent(intent: ApplicationIntent) {
+        println("Before Launch!!")
+        println("Dispatching on: ${coroutineDispatcher.ui}") // Log the dispatcher being used
+        println("Defined scope is : ${definedScope}")
         definedScope.launch(coroutineDispatcher.ui) {
             Timber.d("emitIntent: emitting ${intent.javaClass.simpleName} viewModel: ${javaClass.simpleName}")
+            println("emitIntent: emitting ${intent.javaClass.simpleName} viewModel: ${javaClass.simpleName}")
             _intentFlow.emit(intent)
         }
     }
@@ -55,12 +59,13 @@ abstract class BaseViewModel<UIState : ApplicationUIState> constructor(
             .filter { filterFunction.invoke(it) }
             .onStart { startFunction() }
             .collect { intent ->
-            Timber.d("Received event: $${intent.javaClass.simpleName} viewModel: ${javaClass.simpleName}")
-            handleIntent(intent)
-        }
+                println("Received event: $${intent.javaClass.simpleName} viewModel: ${javaClass.simpleName}")
+                Timber.d("Received event: $${intent.javaClass.simpleName} viewModel: ${javaClass.simpleName}")
+                handleIntent(intent)
+            }
     }
 
-    override fun onCleared() {
+    public override fun onCleared() {
         Timber.d("onCleared: ${javaClass.simpleName}")
         super.onCleared()
     }
