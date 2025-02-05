@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.flow
 
 class TestDefinedChampionListUseCase : ChampionListUseCase {
     override suspend fun invoke(): Flow<List<Champion>> = flow {
-        println("CALLED TEST DEFINED")
         emit(listOf(Champion("Ahri")))
     }
 }

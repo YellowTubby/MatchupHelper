@@ -7,7 +7,5 @@ import com.yellowtubby.victoryvault.model.Champion
 
 
 class TestAddChampionUseCase constructor() : BaseDefinedChampionUseCase() {
-    override suspend fun invoke(champion: Champion) {
-        println("CALLING DEFINED")
-    }
+    override suspend fun invoke(champion: Champion) {}
 }

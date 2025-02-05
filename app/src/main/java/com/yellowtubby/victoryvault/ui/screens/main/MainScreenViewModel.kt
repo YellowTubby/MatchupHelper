@@ -21,8 +21,10 @@ import com.yellowtubby.victoryvault.model.Role
 import com.yellowtubby.victoryvault.model.UserData
 import com.yellowtubby.victoryvault.ui.uicomponents.SnackBarType
 import com.yellowtubby.victoryvault.ui.uicomponents.SnackbarMessage
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.qualifier.named
@@ -63,11 +65,14 @@ class MainScreenViewModel : BaseViewModel<MainScreenUIState>() {
     }
 
     init {
+
         definedScope.launch(coroutineDispatcher.ui) {
+            println("Launching collectSharedFlow in ${javaClass.simpleName}")
             collectSharedFlow()
         }
 
-        definedScope.launch {
+        definedScope.launch(coroutineDispatcher.io) {
+            delay(200)
             combine(
                 getAllChampionsUseCase(),
                 getDefinedChampionsUseCase(),

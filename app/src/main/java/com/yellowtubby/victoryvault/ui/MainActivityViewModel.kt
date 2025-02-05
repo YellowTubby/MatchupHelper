@@ -55,7 +55,6 @@ class MainActivityViewModel : BaseViewModel<MainActivityUIState>() {
     }
 
     init {
-        println("🟢 Before subscribing, collectors count: ${_intentFlow.subscriptionCount.value}")
         definedScope.launch {
             collectSharedFlow()
         }
@@ -67,7 +66,6 @@ class MainActivityViewModel : BaseViewModel<MainActivityUIState>() {
                 )
             }
         }
-        println("🟢 After subscribing, collectors count: ${_intentFlow.subscriptionCount.value}")
     }
 
     override val filterFunction: (ApplicationIntent) -> Boolean

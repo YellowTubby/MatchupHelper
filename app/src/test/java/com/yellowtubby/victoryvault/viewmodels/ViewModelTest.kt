@@ -7,6 +7,8 @@ import com.yellowtubby.victoryvault.di.ScopeProvider
 import com.yellowtubby.victoryvault.di.TestCoroutineDispatcherImpl
 import com.yellowtubby.victoryvault.di.matchUpModule
 import com.yellowtubby.victoryvault.di.testModule
+import com.yellowtubby.victoryvault.domain.champions.AddDefinedChampionUseCase
+import com.yellowtubby.victoryvault.domain.champions.GetDefinedChampionsUseCase
 import com.yellowtubby.victoryvault.general.BaseViewModel
 import com.yellowtubby.victoryvault.ui.ApplicationIntent
 import com.yellowtubby.victoryvault.ui.ApplicationUIState
@@ -14,6 +16,7 @@ import com.yellowtubby.victoryvault.ui.screens.main.MainScreenViewModel
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
+import io.mockk.mockk
 import io.mockk.mockkClass
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -33,9 +36,11 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Before
 import org.junit.Rule
 import org.junit.rules.TestRule
 import org.koin.core.context.loadKoinModules
+import org.koin.dsl.module
 import org.koin.test.KoinTestRule
 import org.koin.test.mock.MockProviderRule
 
@@ -60,36 +65,33 @@ open class ViewModelTest<ViewModelClass : BaseViewModel<UIStateClass>, UIStateCl
         mockkClass(it)
     }
 
+    private var scope: TestScope? = null
+
+
+    @Before
+    fun start(){
+        scope = koinTestRule.koin.get<ScopeProvider>().scope as TestScope
+    }
     @After
     fun teardown() {
-        mainViewModel?.onCleared()
+        scope?.cancel()
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     fun testEmitIntentAndCompareToState(intents: List<IntentClass>, expectedState: UIStateClass) {
-        val scope: TestScope = koinTestRule.koin.get<ScopeProvider>().scope as TestScope
         val dispatcher: MatchupCoroutineDispatcher = koinTestRule.koin.get<MatchupCoroutineDispatcher>()
-        // Ensure we use UnconfinedTestDispatcher
-        // Start the test block with the correct dispatcher context
         runTest(dispatcher.ui) {
-            println("Test started: Ensuring TestScope is active: ${scope.isActive}")
-            // Launch emission of intents in the scope
-            scope.launch(dispatcher.ui) {
-                println("Emitting intents...")
-
+            scope?.launch(dispatcher.ui) {
                 intents.forEach {
                     println("Emitting intent: $it")
                     mainViewModel?.emitIntent(it)
                 }
             }
+            runCurrent()
             advanceUntilIdle()
-            // Allow the emission to process, UnconfinedTestDispatcher should run immediately
-
-            // Collect emitted state values
-            println("Collecting UI state...")
             mainViewModel?.uiState?.test {
                 // Collect the most recent emitted state
-                val state = awaitItem()
+                val state = expectMostRecentItem()
                 println("Collected state: $state")
                 // Assert that the collected state matches the expected state
                 assertEquals(expectedState, state)

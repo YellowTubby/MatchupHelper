@@ -6,6 +6,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 
 interface SharedFlowProvider {
-    fun getSharedFlow() : Flow<ApplicationIntent>
+    fun getSharedFlow() : SharedFlow<ApplicationIntent>
     fun getMutableSharedFlow(): MutableSharedFlow<ApplicationIntent>
 }

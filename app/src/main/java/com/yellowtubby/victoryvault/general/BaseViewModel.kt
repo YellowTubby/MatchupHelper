@@ -18,7 +18,9 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
+import org.koin.core.component.getScopeName
 import org.koin.java.KoinJavaComponent.getKoin
 import org.koin.java.KoinJavaComponent.inject
 import timber.log.Timber
@@ -42,19 +44,15 @@ abstract class BaseViewModel<UIState : ApplicationUIState> : ViewModel() {
     abstract protected val _uiState: MutableStateFlow<UIState>
 
     fun emitIntent(intent: ApplicationIntent) {
-        println("Before Launch!!")
-        println("Dispatching on: ${coroutineDispatcher.ui}") // Log the dispatcher being used
-        println("Defined scope is : ${definedScope}")
         definedScope.launch(coroutineDispatcher.ui) {
             Timber.d("emitIntent: emitting ${intent.javaClass.simpleName} viewModel: ${javaClass.simpleName}")
             println("emitIntent: emitting ${intent.javaClass.simpleName} viewModel: ${javaClass.simpleName}")
-            _intentFlow.emit(intent)
+            _intentFlow.tryEmit(intent)
         }
     }
 
 
     protected suspend fun collectSharedFlow() {
-        Timber.d("collectSharedFlow: COLLECTED BY: ${javaClass.simpleName}")
         intentFlow
             .filter { filterFunction.invoke(it) }
             .onStart { startFunction() }
