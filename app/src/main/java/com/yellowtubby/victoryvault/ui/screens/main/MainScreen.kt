@@ -71,22 +71,24 @@ fun MainScreen(
                 .fillMaxSize()
                 .padding(innerPadding),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = if(uiState.definedChampion.isNotEmpty()) Arrangement.Top else Arrangement.Center
+            verticalArrangement = if (uiState.definedChampion.isNotEmpty()) Arrangement.Top else Arrangement.Center
         ) {
             LaunchedEffect(uiState.snackBarMessage) {
                 scope.launch {
-                    if(uiState.snackBarMessage.first){
+                    if (uiState.snackBarMessage.first) {
                         val showingSnackBar = async {
                             val snackbarManager = SnackbarManager(
                                 snackbarHostState, scope
                             )
-                            when(uiState.snackBarMessage.second.type){
+                            when (uiState.snackBarMessage.second.type) {
                                 SnackBarType.SUCCESS -> snackbarManager.showSuccessSnackbar(
                                     uiState.snackBarMessage.second.description
                                 )
+
                                 SnackBarType.ERROR -> snackbarManager.showErrorSnackbar(
                                     uiState.snackBarMessage.second.description
                                 )
+
                                 SnackBarType.INFO -> snackbarManager.showInfoSnackbar(
                                     uiState.snackBarMessage.second.description
                                 )
@@ -94,18 +96,18 @@ fun MainScreen(
                         }
                         val clearingError = async {
                             mainScreenViewModel.emitIntent(
-                                MainScreenIntent.ErrorClear)
+                                MainScreenIntent.ErrorClear
+                            )
                         }
-                        awaitAll(showingSnackBar,clearingError)
+                        awaitAll(showingSnackBar, clearingError)
                     }
                 }
             }
-            if(uiState.currentChampion != Champion.NAN){
+            if (uiState.currentChampion != Champion.NAN) {
                 ChampionSelector(
                     uiState.definedChampion,
                     uiState.currentChampion
-                ) {
-                        champion ->
+                ) { champion ->
                     scope.launch {
                         mainScreenViewModel.emitIntent(
                             MainScreenIntent.SelectChampion(champion)
@@ -124,14 +126,13 @@ fun MainScreen(
                     mainScreenViewModel,
                 )
                 var filteredList = uiState.allMatchups.sortedBy { it.enemy.name }
-                uiState.filterList.forEach {
-                        filter ->
+                uiState.filterList.forEach { filter ->
                     filteredList = filteredList.filter(filter.filterFunction)
                 }
                 filteredList = filteredList.filter {
                     it.enemy.name.lowercase().contains(uiState.textQuery.lowercase())
                 }
-                if(filteredList.isNotEmpty()) {
+                if (filteredList.isNotEmpty()) {
                     LazyVerticalGrid(
                         modifier = Modifier.padding(8.dp),
                         columns = GridCells.Fixed(3)
@@ -150,11 +151,10 @@ fun MainScreen(
                                     scope.launch {
                                         mainScreenViewModel.emitIntent(
                                             MainScreenIntent.SelectedMatchup(it)
-                                        ).also {
-                                            navController.navigate(Route.MatchupInfo.route) {
-                                                popUpTo(Route.Home.route) {
-                                                    inclusive = false
-                                                }
+                                        )
+                                        navController.navigate(Route.MatchupInfo.route) {
+                                            popUpTo(Route.Home.route) {
+                                                inclusive = false
                                             }
                                         }
                                     }
@@ -167,7 +167,7 @@ fun MainScreen(
                         modifier = Modifier.fillMaxSize(),
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
-                    ){
+                    ) {
                         Text(
                             modifier = Modifier.padding(16.dp),
                             text = stringResource(R.string.no_matchups),
@@ -182,7 +182,7 @@ fun MainScreen(
                 }
             }
 
-            if(uiState.definedChampion.isEmpty()){
+            if (uiState.definedChampion.isEmpty()) {
                 val selectedChampion = remember { mutableStateOf(uiState.currentChampion.name) }
                 Text(
                     modifier = Modifier.padding(16.dp),
@@ -270,15 +270,17 @@ fun RoleSegmentedButton(
                 },
                 checked = uiState.currentRole?.ordinal == index
             ) {
-                Text(text =
-                    when(options[index]){
+                Text(
+                    text =
+                    when (options[index]) {
                         Role.TOP -> "Top"
                         Role.JUNGLE -> "Jungle"
                         Role.MID -> "Mid"
                         Role.BOTTOM -> "Bottom"
                         Role.SUPPORT -> "Support"
                         Role.NAN -> "NAN"
-                    })
+                    }
+                )
             }
         }
     }

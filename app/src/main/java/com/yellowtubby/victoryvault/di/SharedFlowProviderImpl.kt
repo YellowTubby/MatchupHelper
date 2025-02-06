@@ -1,14 +1,9 @@
 package com.yellowtubby.victoryvault.di
 
-import android.util.Log
 import com.yellowtubby.victoryvault.ui.ApplicationIntent
-import com.yellowtubby.victoryvault.ui.screens.main.MainScreenIntent
 import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.onStart
 
 class SharedFlowProviderImpl : SharedFlowProvider {
     private val sharedFlow : MutableSharedFlow<ApplicationIntent> = MutableSharedFlow(replay = 1,

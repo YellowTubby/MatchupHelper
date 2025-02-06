@@ -1,6 +1,7 @@
 package com.yellowtubby.victoryvault.ui.uicomponents
 
 import android.animation.ArgbEvaluator
+import android.util.Log
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -16,6 +17,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,6 +39,7 @@ import com.yellowtubby.victoryvault.ui.screens.main.MainScreenUIState
 import com.yellowtubby.victoryvault.ui.screens.main.MainScreenViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
@@ -48,20 +51,22 @@ fun MatchupCard(
     onClick: () -> Unit
 ) {
     val uiState : MainScreenUIState by viewModel.uiState.collectAsState()
-    var isSelected by remember { mutableStateOf(false) }
+    val isSelected by remember(uiState.selectedMatchups, matchup) {
+        derivedStateOf {
+            uiState.selectedMatchups.any {
+                it.orig.name == matchup.orig.name && it.enemy.name == matchup.enemy.name
+            }
+        }
+    }
     Card(
         modifier = Modifier
             .padding(top = 0.dp, bottom = 8.dp, start = 8.dp, end = 8.dp)
             .pointerInput(Unit) {
                 detectTapGestures(
                     onTap = {
-                        if(uiState.multiSelectEnabled){
-                            isSelected = !isSelected
-                        }
                         onClick()
                     },
                     onLongPress = {
-                        isSelected = !isSelected
                         scope.launch {
                             viewModel.emitIntent(
                                     MainScreenIntent.StartMultiSelectChampion(true)

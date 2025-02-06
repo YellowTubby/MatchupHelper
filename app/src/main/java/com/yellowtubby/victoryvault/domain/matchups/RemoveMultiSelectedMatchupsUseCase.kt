@@ -1,0 +1,18 @@
+package com.yellowtubby.victoryvault.domain.matchups
+
+import com.yellowtubby.victoryvault.model.Matchup
+import kotlinx.coroutines.flow.MutableStateFlow
+
+class RemoveMultiSelectedMatchupsUseCase(
+    private val stateFlow: MutableStateFlow<Pair<Boolean, List<Matchup>>>
+) {
+    suspend operator fun invoke(matchup: Matchup) {
+        stateFlow.value = stateFlow.value.copy(
+            second = stateFlow.value.second.minus(matchup)
+        )
+    }
+
+    suspend operator fun invoke() {
+        stateFlow.value = Pair(false, emptyList())
+    }
+}

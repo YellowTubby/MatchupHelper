@@ -7,6 +7,7 @@ import com.yellowtubby.victoryvault.domain.champions.BaseDefinedChampionUseCase
 import com.yellowtubby.victoryvault.domain.champions.ChampionListUseCase
 import com.yellowtubby.victoryvault.domain.champions.GetDefinedChampionsUseCase
 import com.yellowtubby.victoryvault.model.Champion
+import com.yellowtubby.victoryvault.model.Matchup
 import com.yellowtubby.victoryvault.model.Role
 import com.yellowtubby.victoryvault.model.UserData
 import com.yellowtubby.victoryvault.repositories.MatchupRepository
@@ -51,6 +52,31 @@ class MainScreenViewModelTest : KoinTest, ViewModelTest<
     fun mainScreenViewModelTest_MainStateFirst_ExpectedStateEmitted(){
         testEmitIntentAndCompareToState(emptyList(), MAIN_SCREEN_INIT_STATE)
     }
+
+    @Test
+    fun mainScreenViewModelTest_StartMultiSelect_ExpectedStateEmitted(){
+        testEmitIntentAndCompareToState(
+            listOf(MainScreenIntent.StartMultiSelectChampion(true)),
+            MAIN_SCREEN_INIT_STATE.copy(
+                multiSelectEnabled = true
+            ))
+    }
+
+    @Test
+    fun mainScreenViewModelTest_StartMultiSelectAndSelectMatchup_SeeThatMatchupIsUpdated(){
+        val testMatchup = Matchup()
+        val updateMatchupMock = get<BaseDefinedChampionUseCase>(named("add"))
+        testEmitIntentAndCompareToState(
+            listOf(
+                MainScreenIntent.StartMultiSelectChampion(true),
+                MainScreenIntent.SelectedMatchup(testMatchup)
+            ),
+            MAIN_SCREEN_INIT_STATE.copy(
+                multiSelectEnabled = true,
+            )
+        )
+    }
+
 
     @Test
     fun mainScreenViewModelTest_AddChampion_ExpectedStateEmitted(){

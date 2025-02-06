@@ -22,7 +22,12 @@ data class Matchup(
     val numWins: Int = 0,
     val numTotal: Int = 0,
     val difficulty: Int = 0
-) : Parcelable
+) : Parcelable {
+    override fun toString(): String {
+        return "Matchup(${orig.name} -> ${enemy.name})"
+    }
+}
+
 
 
 class MatchupNavType : NavType<Matchup>(isNullableAllowed = false) {

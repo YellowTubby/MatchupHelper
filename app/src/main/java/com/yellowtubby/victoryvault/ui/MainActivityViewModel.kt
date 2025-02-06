@@ -1,13 +1,11 @@
 package com.yellowtubby.victoryvault.ui
 
-import androidx.lifecycle.viewModelScope
-import com.yellowtubby.victoryvault.di.MatchupCoroutineDispatcher
-import com.yellowtubby.victoryvault.di.ScopeProvider
-import com.yellowtubby.victoryvault.di.SharedFlowProvider
 import com.yellowtubby.victoryvault.domain.champions.ChampionListUseCase
+import com.yellowtubby.victoryvault.domain.matchups.AddMultiSelectedMatchupsUseCase
+import com.yellowtubby.victoryvault.domain.matchups.GetMultiSelectedMatchupsUseCase
+import com.yellowtubby.victoryvault.domain.matchups.RemoveMultiSelectedMatchupsUseCase
 import com.yellowtubby.victoryvault.general.BaseViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.core.qualifier.named
 import org.koin.java.KoinJavaComponent.inject
@@ -17,20 +15,18 @@ class MainActivityViewModel : BaseViewModel<MainActivityUIState>() {
         MAIN_ACTIVITY_STATE
     )
     private val getDefinedChampionsUseCase: ChampionListUseCase by inject(ChampionListUseCase::class.java, qualifier = named("defined"))
-
+    private val getMultiSelectedMatchupsUseCase : GetMultiSelectedMatchupsUseCase by inject(GetMultiSelectedMatchupsUseCase::class.java)
+    private val addMultiSelectedMatchupsUseCase : AddMultiSelectedMatchupsUseCase by inject(AddMultiSelectedMatchupsUseCase::class.java)
+    private val removeMultiSelectedMatchupsUseCase : RemoveMultiSelectedMatchupsUseCase by inject(RemoveMultiSelectedMatchupsUseCase::class.java)
 
     override suspend fun handleIntent(intent: ApplicationIntent) {
         when(intent){
-            is MainActivityIntent.UpdatedSelectedChampions -> {
-                _uiState.value = _uiState.value.copy(
-                    selectedAmount = intent.championNumber
-                )
-            }
             is MainActivityIntent.MultiSelectChanged -> {
-                _uiState.value = _uiState.value.copy(
-                    multiSelectEnabled = intent.isEnabled,
-                    selectedAmount = if (!intent.isEnabled) 0 else _uiState.value.selectedAmount
-                )
+                if (!intent.isEnabled) {
+                    removeMultiSelectedMatchupsUseCase()
+                } else {
+                    addMultiSelectedMatchupsUseCase()
+                }
             }
 
             is MainActivityIntent.NavigatedBottomBar -> {
@@ -57,6 +53,15 @@ class MainActivityViewModel : BaseViewModel<MainActivityUIState>() {
     init {
         definedScope.launch {
             collectSharedFlow()
+        }
+
+        definedScope.launch {
+            getMultiSelectedMatchupsUseCase().collect {
+                _uiState.value = _uiState.value.copy(
+                    selectedAmount = it.second.size,
+                    multiSelectEnabled = it.first
+                )
+            }
         }
 
         definedScope.launch {

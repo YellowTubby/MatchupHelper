@@ -14,13 +14,17 @@ import com.yellowtubby.victoryvault.domain.userdata.GetCurrentUserDataUseCase
 import com.yellowtubby.victoryvault.domain.champions.GetDefinedChampionsUseCase
 import com.yellowtubby.victoryvault.domain.matchups.GetFilteredMatchupsUseCase
 import com.yellowtubby.victoryvault.domain.champions.RemoveDefinedChampionUseCase
+import com.yellowtubby.victoryvault.domain.matchups.AddMultiSelectedMatchupsUseCase
+import com.yellowtubby.victoryvault.domain.matchups.GetMultiSelectedMatchupsUseCase
 import com.yellowtubby.victoryvault.domain.matchups.MatchupListUseCase
 import com.yellowtubby.victoryvault.domain.matchups.RemoveMatchUpsUseCase
+import com.yellowtubby.victoryvault.domain.matchups.RemoveMultiSelectedMatchupsUseCase
 import com.yellowtubby.victoryvault.domain.userdata.UpdateCurrentMatchupUseCase
 import com.yellowtubby.victoryvault.domain.userdata.UpdateCurrentRoleUseCase
 import com.yellowtubby.victoryvault.domain.userdata.UpdateCurrentSelectedChampionUseCase
 import com.yellowtubby.victoryvault.domain.matchups.UpdateMatchUpUseCase
 import com.yellowtubby.victoryvault.domain.userdata.UserDataUseCase
+import com.yellowtubby.victoryvault.model.Matchup
 import com.yellowtubby.victoryvault.repositories.ChampionInfoRepository
 import com.yellowtubby.victoryvault.repositories.ChampionInfoRepositoryImpl
 import com.yellowtubby.victoryvault.repositories.MatchupRepository
@@ -30,8 +34,10 @@ import com.yellowtubby.victoryvault.repositories.UserRepositoryImpl
 import com.yellowtubby.victoryvault.repositories.room.MatchupDatabase
 import com.yellowtubby.victoryvault.ui.MainActivityViewModel
 import com.yellowtubby.victoryvault.ui.screens.addmatchup.AddMatchupViewModel
+import com.yellowtubby.victoryvault.ui.screens.main.MainScreenIntent
 import com.yellowtubby.victoryvault.ui.screens.main.MainScreenViewModel
 import com.yellowtubby.victoryvault.ui.screens.matchup.MatchupViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.core.qualifier.named
@@ -47,23 +53,43 @@ val matchUpModule = module {
 
 
 //    Use cases
+    // Champion
     single<ChampionListUseCase>(named("all")) { GetAllChampionsUseCase(get()) }
     single<ChampionListUseCase>(named("defined")) { GetDefinedChampionsUseCase() }
-
-
-    single<MatchupListUseCase> { GetFilteredMatchupsUseCase() }
     single<BaseDefinedChampionUseCase>(named("add")) { AddDefinedChampionUseCase() }
     single<BaseDefinedChampionUseCase>(named("remove")) { RemoveDefinedChampionUseCase() }
-    single<UserDataUseCase> { GetCurrentUserDataUseCase(get()) }
+
+
+    val multiSelectStateFlow = MutableStateFlow<Pair<Boolean, List<Matchup>>>(
+        Pair(false,emptyList())
+    )
+
+    single<MutableStateFlow<Pair<Boolean, List<Matchup>>>> { MutableStateFlow(
+        Pair(false,emptyList())
+    ) }
+    // Matchup
+    single<AddMultiSelectedMatchupsUseCase> { AddMultiSelectedMatchupsUseCase(get()) }
+    single<RemoveMultiSelectedMatchupsUseCase> { RemoveMultiSelectedMatchupsUseCase(get()) }
+    single<GetMultiSelectedMatchupsUseCase> { GetMultiSelectedMatchupsUseCase(get()) }
+    single<MatchupListUseCase> { GetFilteredMatchupsUseCase() }
     single<AddMatchUpUseCase> { AddMatchUpUseCase() }
     single<RemoveMatchUpsUseCase> { RemoveMatchUpsUseCase() }
     single<UpdateMatchUpUseCase> { UpdateMatchUpUseCase() }
+
+    // UserData
     single<UpdateCurrentMatchupUseCase> { UpdateCurrentMatchupUseCase() }
     single<UpdateCurrentRoleUseCase> { UpdateCurrentRoleUseCase() }
     single<UpdateCurrentSelectedChampionUseCase> { UpdateCurrentSelectedChampionUseCase() }
+    single<UserDataUseCase> { GetCurrentUserDataUseCase(get()) }
+
+
+
+
+
     single<SharedFlowProvider> { SharedFlowProviderImpl() }
     single<MatchupCoroutineDispatcher> { MatchupCoroutineDispatcherImpl() }
     single<ScopeProvider> { ScopeProviderImpl() }
+
 
 
     // 3rd Party
