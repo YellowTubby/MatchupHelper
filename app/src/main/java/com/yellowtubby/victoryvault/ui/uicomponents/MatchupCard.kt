@@ -47,7 +47,6 @@ fun MatchupCard(
     viewModel: MainScreenViewModel,
     scope : CoroutineScope,
     matchup: Matchup,
-    difficulty: Int,
     onClick: () -> Unit
 ) {
     val uiState : MainScreenUIState by viewModel.uiState.collectAsState()
@@ -99,7 +98,7 @@ fun MatchupCard(
                     .fillMaxWidth()
                     .wrapContentHeight().border(
                         width = 4.dp,
-                        color = Color(ArgbEvaluator().evaluate(difficulty.toFloat()/10, Color.Green.toArgb(), Color.Red.toArgb()) as Int),
+                        color = Color(ArgbEvaluator().evaluate(matchup.difficulty.toFloat()/10, Color.Green.toArgb(), Color.Red.toArgb()) as Int),
                         shape = RoundedCornerShape(48.dp, 48.dp, 4.dp, 4.dp)
                     ),
                 contentScale = ContentScale.FillBounds,

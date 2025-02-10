@@ -45,7 +45,6 @@ import com.yellowtubby.victoryvault.ui.screens.getIconPainerResource
 import com.yellowtubby.victoryvault.model.Role
 import com.yellowtubby.victoryvault.model.Champion
 import com.yellowtubby.victoryvault.ui.screens.Route
-import com.yellowtubby.victoryvault.ui.screens.matchup.MatchupViewModel
 import com.yellowtubby.victoryvault.ui.uicomponents.MatchupProgressIndicator
 import com.yellowtubby.victoryvault.ui.uicomponents.SnackBarType
 import com.yellowtubby.victoryvault.ui.uicomponents.SnackbarManager
@@ -53,7 +52,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.koinViewModel
 import timber.log.Timber
 
 @Composable
@@ -125,86 +123,104 @@ fun MainScreen(
                     scope,
                     mainScreenViewModel,
                 )
-                var filteredList = uiState.allMatchups.sortedBy { it.enemy.name }
-                uiState.filterList.forEach { filter ->
-                    filteredList = filteredList.filter(filter.filterFunction)
+
+                if (uiState.currentMatchupList.isNotEmpty()) {
+                    MatchUpList(
+                        mainScreenViewModel,
+                        uiState,
+                        navController,
+                        scope
+                    )
+                } else {
+                    NoMatchupSection(
+                        navController
+                    )
                 }
-                filteredList = filteredList.filter {
-                    it.enemy.name.lowercase().contains(uiState.textQuery.lowercase())
+            }
+        }
+
+        if (uiState.definedChampion.isEmpty()) {
+            val selectedChampion = remember { mutableStateOf(uiState.currentChampion.name) }
+            Text(
+                modifier = Modifier.padding(16.dp),
+                text = "You currently have no selected champions, please add a new champion",
+                textAlign = TextAlign.Center
+            )
+            ChampionSelector(
+                uiState.allChampions,
+                Champion(selectedChampion.value)
+            ) {
+                selectedChampion.value = it.name
+            }
+            Spacer(modifier = Modifier.size(8.dp))
+            Button(
+                enabled = selectedChampion.value != "NAN",
+                onClick = {
+                    mainScreenViewModel.emitIntent(
+                        MainScreenIntent.AddChampion(Champion(selectedChampion.value))
+                    )
                 }
-                if (filteredList.isNotEmpty()) {
-                    LazyVerticalGrid(
-                        modifier = Modifier.padding(8.dp),
-                        columns = GridCells.Fixed(3)
-                    ) {
-                        items(filteredList) {
-                            MatchupCard(
-                                mainScreenViewModel, scope = scope, it, it.difficulty
-                            ) {
-                                if (uiState.multiSelectEnabled) {
-                                    scope.launch {
-                                        mainScreenViewModel.emitIntent(
-                                            MainScreenIntent.MultiSelectMatchups(it)
-                                        )
-                                    }
-                                } else {
-                                    scope.launch {
-                                        mainScreenViewModel.emitIntent(
-                                            MainScreenIntent.SelectedMatchup(it)
-                                        )
-                                        navController.navigate(Route.MatchupInfo.route) {
-                                            popUpTo(Route.Home.route) {
-                                                inclusive = false
-                                            }
-                                        }
-                                    }
-                                }
+            ) {
+                Text(text = "Add Champion")
+            }
+        }
+    }
+}
+
+@Composable
+fun NoMatchupSection(navController: NavController) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            modifier = Modifier.padding(16.dp),
+            text = stringResource(R.string.no_matchups),
+            textAlign = TextAlign.Center
+        )
+        Button(onClick = {
+            navController.navigate("addMatchup")
+        }) {
+            Text(text = stringResource(R.string.add_matchup_string))
+        }
+    }
+}
+
+@Composable
+fun MatchUpList(
+    mainScreenViewModel: MainScreenViewModel,
+    uiState: MainScreenUIState,
+    navController: NavController,
+    scope: CoroutineScope
+) {
+    LazyVerticalGrid(
+        modifier = Modifier.padding(8.dp),
+        columns = GridCells.Fixed(3)
+    ) {
+        val stableMatchupList = uiState.currentMatchupList
+        items(stableMatchupList) {
+            Timber.d("MATCHUP SHOWING!: ${it}")
+            MatchupCard(
+                mainScreenViewModel, scope = scope, it
+            ) {
+                val selectedMatchup = it
+                scope.launch {
+                    if (uiState.multiSelectEnabled) {
+                        Timber.d("EMITTING! to MULTISELECT ${selectedMatchup}")
+                        mainScreenViewModel.emitIntent(
+                            MainScreenIntent.MultiSelectMatchups(selectedMatchup)
+                        )
+                    } else {
+                        mainScreenViewModel.emitIntent(
+                            MainScreenIntent.SelectedMatchup(selectedMatchup)
+                        )
+                        navController.navigate(Route.MatchupInfo.route) {
+                            popUpTo(Route.Home.route) {
+                                inclusive = false
                             }
                         }
                     }
-                } else {
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            modifier = Modifier.padding(16.dp),
-                            text = stringResource(R.string.no_matchups),
-                            textAlign = TextAlign.Center
-                        )
-                        Button(onClick = {
-                            navController.navigate("addMatchup")
-                        }) {
-                            Text(text = stringResource(R.string.add_matchup_string))
-                        }
-                    }
-                }
-            }
-
-            if (uiState.definedChampion.isEmpty()) {
-                val selectedChampion = remember { mutableStateOf(uiState.currentChampion.name) }
-                Text(
-                    modifier = Modifier.padding(16.dp),
-                    text = "You currently have no selected champions, please add a new champion",
-                    textAlign = TextAlign.Center
-                )
-                ChampionSelector(
-                    uiState.allChampions,
-                    Champion(selectedChampion.value)
-                ) {
-                    selectedChampion.value = it.name
-                }
-                Spacer(modifier = Modifier.size(8.dp))
-                Button(
-                    enabled = selectedChampion.value != "NAN",
-                    onClick = {
-                        mainScreenViewModel.emitIntent(
-                            MainScreenIntent.AddChampion(Champion(selectedChampion.value))
-                        )
-                    }
-                ) {
-                    Text(text = "Add Champion")
                 }
             }
         }
@@ -253,7 +269,7 @@ fun RoleSegmentedButton(
             SegmentedButton(
                 shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
                 icon = {
-                    SegmentedButtonDefaults.Icon(active = index == uiState.currentRole?.ordinal) {
+                    SegmentedButtonDefaults.Icon(active = index == uiState.currentRole.ordinal) {
                         Icon(
                             painter = getIconPainerResource(options[index]),
                             contentDescription = null,

@@ -1,8 +1,5 @@
 package com.yellowtubby.victoryvault.ui.screens.main
 
-import android.util.Log
-import com.yellowtubby.victoryvault.di.MatchupCoroutineDispatcher
-import com.yellowtubby.victoryvault.di.SharedFlowProvider
 import com.yellowtubby.victoryvault.domain.champions.BaseDefinedChampionUseCase
 import com.yellowtubby.victoryvault.domain.champions.ChampionListUseCase
 import com.yellowtubby.victoryvault.domain.matchups.AddMultiSelectedMatchupsUseCase
@@ -28,7 +25,6 @@ import com.yellowtubby.victoryvault.ui.uicomponents.SnackbarMessage
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.qualifier.named
@@ -102,6 +98,7 @@ class MainScreenViewModel : BaseViewModel<MainScreenUIState>() {
         definedScope.launch(coroutineDispatcher.ui) {
             delay(200)
             getMultiSelectedMatchupsUseCase().collect {
+                Timber.d("COLLECTED DATA: ${it.second}")
                 _uiState.value = _uiState.value.copy(
                     selectedMatchups = it.second,
                     multiSelectEnabled = it.first
@@ -117,17 +114,6 @@ class MainScreenViewModel : BaseViewModel<MainScreenUIState>() {
                 getAllMatchupsUseCase(),
                 getCurrentUserDataUseCase()
             ) { allChampions, allDefinedChampions, allMatchups, userData ->
-                Timber.d(
-                    "COLLECTED DATA: " +
-                            "${
-                                ApplicationDataState(
-                                    allChampions,
-                                    allDefinedChampions,
-                                    allMatchups,
-                                    userData
-                                )
-                            }"
-                )
                 ApplicationDataState(allChampions, allDefinedChampions, allMatchups, userData)
             }.collect {
                 handleCollectedData(it)
@@ -167,7 +153,7 @@ class MainScreenViewModel : BaseViewModel<MainScreenUIState>() {
                 allChampions = applicationDataState.allChampions,
                 currentChampion = currentChampion,
                 currentRole = role,
-                allMatchups = displayedMatchups,
+                currentMatchupList = displayedMatchups,
                 loading = allChampions.isEmpty()
             )
         }
@@ -192,13 +178,17 @@ class MainScreenViewModel : BaseViewModel<MainScreenUIState>() {
             is MainScreenIntent.MultiSelectMatchups -> {
                 val currentMatchups = _uiState.value.selectedMatchups
                 if (currentMatchups.isEmpty()) {
+                    Timber.d("ADDING ${intent.matchup}")
                     addMultiSelectedMatchupsUseCase(intent.matchup)
                 } else if (currentMatchups.any {
                         it.orig.name == intent.matchup.orig.name &&
                                 it.enemy.name == intent.matchup.enemy.name
                     }) {
+                    Timber.d("REMOVING ${intent.matchup}")
                     removeMultiSelectedMatchupsUseCase(intent.matchup)
                 } else {
+                    Timber.d("ADDING ${intent.matchup}")
+
                     addMultiSelectedMatchupsUseCase(intent.matchup)
                 }
             }
