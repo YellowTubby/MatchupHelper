@@ -3,7 +3,7 @@ package com.yellowtubby.victoryvault.domain.matchups
 import com.yellowtubby.victoryvault.model.Matchup
 import kotlinx.coroutines.flow.MutableStateFlow
 
-class AddMultiSelectedMatchupsUseCase(
+open class AddMultiSelectedMatchupsUseCase(
     private val stateFlow: MutableStateFlow<Pair<Boolean, List<Matchup>>>
 ) {
     suspend operator fun invoke(matchup: Matchup) {

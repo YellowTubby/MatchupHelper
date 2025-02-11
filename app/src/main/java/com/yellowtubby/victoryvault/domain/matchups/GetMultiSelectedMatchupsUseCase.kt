@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class GetMultiSelectedMatchupsUseCase(
+open class GetMultiSelectedMatchupsUseCase(
     private val stateFlow: MutableStateFlow<Pair<Boolean, List<Matchup>>>
 ) {
     suspend operator fun invoke(): Flow<Pair<Boolean,List<Matchup>>> {

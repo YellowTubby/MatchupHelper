@@ -3,6 +3,7 @@ package com.yellowtubby.victoryvault
 import android.app.Application
 import android.os.Build
 import com.yellowtubby.victoryvault.di.matchUpModule
+import com.yellowtubby.victoryvault.di.previewModule
 import com.yellowtubby.victoryvault.domain.champions.GetAllChampionsUseCase
 import com.yellowtubby.victoryvault.domain.userdata.GetCurrentUserDataUseCase
 import kotlinx.coroutines.MainScope
@@ -18,7 +19,7 @@ class MatchUpApplication : Application() {
 
         startKoin {
             androidContext(applicationContext)
-            modules(matchUpModule)
+            modules(matchUpModule + previewModule)
         }
         if(BuildConfig.DEBUG) {
             Timber.plant(object : Timber.DebugTree() {

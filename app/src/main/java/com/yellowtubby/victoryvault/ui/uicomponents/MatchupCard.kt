@@ -25,15 +25,22 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
+import com.bumptech.glide.integration.compose.Placeholder
+import com.bumptech.glide.integration.compose.placeholder
+import com.yellowtubby.victoryvault.R
 import com.yellowtubby.victoryvault.ui.screens.matchup.MatchupViewModel
 import com.yellowtubby.victoryvault.model.Matchup
+import com.yellowtubby.victoryvault.ui.screens.main.MAIN_SCREEN_INIT_STATE
 import com.yellowtubby.victoryvault.ui.screens.main.MainScreenIntent
 import com.yellowtubby.victoryvault.ui.screens.main.MainScreenUIState
 import com.yellowtubby.victoryvault.ui.screens.main.MainScreenViewModel
@@ -41,21 +48,17 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
+@Preview
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun MatchupCard(
-    viewModel: MainScreenViewModel,
-    scope : CoroutineScope,
-    matchup: Matchup,
-    onClick: () -> Unit
+    uiState: MainScreenUIState = MAIN_SCREEN_INIT_STATE,
+    matchup: Matchup = Matchup(),
+    onClick: () -> Unit = {},
+    onLongPress: (Offset) -> Unit = {}
 ) {
-    val uiState : MainScreenUIState by viewModel.uiState.collectAsState()
-    val isSelected by remember(uiState.selectedMatchups, matchup) {
-        derivedStateOf {
-            uiState.selectedMatchups.any {
-                it.orig.name == matchup.orig.name && it.enemy.name == matchup.enemy.name
-            }
-        }
+    val isSelected = uiState.selectedMatchups.any {
+        it.orig.name == matchup.orig.name && it.enemy.name == matchup.enemy.name
     }
     Card(
         modifier = Modifier
@@ -65,19 +68,7 @@ fun MatchupCard(
                     onTap = {
                         onClick()
                     },
-                    onLongPress = {
-                        scope.launch {
-                            viewModel.emitIntent(
-                                    MainScreenIntent.StartMultiSelectChampion(true)
-                                )
-                                .also {
-                                    viewModel.emitIntent(
-                                        MainScreenIntent.MultiSelectMatchups(matchup)
-                                    )
-                                }
-
-                        }
-                    }
+                    onLongPress = onLongPress
                 )
             }
             .clip(
@@ -92,7 +83,6 @@ fun MatchupCard(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top){
-            
             GlideImage(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -102,7 +92,8 @@ fun MatchupCard(
                         shape = RoundedCornerShape(48.dp, 48.dp, 4.dp, 4.dp)
                     ),
                 contentScale = ContentScale.FillBounds,
-                model = matchup.enemy.iconUri, contentDescription = "grid_icon_${matchup.enemy.name}"
+                loading = placeholder(R.drawable.logo),
+                model = matchup.enemy.iconUri, contentDescription = "grid_icon_${matchup.enemy.name}",
             )
             Text(
                 text = matchup.enemy.name

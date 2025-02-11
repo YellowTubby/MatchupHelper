@@ -1,5 +1,7 @@
 package com.yellowtubby.victoryvault.di
 
+import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.room.Room
 import com.google.gson.Gson
@@ -24,7 +26,10 @@ import com.yellowtubby.victoryvault.domain.userdata.UpdateCurrentRoleUseCase
 import com.yellowtubby.victoryvault.domain.userdata.UpdateCurrentSelectedChampionUseCase
 import com.yellowtubby.victoryvault.domain.matchups.UpdateMatchUpUseCase
 import com.yellowtubby.victoryvault.domain.userdata.UserDataUseCase
+import com.yellowtubby.victoryvault.model.Champion
 import com.yellowtubby.victoryvault.model.Matchup
+import com.yellowtubby.victoryvault.model.Role
+import com.yellowtubby.victoryvault.model.UserData
 import com.yellowtubby.victoryvault.repositories.ChampionInfoRepository
 import com.yellowtubby.victoryvault.repositories.ChampionInfoRepositoryImpl
 import com.yellowtubby.victoryvault.repositories.MatchupRepository
@@ -37,12 +42,13 @@ import com.yellowtubby.victoryvault.ui.screens.addmatchup.AddMatchupViewModel
 import com.yellowtubby.victoryvault.ui.screens.main.MainScreenIntent
 import com.yellowtubby.victoryvault.ui.screens.main.MainScreenViewModel
 import com.yellowtubby.victoryvault.ui.screens.matchup.MatchupViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.core.qualifier.named
-
 import org.koin.dsl.module
+import org.koin.core.module.Module
 
 val matchUpModule = module {
     // Repos
@@ -109,4 +115,64 @@ val matchUpModule = module {
     viewModel { AddMatchupViewModel() }
 
 
+}
+
+// Define a Koin module for preview-specific dependencies
+val previewModule: Module = module {
+    // Provide mock or simplified versions of your use cases for previews
+    single(named("all")) { FakeChampionListUseCase() }
+    single(named("defined")) { FakeChampionListUseCase() }
+    single(named("add")) { FakeBaseDefinedChampionUseCase() }
+    single { FakeRemoveMatchUpsUseCase() }
+    single { FakeMatchupListUseCase() }
+    single { FakeUserDataUseCase() }
+    single { FakeUpdateCurrentRoleUseCase() }
+    single { FakeAddMultiSelectedMatchupsUseCase() }
+    single { FakeRemoveMultiSelectedMatchupsUseCase() }
+    single { FakeGetMultiSelectedMatchupsUseCase() }
+    single { FakeUpdateCurrentMatchupUseCase() }
+    single { FakeUpdateCurrentSelectedChampionUseCase() }
+}
+
+// Fake implementations for each of the use cases your ViewModel depends on
+class FakeChampionListUseCase : ChampionListUseCase {
+    override suspend fun invoke(): Flow<List<Champion>> {
+        TODO("Not yet implemented")
+    }
+}
+
+class FakeBaseDefinedChampionUseCase : BaseDefinedChampionUseCase() {
+    override suspend fun invoke(champion: Champion) {
+        TODO("Not yet implemented")
+    }
+}
+
+class FakeRemoveMatchUpsUseCase : RemoveMatchUpsUseCase() {
+}
+
+class FakeMatchupListUseCase : MatchupListUseCase {
+    override suspend fun invoke(): Flow<List<Matchup>> {
+        TODO("Not yet implemented")
+    }
+}
+
+class FakeUserDataUseCase : UserDataUseCase {
+    override fun invoke(): Flow<UserData> {
+        TODO("Not yet implemented")
+    }
+}
+
+class FakeUpdateCurrentRoleUseCase : UpdateCurrentRoleUseCase()
+
+class FakeAddMultiSelectedMatchupsUseCase : AddMultiSelectedMatchupsUseCase(stateFlow = MutableStateFlow(Pair(false, emptyList()))) {
+}
+
+class FakeRemoveMultiSelectedMatchupsUseCase : RemoveMultiSelectedMatchupsUseCase(stateFlow = MutableStateFlow(Pair(false, emptyList())))
+
+class FakeGetMultiSelectedMatchupsUseCase : GetMultiSelectedMatchupsUseCase(stateFlow = MutableStateFlow(Pair(false, emptyList())))
+
+class FakeUpdateCurrentMatchupUseCase : UpdateCurrentMatchupUseCase() {
+}
+
+class FakeUpdateCurrentSelectedChampionUseCase : UpdateCurrentSelectedChampionUseCase() {
 }

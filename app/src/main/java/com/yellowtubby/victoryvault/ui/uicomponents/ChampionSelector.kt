@@ -20,17 +20,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.yellowtubby.victoryvault.model.Champion
 
+@Preview
 @Composable
 fun ChampionSelector(
-    championList: List<Champion>,
-    initialChampion: Champion,
-    onSelected: (Champion) -> Unit,
+    championList: List<Champion> = listOf(Champion("Ahri"), Champion("Aatrox")),
+    initialChampion: Champion = Champion("Ahri"),
+    onSelected: (Champion) -> Unit = {},
 ) {
     val expanded = remember { mutableStateOf(false) }
     val selectedIndex = remember { mutableIntStateOf(championList.indexOf(initialChampion)) }

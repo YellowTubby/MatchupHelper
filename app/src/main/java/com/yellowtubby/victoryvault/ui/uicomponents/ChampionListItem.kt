@@ -21,14 +21,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
+import com.bumptech.glide.integration.compose.placeholder
+import com.yellowtubby.victoryvault.R
 import com.yellowtubby.victoryvault.model.Champion
 
 @OptIn(ExperimentalGlideComposeApi::class)
+@Preview
 @Composable
-fun ChampionListItem(champion: Champion, onItemClicked: () -> Unit) {
+fun ChampionListItem(champion: Champion = Champion("Ahri"), onItemClicked: () -> Unit = {}) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -45,7 +49,7 @@ fun ChampionListItem(champion: Champion, onItemClicked: () -> Unit) {
                 .size(48.dp)
                 .padding(8.dp)
                 .clip(CircleShape),
-
+            loading = placeholder(R.drawable.logo),
             model = champion.iconUri, contentDescription = "icon_champion_${champion.name}"
         )
         Text(

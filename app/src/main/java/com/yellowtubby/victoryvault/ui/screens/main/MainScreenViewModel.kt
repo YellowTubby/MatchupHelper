@@ -32,11 +32,6 @@ import org.koin.java.KoinJavaComponent.inject
 import timber.log.Timber
 
 class MainScreenViewModel : BaseViewModel<MainScreenUIState>() {
-
-    override val _uiState: MutableStateFlow<MainScreenUIState> = MutableStateFlow(
-        MAIN_SCREEN_INIT_STATE
-    )
-
     private val getAllChampionsUseCase: ChampionListUseCase by inject(
         ChampionListUseCase::class.java,
         qualifier = named("all")
@@ -67,6 +62,10 @@ class MainScreenViewModel : BaseViewModel<MainScreenUIState>() {
     )
     private val updateCurrentSelectedChampion: UpdateCurrentSelectedChampionUseCase by inject(
         UpdateCurrentSelectedChampionUseCase::class.java
+    )
+
+    override val _uiState: MutableStateFlow<MainScreenUIState> = MutableStateFlow(
+        MAIN_SCREEN_INIT_STATE
     )
 
     data class ApplicationDataState(

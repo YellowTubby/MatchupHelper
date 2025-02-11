@@ -31,19 +31,27 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.yellowtubby.victoryvault.R
+import com.yellowtubby.victoryvault.di.matchUpModule
+import com.yellowtubby.victoryvault.di.previewModule
 import com.yellowtubby.victoryvault.ui.uicomponents.ChampionSelector
 import com.yellowtubby.victoryvault.ui.uicomponents.MatchupCard
 import com.yellowtubby.victoryvault.ui.screens.getIconPainerResource
 import com.yellowtubby.victoryvault.model.Role
 import com.yellowtubby.victoryvault.model.Champion
+import com.yellowtubby.victoryvault.model.Matchup
 import com.yellowtubby.victoryvault.ui.screens.Route
 import com.yellowtubby.victoryvault.ui.uicomponents.MatchupProgressIndicator
 import com.yellowtubby.victoryvault.ui.uicomponents.SnackBarType
@@ -52,7 +60,48 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
+import org.koin.android.ext.koin.androidContext
+import org.koin.compose.KoinApplication
+import org.koin.compose.getKoin
+import org.koin.core.context.GlobalContext.startKoin
+import org.koin.mp.KoinPlatformTools
 import timber.log.Timber
+
+
+
+
+@Preview(showBackground = true)
+@Composable
+fun MainScreenPreview() {
+    val context = LocalContext.current
+
+
+    // Create a mock NavController and other dependencies
+    val navController = rememberNavController()
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val innerPadding = PaddingValues(16.dp)
+
+
+    KoinApplication(application = {
+        // If you need Context
+        androidContext(context)
+        modules(matchUpModule + previewModule)
+    }) {
+        // Get the ViewModel from Koin
+        val mainScreenViewModel: MainScreenViewModel = getKoin().get()
+
+        // Render your MainScreen with the mocked dependencies
+        MainScreen(
+            navController = navController,
+            mainScreenViewModel = mainScreenViewModel,
+            scope = scope,
+            innerPadding = innerPadding,
+            snackbarHostState = snackbarHostState
+        )
+    }
+}
+
 
 @Composable
 fun MainScreen(
@@ -114,26 +163,62 @@ fun MainScreen(
                 }
                 RoleSegmentedButton(
                     uiState,
-                    mainViewModel = mainScreenViewModel,
-                    scope
+                    onCheckedChange = {
+                            _, role ->
+                        scope.launch {
+                            mainScreenViewModel.emitIntent(
+                                MainScreenIntent.RoleChanged(role)
+                            )
+                        }
+                    }
                 )
                 Spacer(modifier = Modifier.size(8.dp))
 
                 ChampionFilter(
-                    scope,
-                    mainScreenViewModel,
-                )
+                    uiState
+                ) {
+                    scope.launch {
+                        mainScreenViewModel.emitIntent(
+                            MainScreenIntent.TextFilterChanged(filter = it)
+                        )
+                    }
+                }
 
                 if (uiState.currentMatchupList.isNotEmpty()) {
                     MatchUpList(
-                        mainScreenViewModel,
                         uiState,
-                        navController,
-                        scope
+                        onClick = {
+                            val selectedMatchup = it
+                            scope.launch {
+                                if (uiState.multiSelectEnabled) {
+                                    Timber.d("EMITTING! to MULTISELECT $selectedMatchup")
+                                    mainScreenViewModel.emitIntent(
+                                        MainScreenIntent.MultiSelectMatchups(selectedMatchup)
+                                    )
+                                } else {
+                                    mainScreenViewModel.emitIntent(
+                                        MainScreenIntent.SelectedMatchup(selectedMatchup)
+                                    )
+                                    navController.navigate(Route.MatchupInfo.route) {
+                                        popUpTo(Route.Home.route) {
+                                            inclusive = false
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        onLongClick = { _, matchup ->
+                            scope.launch {
+                                mainScreenViewModel.emitIntent(MainScreenIntent.StartMultiSelectChampion(true))
+                                mainScreenViewModel.emitIntent(MainScreenIntent.MultiSelectMatchups(matchup))
+                            }
+                        }
                     )
                 } else {
                     NoMatchupSection(
-                        navController
+                        onClick = {
+                            navController.navigate("addMatchup")
+                        }
                     )
                 }
             }
@@ -167,8 +252,11 @@ fun MainScreen(
     }
 }
 
+@Preview
 @Composable
-fun NoMatchupSection(navController: NavController) {
+fun NoMatchupSection(
+    onClick: () -> Unit = {}
+) {
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -179,20 +267,21 @@ fun NoMatchupSection(navController: NavController) {
             text = stringResource(R.string.no_matchups),
             textAlign = TextAlign.Center
         )
-        Button(onClick = {
-            navController.navigate("addMatchup")
-        }) {
+        Button(onClick = onClick) {
             Text(text = stringResource(R.string.add_matchup_string))
         }
     }
 }
 
+
+@Preview
 @Composable
 fun MatchUpList(
-    mainScreenViewModel: MainScreenViewModel,
-    uiState: MainScreenUIState,
-    navController: NavController,
-    scope: CoroutineScope
+    uiState: MainScreenUIState = MAIN_SCREEN_INIT_STATE.copy(
+        currentMatchupList = listOf(Matchup(), Matchup())
+    ),
+    onClick : (Matchup) -> Unit = {},
+    onLongClick: (Offset, Matchup) -> Unit = { offset: Offset, matchup: Matchup -> }
 ) {
     LazyVerticalGrid(
         modifier = Modifier.padding(8.dp),
@@ -200,52 +289,28 @@ fun MatchUpList(
     ) {
         val stableMatchupList = uiState.currentMatchupList
         items(stableMatchupList) {
-            Timber.d("MATCHUP SHOWING!: ${it}")
-            MatchupCard(
-                mainScreenViewModel, scope = scope, it
-            ) {
-                val selectedMatchup = it
-                scope.launch {
-                    if (uiState.multiSelectEnabled) {
-                        Timber.d("EMITTING! to MULTISELECT ${selectedMatchup}")
-                        mainScreenViewModel.emitIntent(
-                            MainScreenIntent.MultiSelectMatchups(selectedMatchup)
-                        )
-                    } else {
-                        mainScreenViewModel.emitIntent(
-                            MainScreenIntent.SelectedMatchup(selectedMatchup)
-                        )
-                        navController.navigate(Route.MatchupInfo.route) {
-                            popUpTo(Route.Home.route) {
-                                inclusive = false
-                            }
-                        }
-                    }
-                }
-            }
+            matchup ->
+            Timber.d("MATCHUP SHOWING!: $matchup")
+            MatchupCard(uiState, matchup, onClick = { onClick(matchup) }, { onLongClick(it,matchup) } )
         }
     }
 }
 
+@Preview(showBackground = true)
 @Composable
 fun ChampionFilter(
-    scope: CoroutineScope,
-    mainViewModel: MainScreenViewModel
+    state: MainScreenUIState = MAIN_SCREEN_INIT_STATE.copy(
+        textQuery = "Test"
+    ),
+    onValueChanged : (String) -> Unit = {}
 ) {
-    val uiState: MainScreenUIState by mainViewModel.uiState.collectAsState()
     TextField(
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
             .clip(RoundedCornerShape(8.dp)),
-        value = uiState.textQuery,
-        onValueChange = { str: String ->
-            scope.launch {
-                mainViewModel.emitIntent(
-                    MainScreenIntent.TextFilterChanged(filter = str)
-                )
-            }
-        },
+        value = state.textQuery,
+        onValueChange = onValueChanged,
         trailingIcon = {
             Icon(
                 imageVector = Icons.Rounded.Search,
@@ -256,16 +321,16 @@ fun ChampionFilter(
 }
 
 
+@Preview
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RoleSegmentedButton(
-    uiState: MainScreenUIState,
-    mainViewModel: MainScreenViewModel,
-    scope: CoroutineScope
+    uiState: MainScreenUIState = MAIN_SCREEN_INIT_STATE,
+    onCheckedChange : (Boolean, Role) -> Unit = { _, _ -> }
 ) {
     val options = listOf(Role.TOP, Role.JUNGLE, Role.MID, Role.BOTTOM, Role.SUPPORT)
     MultiChoiceSegmentedButtonRow {
-        options.forEachIndexed { index, label ->
+        options.forEachIndexed { index, _ ->
             SegmentedButton(
                 shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
                 icon = {
@@ -278,13 +343,9 @@ fun RoleSegmentedButton(
                     }
                 },
                 onCheckedChange = {
-                    scope.launch {
-                        mainViewModel.emitIntent(
-                            MainScreenIntent.RoleChanged(options[index])
-                        )
-                    }
+                    onCheckedChange(it, options[index])
                 },
-                checked = uiState.currentRole?.ordinal == index
+                checked = uiState.currentRole.ordinal == index
             ) {
                 Text(
                     text =
