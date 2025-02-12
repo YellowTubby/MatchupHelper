@@ -19,6 +19,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MultiChoiceSegmentedButtonRow
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SnackbarHostState
@@ -26,9 +27,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -43,28 +41,22 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.compose.VictoryVaultTheme
 import com.yellowtubby.victoryvault.R
-import com.yellowtubby.victoryvault.di.matchUpModule
-import com.yellowtubby.victoryvault.di.previewModule
 import com.yellowtubby.victoryvault.ui.uicomponents.ChampionSelector
 import com.yellowtubby.victoryvault.ui.uicomponents.MatchupCard
 import com.yellowtubby.victoryvault.ui.screens.getIconPainerResource
 import com.yellowtubby.victoryvault.model.Role
 import com.yellowtubby.victoryvault.model.Champion
 import com.yellowtubby.victoryvault.model.Matchup
+import com.yellowtubby.victoryvault.ui.ApplicationIntent
 import com.yellowtubby.victoryvault.ui.screens.Route
 import com.yellowtubby.victoryvault.ui.uicomponents.MatchupProgressIndicator
 import com.yellowtubby.victoryvault.ui.uicomponents.SnackBarType
 import com.yellowtubby.victoryvault.ui.uicomponents.SnackbarManager
+import com.yellowtubby.victoryvault.ui.uicomponents.SnackbarMessage
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
-import org.koin.android.ext.koin.androidContext
-import org.koin.compose.KoinApplication
-import org.koin.compose.getKoin
-import org.koin.core.context.GlobalContext.startKoin
-import org.koin.mp.KoinPlatformTools
 import timber.log.Timber
 
 
@@ -75,30 +67,28 @@ import timber.log.Timber
 fun MainScreenPreview() {
     val context = LocalContext.current
 
-
     // Create a mock NavController and other dependencies
     val navController = rememberNavController()
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
-    val innerPadding = PaddingValues(16.dp)
+    val innerPadding = PaddingValues(4.dp)
 
-
-    KoinApplication(application = {
-        // If you need Context
-        androidContext(context)
-        modules(matchUpModule + previewModule)
-    }) {
-        // Get the ViewModel from Koin
-        val mainScreenViewModel: MainScreenViewModel = getKoin().get()
-
-        // Render your MainScreen with the mocked dependencies
-        MainScreen(
-            navController = navController,
-            mainScreenViewModel = mainScreenViewModel,
-            scope = scope,
-            innerPadding = innerPadding,
-            snackbarHostState = snackbarHostState
-        )
+    VictoryVaultTheme {
+        Scaffold(modifier = Modifier.fillMaxSize()) {
+            MainScreen(
+                navController = navController,
+                scope = scope,
+                innerPadding = it,
+                snackbarHostState = snackbarHostState,
+                uiState = MAIN_SCREEN_INIT_STATE.copy(
+                    currentMatchupList = listOf(Matchup()),
+                    currentChampion = Champion("Ahri"),
+                    definedChampion = listOf(Champion("Ahri")),
+                    loading = false
+                ),
+                emitIntentFunction = {}
+            )
+        }
     }
 }
 
@@ -106,12 +96,12 @@ fun MainScreenPreview() {
 @Composable
 fun MainScreen(
     navController: NavController,
-    mainScreenViewModel: MainScreenViewModel,
     scope: CoroutineScope,
+    uiState: MainScreenUIState,
     innerPadding: PaddingValues,
+    emitIntentFunction: (ApplicationIntent) -> Unit,
     snackbarHostState: SnackbarHostState
 ) {
-    val uiState: MainScreenUIState by mainScreenViewModel.uiState.collectAsState()
     MatchupProgressIndicator(uiState) {
         Column(
             modifier = Modifier
@@ -120,34 +110,23 @@ fun MainScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = if (uiState.definedChampion.isNotEmpty()) Arrangement.Top else Arrangement.Center
         ) {
-            LaunchedEffect(uiState.snackBarMessage) {
-                scope.launch {
-                    if (uiState.snackBarMessage.first) {
-                        val showingSnackBar = async {
-                            val snackbarManager = SnackbarManager(
-                                snackbarHostState, scope
-                            )
-                            when (uiState.snackBarMessage.second.type) {
-                                SnackBarType.SUCCESS -> snackbarManager.showSuccessSnackbar(
-                                    uiState.snackBarMessage.second.description
-                                )
 
-                                SnackBarType.ERROR -> snackbarManager.showErrorSnackbar(
-                                    uiState.snackBarMessage.second.description
-                                )
+            if(uiState.snackBarMessage.first){
+                val snackbarManager = SnackbarManager(
+                    snackbarHostState, scope, LocalContext.current
+                )
+                when (uiState.snackBarMessage.second.type) {
+                    SnackBarType.SUCCESS -> snackbarManager.showSuccessSnackbar(
+                        uiState.snackBarMessage.second.stringRes
+                    )
 
-                                SnackBarType.INFO -> snackbarManager.showInfoSnackbar(
-                                    uiState.snackBarMessage.second.description
-                                )
-                            }
-                        }
-                        val clearingError = async {
-                            mainScreenViewModel.emitIntent(
-                                MainScreenIntent.ErrorClear
-                            )
-                        }
-                        awaitAll(showingSnackBar, clearingError)
-                    }
+                    SnackBarType.ERROR -> snackbarManager.showErrorSnackbar(
+                        uiState.snackBarMessage.second.stringRes
+                    )
+
+                    SnackBarType.INFO -> snackbarManager.showInfoSnackbar(
+                        uiState.snackBarMessage.second.stringRes
+                    )
                 }
             }
             if (uiState.currentChampion != Champion.NAN) {
@@ -156,7 +135,7 @@ fun MainScreen(
                     uiState.currentChampion
                 ) { champion ->
                     scope.launch {
-                        mainScreenViewModel.emitIntent(
+                        emitIntentFunction(
                             MainScreenIntent.SelectChampion(champion)
                         )
                     }
@@ -166,7 +145,7 @@ fun MainScreen(
                     onCheckedChange = {
                             _, role ->
                         scope.launch {
-                            mainScreenViewModel.emitIntent(
+                            emitIntentFunction(
                                 MainScreenIntent.RoleChanged(role)
                             )
                         }
@@ -178,7 +157,7 @@ fun MainScreen(
                     uiState
                 ) {
                     scope.launch {
-                        mainScreenViewModel.emitIntent(
+                        emitIntentFunction(
                             MainScreenIntent.TextFilterChanged(filter = it)
                         )
                     }
@@ -192,13 +171,9 @@ fun MainScreen(
                             scope.launch {
                                 if (uiState.multiSelectEnabled) {
                                     Timber.d("EMITTING! to MULTISELECT $selectedMatchup")
-                                    mainScreenViewModel.emitIntent(
-                                        MainScreenIntent.MultiSelectMatchups(selectedMatchup)
-                                    )
+                                    emitIntentFunction(MainScreenIntent.MultiSelectMatchups(selectedMatchup))
                                 } else {
-                                    mainScreenViewModel.emitIntent(
-                                        MainScreenIntent.SelectedMatchup(selectedMatchup)
-                                    )
+                                    emitIntentFunction(MainScreenIntent.SelectedMatchup(selectedMatchup))
                                     navController.navigate(Route.MatchupInfo.route) {
                                         popUpTo(Route.Home.route) {
                                             inclusive = false
@@ -209,8 +184,8 @@ fun MainScreen(
                         },
                         onLongClick = { _, matchup ->
                             scope.launch {
-                                mainScreenViewModel.emitIntent(MainScreenIntent.StartMultiSelectChampion(true))
-                                mainScreenViewModel.emitIntent(MainScreenIntent.MultiSelectMatchups(matchup))
+                                emitIntentFunction(MainScreenIntent.StartMultiSelectChampion(true))
+                                emitIntentFunction(MainScreenIntent.MultiSelectMatchups(matchup))
                             }
                         }
                     )
@@ -241,9 +216,7 @@ fun MainScreen(
             Button(
                 enabled = selectedChampion.value != "NAN",
                 onClick = {
-                    mainScreenViewModel.emitIntent(
-                        MainScreenIntent.AddChampion(Champion(selectedChampion.value))
-                    )
+                    emitIntentFunction( MainScreenIntent.AddChampion(Champion(selectedChampion.value)))
                 }
             ) {
                 Text(text = "Add Champion")
@@ -252,7 +225,6 @@ fun MainScreen(
     }
 }
 
-@Preview
 @Composable
 fun NoMatchupSection(
     onClick: () -> Unit = {}
@@ -274,7 +246,6 @@ fun NoMatchupSection(
 }
 
 
-@Preview
 @Composable
 fun MatchUpList(
     uiState: MainScreenUIState = MAIN_SCREEN_INIT_STATE.copy(
@@ -296,7 +267,6 @@ fun MatchUpList(
     }
 }
 
-@Preview(showBackground = true)
 @Composable
 fun ChampionFilter(
     state: MainScreenUIState = MAIN_SCREEN_INIT_STATE.copy(
@@ -321,7 +291,6 @@ fun ChampionFilter(
 }
 
 
-@Preview
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RoleSegmentedButton(

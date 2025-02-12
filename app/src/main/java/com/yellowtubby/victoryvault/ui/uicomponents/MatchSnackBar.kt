@@ -1,5 +1,7 @@
 package com.yellowtubby.victoryvault.ui.uicomponents
 
+import android.content.Context
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -25,7 +27,12 @@ import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.capitalize
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import com.yellowtubby.victoryvault.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -37,26 +44,26 @@ enum class SnackBarType {
 }
 
 data class SnackbarMessage(
-    val title: String = "",
-    val description: String = "",
+    val stringRes: Int = 0,
     val type: SnackBarType = SnackBarType.ERROR
 )
 
-data class SnackbarManager(val snackbarHostState: SnackbarHostState, val scope: CoroutineScope) {
+data class SnackbarManager(val snackbarHostState: SnackbarHostState,
+                           val scope: CoroutineScope, val context: Context) {
     private var isSnackbarVisible = false
 
-    fun showSuccessSnackbar(description: String) {
-        val message = SnackbarMessage("Success", description, SnackBarType.SUCCESS)
+    fun showSuccessSnackbar(description: Int) {
+        val message = SnackbarMessage(description, SnackBarType.ERROR)
         showSnackbar(message)
     }
 
-    fun showErrorSnackbar(description: String) {
-        val message = SnackbarMessage("Error", description, SnackBarType.ERROR)
+    fun showErrorSnackbar(description: Int) {
+        val message = SnackbarMessage(description, SnackBarType.ERROR)
         showSnackbar(message)
     }
 
-    fun showInfoSnackbar(description: String) {
-        val message = SnackbarMessage("Info", description, SnackBarType.INFO)
+    fun showInfoSnackbar(description: Int) {
+        val message = SnackbarMessage(description, SnackBarType.INFO)
         showSnackbar(message)
     }
 
@@ -65,7 +72,9 @@ data class SnackbarManager(val snackbarHostState: SnackbarHostState, val scope: 
             scope.launch {
                 isSnackbarVisible = true
                 snackbarHostState.showSnackbar(
-                    message = with(snackbarMessage) { "$title: $description" },
+                    message = with(snackbarMessage) { "${SnackBarType.SUCCESS.name.lowercase().capitalize(
+                        Locale.current
+                    )}: ${ContextCompat.getString(context,stringRes)}" },
                     duration = SnackbarDuration.Short
                 )
                 isSnackbarVisible = false

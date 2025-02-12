@@ -27,7 +27,7 @@ data class MainScreenUIState(
     val allChampions: List<Champion>,
     val filterList : List<MatchupFilter>,
     val textQuery : String = "",
-    override val snackBarMessage: Pair<Boolean, SnackbarMessage> = Pair(false, SnackbarMessage()),
+    override var snackBarMessage: Pair<Boolean, SnackbarMessage> = Pair(false, SnackbarMessage()),
     override val loading: Boolean = false,
     override val multiSelectEnabled: Boolean = false,
 ) : ApplicationUIState() {

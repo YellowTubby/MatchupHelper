@@ -17,7 +17,7 @@ data class MainActivityUIState(
     val isFabExpanded: Boolean = false,
     val shouldShowFab: Boolean = false,
     val isBottomBarVisible: Boolean = true,
-    override val snackBarMessage: Pair<Boolean, SnackbarMessage> = Pair(false, SnackbarMessage()),
+    override var snackBarMessage: Pair<Boolean, SnackbarMessage> = Pair(false, SnackbarMessage()),
     override val loading: Boolean = false,
     override val multiSelectEnabled: Boolean = false,
 ) : ApplicationUIState()

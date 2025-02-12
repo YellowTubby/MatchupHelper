@@ -1,40 +1,24 @@
 package com.yellowtubby.victoryvault.viewmodels
 
-import android.util.Log
-import com.yellowtubby.victoryvault.di.ScopeProvider
-import com.yellowtubby.victoryvault.domain.champions.AddDefinedChampionUseCase
 import com.yellowtubby.victoryvault.domain.champions.BaseDefinedChampionUseCase
 import com.yellowtubby.victoryvault.domain.champions.ChampionListUseCase
-import com.yellowtubby.victoryvault.domain.champions.GetDefinedChampionsUseCase
 import com.yellowtubby.victoryvault.model.Champion
 import com.yellowtubby.victoryvault.model.Matchup
-import com.yellowtubby.victoryvault.model.Role
-import com.yellowtubby.victoryvault.model.UserData
-import com.yellowtubby.victoryvault.repositories.MatchupRepository
-import com.yellowtubby.victoryvault.ui.MainActivityViewModel
 import com.yellowtubby.victoryvault.ui.screens.main.MAIN_SCREEN_INIT_STATE
 import com.yellowtubby.victoryvault.ui.screens.main.MainScreenIntent
 import com.yellowtubby.victoryvault.ui.screens.main.MainScreenUIState
 import com.yellowtubby.victoryvault.ui.screens.main.MainScreenViewModel
 import com.yellowtubby.victoryvault.ui.uicomponents.SnackBarType
 import com.yellowtubby.victoryvault.ui.uicomponents.SnackbarMessage
-import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.every
-import io.mockk.just
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.koin.core.qualifier.named
 import org.koin.test.KoinTest
 import org.koin.test.get
-import org.koin.test.mock.declareMock
 
 class MainScreenViewModelTest : KoinTest, ViewModelTest<
         MainScreenViewModel,
@@ -95,7 +79,7 @@ class MainScreenViewModelTest : KoinTest, ViewModelTest<
                 loading = false,
                 snackBarMessage= Pair(
                     true,
-                    SnackbarMessage(title="Info", description="Ahri has been added", type=SnackBarType.SUCCESS))
+                    SnackbarMessage(title="Info", stringRes="Ahri has been added", type=SnackBarType.SUCCESS))
             )
         )
 

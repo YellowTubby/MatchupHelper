@@ -112,12 +112,14 @@ fun MainContent() {
             NavHost(navController = navController, startDestination = Route.Home.route) {
                 composable(Route.Home.route) {
                     mainViewModel.emitIntent(MainActivityIntent.BottomBarVisibilityChanged(true))
+                    val uiState by mainScreenViewModel.uiState.collectAsState()
                     MainScreen(
                         innerPadding = innerPadding,
                         scope = scope,
+                        uiState = uiState,
                         navController = navController,
                         snackbarHostState = snackBarState,
-                        mainScreenViewModel = mainScreenViewModel
+                        emitIntentFunction = mainScreenViewModel::emitIntent
                     )
                 }
                 composable(Route.MatchupInfo.route) {

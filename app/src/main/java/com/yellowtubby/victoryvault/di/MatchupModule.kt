@@ -44,6 +44,7 @@ import com.yellowtubby.victoryvault.ui.screens.main.MainScreenViewModel
 import com.yellowtubby.victoryvault.ui.screens.matchup.MatchupViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flow
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.core.qualifier.named
@@ -137,13 +138,15 @@ val previewModule: Module = module {
 // Fake implementations for each of the use cases your ViewModel depends on
 class FakeChampionListUseCase : ChampionListUseCase {
     override suspend fun invoke(): Flow<List<Champion>> {
-        TODO("Not yet implemented")
+        return flow {
+            emit(emptyList())
+        }
     }
 }
 
 class FakeBaseDefinedChampionUseCase : BaseDefinedChampionUseCase() {
     override suspend fun invoke(champion: Champion) {
-        TODO("Not yet implemented")
+        return
     }
 }
 
@@ -152,13 +155,17 @@ class FakeRemoveMatchUpsUseCase : RemoveMatchUpsUseCase() {
 
 class FakeMatchupListUseCase : MatchupListUseCase {
     override suspend fun invoke(): Flow<List<Matchup>> {
-        TODO("Not yet implemented")
+        return flow {
+            emit(emptyList())
+        }
     }
 }
 
 class FakeUserDataUseCase : UserDataUseCase {
     override fun invoke(): Flow<UserData> {
-        TODO("Not yet implemented")
+        return flow {
+            UserData()
+        }
     }
 }
 

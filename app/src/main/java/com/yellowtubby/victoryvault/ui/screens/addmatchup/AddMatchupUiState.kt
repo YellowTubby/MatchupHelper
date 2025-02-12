@@ -19,7 +19,7 @@ data class AddMatchupUiState(
     val allChampions: List<Champion>,
     val selectedChampion: Champion?,
     val selectedDifficulty: Float,
-    override val snackBarMessage: Pair<Boolean, SnackbarMessage> = Pair(false, SnackbarMessage()),
+    override var snackBarMessage: Pair<Boolean, SnackbarMessage> = Pair(false, SnackbarMessage()),
     override val loading: Boolean = false,
     override val multiSelectEnabled: Boolean = false,
     ) : ApplicationUIState()

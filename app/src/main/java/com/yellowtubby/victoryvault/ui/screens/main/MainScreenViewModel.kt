@@ -1,5 +1,6 @@
 package com.yellowtubby.victoryvault.ui.screens.main
 
+import com.yellowtubby.victoryvault.R
 import com.yellowtubby.victoryvault.domain.champions.BaseDefinedChampionUseCase
 import com.yellowtubby.victoryvault.domain.champions.ChampionListUseCase
 import com.yellowtubby.victoryvault.domain.matchups.AddMultiSelectedMatchupsUseCase
@@ -235,7 +236,12 @@ class MainScreenViewModel : BaseViewModel<MainScreenUIState>() {
                         _intentFlow.tryEmit(
                             MainActivityIntent.MultiSelectChanged(isEnabled = false)
                         )
-                        _uiState.value = _uiState.value.copy(loading = false)
+                        _uiState.value = _uiState.value.copy(
+                            loading = false,
+                            snackBarMessage = Pair(true, SnackbarMessage(
+                                R.string.matchups_removed, SnackBarType.SUCCESS
+                            ))
+                        )
                     }
                 }
 
@@ -263,7 +269,6 @@ class MainScreenViewModel : BaseViewModel<MainScreenUIState>() {
 
             is MainScreenIntent.AddChampion -> {
                 _uiState.value = _uiState.value.copy(
-                    snackBarMessage = Pair(false, SnackbarMessage()),
                     loading = true
                 )
                 _intentFlow.tryEmit(
@@ -276,8 +281,7 @@ class MainScreenViewModel : BaseViewModel<MainScreenUIState>() {
                             _uiState.value = _uiState.value.copy(
                                 snackBarMessage = Pair(
                                     true, SnackbarMessage(
-                                        title = "Info",
-                                        description = "${intent.champion.name} has been added",
+                                        stringRes = R.string.added_champion,
                                         type = SnackBarType.SUCCESS
                                     )
                                 ),
@@ -289,8 +293,7 @@ class MainScreenViewModel : BaseViewModel<MainScreenUIState>() {
                     _uiState.value = _uiState.value.copy(
                         snackBarMessage = Pair(
                             true, SnackbarMessage(
-                                title = "Error",
-                                description = "Champion is already defined",
+                                stringRes = R.string.already_defined,
                                 SnackBarType.ERROR
                             )
                         )

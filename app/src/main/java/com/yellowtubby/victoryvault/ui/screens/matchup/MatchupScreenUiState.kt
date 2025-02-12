@@ -7,7 +7,7 @@ import com.yellowtubby.victoryvault.ui.uicomponents.SnackbarMessage
 val MATCHUP_SCREEN_INIT_STATE : MatchupScreenUIState = MatchupScreenUIState()
 data class MatchupScreenUIState(
     val matchup: Matchup = Matchup(),
-    override val snackBarMessage: Pair<Boolean, SnackbarMessage> = Pair(false, SnackbarMessage()),
+    override var snackBarMessage: Pair<Boolean, SnackbarMessage> = Pair(false, SnackbarMessage()),
     override val loading: Boolean = true,
     override val multiSelectEnabled: Boolean = false,
 ) : ApplicationUIState()

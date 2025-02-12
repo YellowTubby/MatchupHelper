@@ -9,18 +9,22 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.yellowtubby.victoryvault.ui.ApplicationUIState
+import com.yellowtubby.victoryvault.ui.MAIN_ACTIVITY_STATE
 
+@Preview
 @Composable
 fun MatchupProgressIndicator(
-    uiState: ApplicationUIState,
-    content: @Composable () -> Unit
+    uiState: ApplicationUIState = MAIN_ACTIVITY_STATE,
+    content: @Composable () -> Unit = {}
 ) {
     if (uiState.loading) {
         Surface(shadowElevation = 9.dp) {

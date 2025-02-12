@@ -9,4 +9,9 @@
     <string name="damage_or_shield">Scale: </string>
     <string name="current_winrate">"Winrate: "</string>
     <string name="total_games">Total games:</string>
+    <string name="info">Info</string>
+    <string name="added_champion">%s has been added</string>
+    <string name="error">Error</string>
+    <string name="already_defined">Champion is already defined</string>
+    <string name="matchups_removed">Selected matchups have been removed</string>
 </resources>

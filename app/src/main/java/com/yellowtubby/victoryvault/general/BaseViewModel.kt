@@ -10,6 +10,7 @@ import com.yellowtubby.victoryvault.repositories.ChampionInfoRepository
 import com.yellowtubby.victoryvault.repositories.MatchupRepository
 import com.yellowtubby.victoryvault.ui.ApplicationIntent
 import com.yellowtubby.victoryvault.ui.ApplicationUIState
+import com.yellowtubby.victoryvault.ui.uicomponents.SnackbarMessage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
@@ -56,6 +58,11 @@ abstract class BaseViewModel<UIState : ApplicationUIState> : ViewModel() {
         intentFlow
             .filter { filterFunction.invoke(it) }
             .onStart { startFunction() }
+            .onEach {
+                val prevValue = _uiState.value
+                prevValue.snackBarMessage = Pair(false, SnackbarMessage())
+                _uiState.value = prevValue
+            }
             .collect { intent ->
                 println("Received event: $${intent.javaClass.simpleName} viewModel: ${javaClass.simpleName}")
                 Timber.d("Received event: $${intent.javaClass.simpleName} viewModel: ${javaClass.simpleName}")
