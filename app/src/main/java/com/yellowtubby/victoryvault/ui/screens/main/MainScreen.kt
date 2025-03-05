@@ -1,5 +1,6 @@
 package com.yellowtubby.victoryvault.ui.screens.main
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -27,6 +28,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -46,62 +49,31 @@ import com.yellowtubby.victoryvault.R
 import com.yellowtubby.victoryvault.ui.uicomponents.ChampionSelector
 import com.yellowtubby.victoryvault.ui.uicomponents.MatchupCard
 import com.yellowtubby.victoryvault.ui.screens.getIconPainerResource
-import com.yellowtubby.victoryvault.model.Role
-import com.yellowtubby.victoryvault.model.Champion
-import com.yellowtubby.victoryvault.model.Matchup
+import com.yellowtubby.victoryvault.data.datamodels.Role
+import com.yellowtubby.victoryvault.data.datamodels.Champion
+import com.yellowtubby.victoryvault.data.datamodels.Matchup
 import com.yellowtubby.victoryvault.ui.ApplicationIntent
 import com.yellowtubby.victoryvault.ui.screens.Route
 import com.yellowtubby.victoryvault.ui.uicomponents.MatchupProgressIndicator
 import com.yellowtubby.victoryvault.ui.uicomponents.SnackBarType
 import com.yellowtubby.victoryvault.ui.uicomponents.SnackbarManager
-import com.yellowtubby.victoryvault.ui.uicomponents.SnackbarMessage
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 import timber.log.Timber
-
-
-
-
-@Preview(showBackground = true)
-@Composable
-fun MainScreenPreview() {
-    val context = LocalContext.current
-
-    // Create a mock NavController and other dependencies
-    val navController = rememberNavController()
-    val scope = rememberCoroutineScope()
-    val snackbarHostState = remember { SnackbarHostState() }
-    val innerPadding = PaddingValues(4.dp)
-
-    VictoryVaultTheme {
-        Scaffold(modifier = Modifier.fillMaxSize()) {
-            MainScreen(
-                navController = navController,
-                scope = scope,
-                innerPadding = it,
-                snackbarHostState = snackbarHostState,
-                uiState = MAIN_SCREEN_INIT_STATE.copy(
-                    currentMatchupList = listOf(Matchup()),
-                    currentChampion = Champion("Ahri"),
-                    definedChampion = listOf(Champion("Ahri")),
-                    loading = false
-                ),
-                emitIntentFunction = {}
-            )
-        }
-    }
-}
 
 
 @Composable
 fun MainScreen(
     navController: NavController,
     scope: CoroutineScope,
-    uiState: MainScreenUIState,
     innerPadding: PaddingValues,
-    emitIntentFunction: (ApplicationIntent) -> Unit,
     snackbarHostState: SnackbarHostState
 ) {
+    val mainScreenViewModel = koinViewModel<MainScreenViewModel>()
+    val uiState by mainScreenViewModel.uiState.collectAsState()
+    Timber.d("Called with ${uiState.definedChampion}")
     MatchupProgressIndicator(uiState) {
         Column(
             modifier = Modifier
@@ -110,116 +82,136 @@ fun MainScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = if (uiState.definedChampion.isNotEmpty()) Arrangement.Top else Arrangement.Center
         ) {
-
-            if(uiState.snackBarMessage.first){
-                val snackbarManager = SnackbarManager(
-                    snackbarHostState, scope, LocalContext.current
-                )
-                when (uiState.snackBarMessage.second.type) {
-                    SnackBarType.SUCCESS -> snackbarManager.showSuccessSnackbar(
-                        uiState.snackBarMessage.second.stringRes
+            if (uiState.definedChampion.isNotEmpty()) {
+                if (uiState.snackBarMessage.first) {
+                    val snackbarManager = SnackbarManager(
+                        snackbarHostState, scope, LocalContext.current
                     )
+                    Timber.d("SHOWING SNACKBAR: ${uiState.snackBarMessage.second}")
+                    when (uiState.snackBarMessage.second.type) {
+                        SnackBarType.SUCCESS -> snackbarManager.showSuccessSnackbar(
+                            uiState.snackBarMessage.second.stringRes
+                        )
 
-                    SnackBarType.ERROR -> snackbarManager.showErrorSnackbar(
-                        uiState.snackBarMessage.second.stringRes
-                    )
+                        SnackBarType.ERROR -> snackbarManager.showErrorSnackbar(
+                            uiState.snackBarMessage.second.stringRes
+                        )
 
-                    SnackBarType.INFO -> snackbarManager.showInfoSnackbar(
-                        uiState.snackBarMessage.second.stringRes
-                    )
-                }
-            }
-            if (uiState.currentChampion != Champion.NAN) {
-                ChampionSelector(
-                    uiState.definedChampion,
-                    uiState.currentChampion
-                ) { champion ->
-                    scope.launch {
-                        emitIntentFunction(
-                            MainScreenIntent.SelectChampion(champion)
+                        SnackBarType.INFO -> snackbarManager.showInfoSnackbar(
+                            uiState.snackBarMessage.second.stringRes
                         )
                     }
                 }
-                RoleSegmentedButton(
-                    uiState,
-                    onCheckedChange = {
-                            _, role ->
+                if (uiState.currentChampion != Champion.NAN) {
+                    ChampionSelector(
+                        uiState.definedChampion,
+                        uiState.currentChampion
+                    ) { champion ->
                         scope.launch {
-                            emitIntentFunction(
-                                MainScreenIntent.RoleChanged(role)
+                            mainScreenViewModel.emitIntent(
+                                MainScreenIntent.SelectChampion(champion)
                             )
                         }
                     }
-                )
-                Spacer(modifier = Modifier.size(8.dp))
-
-                ChampionFilter(
-                    uiState
-                ) {
-                    scope.launch {
-                        emitIntentFunction(
-                            MainScreenIntent.TextFilterChanged(filter = it)
-                        )
-                    }
-                }
-
-                if (uiState.currentMatchupList.isNotEmpty()) {
-                    MatchUpList(
+                    RoleSegmentedButton(
                         uiState,
-                        onClick = {
-                            val selectedMatchup = it
+                        onCheckedChange = { _, role ->
                             scope.launch {
-                                if (uiState.multiSelectEnabled) {
-                                    Timber.d("EMITTING! to MULTISELECT $selectedMatchup")
-                                    emitIntentFunction(MainScreenIntent.MultiSelectMatchups(selectedMatchup))
-                                } else {
-                                    emitIntentFunction(MainScreenIntent.SelectedMatchup(selectedMatchup))
-                                    navController.navigate(Route.MatchupInfo.route) {
-                                        popUpTo(Route.Home.route) {
-                                            inclusive = false
+                                mainScreenViewModel.emitIntent(
+                                    MainScreenIntent.RoleChanged(role)
+                                )
+                            }
+                        }
+                    )
+                    Spacer(modifier = Modifier.size(8.dp))
+
+                    ChampionFilter(
+                        uiState
+                    ) {
+                        scope.launch {
+                            mainScreenViewModel.emitIntent(
+                                MainScreenIntent.TextFilterChanged(filter = it)
+                            )
+                        }
+                    }
+
+                    if (uiState.currentMatchupList.isNotEmpty()) {
+                        MatchUpList(
+                            uiState,
+                            onClick = {
+                                val selectedMatchup = it
+                                scope.launch {
+                                    if (uiState.multiSelectEnabled) {
+                                        mainScreenViewModel.emitIntent(
+                                            MainScreenIntent.MultiSelectMatchups(
+                                                selectedMatchup
+                                            )
+                                        )
+                                    } else {
+                                        mainScreenViewModel.emitIntent(
+                                            MainScreenIntent.SelectedMatchup(
+                                                selectedMatchup
+                                            )
+                                        )
+                                        navController.navigate(Route.MatchupInfo.route) {
+                                            popUpTo(Route.Home.route) {
+                                                inclusive = false
+                                            }
                                         }
                                     }
                                 }
+                            },
+                            onLongClick = { _, matchup ->
+                                scope.launch {
+                                    mainScreenViewModel.emitIntent(
+                                        MainScreenIntent.StartMultiSelectChampion(
+                                            true
+                                        )
+                                    )
+                                    mainScreenViewModel.emitIntent(
+                                        MainScreenIntent.MultiSelectMatchups(
+                                            matchup
+                                        )
+                                    )
+                                }
                             }
-                        },
-                        onLongClick = { _, matchup ->
-                            scope.launch {
-                                emitIntentFunction(MainScreenIntent.StartMultiSelectChampion(true))
-                                emitIntentFunction(MainScreenIntent.MultiSelectMatchups(matchup))
+                        )
+                    } else {
+                        NoMatchupSection(
+                            onClick = {
+                                navController.navigate("addMatchup")
                             }
-                        }
-                    )
-                } else {
-                    NoMatchupSection(
-                        onClick = {
-                            navController.navigate("addMatchup")
-                        }
-                    )
+                        )
+                    }
                 }
-            }
-        }
-
-        if (uiState.definedChampion.isEmpty()) {
-            val selectedChampion = remember { mutableStateOf(uiState.currentChampion.name) }
-            Text(
-                modifier = Modifier.padding(16.dp),
-                text = "You currently have no selected champions, please add a new champion",
-                textAlign = TextAlign.Center
-            )
-            ChampionSelector(
-                uiState.allChampions,
-                Champion(selectedChampion.value)
-            ) {
-                selectedChampion.value = it.name
-            }
-            Spacer(modifier = Modifier.size(8.dp))
-            Button(
-                enabled = selectedChampion.value != "NAN",
-                onClick = {
-                    emitIntentFunction( MainScreenIntent.AddChampion(Champion(selectedChampion.value)))
+            } else {
+                val selectedChampion = remember { mutableStateOf(uiState.currentChampion.name) }
+                Text(
+                    modifier = Modifier.padding(16.dp),
+                    text = "You currently have no defined champions, please add a new champion",
+                    textAlign = TextAlign.Center
+                )
+                ChampionSelector(
+                    uiState.allChampions,
+                    Champion(selectedChampion.value)
+                ) {
+                    selectedChampion.value = it.name
                 }
-            ) {
-                Text(text = "Add Champion")
+                Spacer(modifier = Modifier.size(8.dp))
+                Button(
+                    enabled = selectedChampion.value != "NAN",
+                    onClick = {
+                        mainScreenViewModel.emitIntent(
+                            MainScreenIntent.AddChampion(
+                                Champion(
+                                    selectedChampion.value
+                                )
+                            )
+                        )
+                    }
+                ) {
+                    Text(text = "Add Champion")
+                }
             }
         }
     }

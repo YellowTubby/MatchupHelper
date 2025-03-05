@@ -1,14 +1,9 @@
 package com.yellowtubby.victoryvault.ui.screens.matchup
 
-import android.util.Log
-import com.yellowtubby.victoryvault.di.MatchupCoroutineDispatcher
-import com.yellowtubby.victoryvault.di.ScopeProvider
-import com.yellowtubby.victoryvault.di.SharedFlowProvider
-import com.yellowtubby.victoryvault.domain.userdata.GetCurrentUserDataUseCase
 import com.yellowtubby.victoryvault.domain.userdata.UpdateCurrentMatchupUseCase
 import com.yellowtubby.victoryvault.domain.matchups.UpdateMatchUpUseCase
 import com.yellowtubby.victoryvault.domain.userdata.UserDataUseCase
-import com.yellowtubby.victoryvault.general.BaseViewModel
+import com.yellowtubby.victoryvault.ui.BaseViewModel
 import com.yellowtubby.victoryvault.ui.ApplicationIntent
 import com.yellowtubby.victoryvault.ui.uicomponents.SnackbarMessage
 import kotlinx.coroutines.flow.MutableStateFlow

@@ -1,16 +1,13 @@
-package com.yellowtubby.victoryvault.repositories
+package com.yellowtubby.victoryvault.data.repositories
 
-import android.util.Log
 import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.intl.Locale
 import com.yellowtubby.victoryvault.MatchUpApplication
 import com.yellowtubby.victoryvault.R
-import com.yellowtubby.victoryvault.model.Champion
-import com.yellowtubby.victoryvault.model.UserData
+import com.yellowtubby.victoryvault.data.datamodels.Champion
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.flow
 
 
 class ChampionInfoRepositoryImpl : ChampionInfoRepository {

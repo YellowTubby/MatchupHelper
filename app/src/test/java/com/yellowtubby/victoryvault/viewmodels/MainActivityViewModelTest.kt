@@ -69,14 +69,6 @@ class MainActivityViewModelTest : KoinTest, ViewModelTest<
     }
 
 
-    @Test
-    fun mainActivityViewModel_AmountOfChampsReflected_CorrectLoadoutShown() {
-        testEmitIntentAndCompareToState(
-            listOf(MainActivityIntent.UpdatedSelectedChampions(championNumber = 4)),
-            MAIN_ACTIVITY_STATE.copy(selectedAmount = 4)
-        )
-    }
-
 
     @Test
     fun mainActivityViewModel_ChangedPage_CorrectLoadoutShown() {

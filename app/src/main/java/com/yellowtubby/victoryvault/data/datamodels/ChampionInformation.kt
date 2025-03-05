@@ -1,4 +1,4 @@
-package com.yellowtubby.victoryvault.model
+package com.yellowtubby.victoryvault.data.datamodels
 
 data class ChampionInformation(
     val name : String,

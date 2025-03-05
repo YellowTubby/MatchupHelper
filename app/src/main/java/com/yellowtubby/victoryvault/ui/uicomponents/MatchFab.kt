@@ -21,7 +21,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.yellowtubby.victoryvault.ui.ApplicationIntent
 import com.yellowtubby.victoryvault.ui.MainActivityIntent
+import com.yellowtubby.victoryvault.ui.MainActivityUIState
 import com.yellowtubby.victoryvault.ui.MainActivityViewModel
 import com.yellowtubby.victoryvault.ui.screens.Route
 import com.yellowtubby.victoryvault.ui.screens.main.MainScreenIntent
@@ -34,12 +36,10 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun MatchFab(
     scope : CoroutineScope,
-    mainViewModel: MainActivityViewModel,
-    mainScreenViewModel: MainScreenViewModel,
-    navController: NavController
+    navController: NavController,
+    uiState: MainActivityUIState,
+    onIntentEmitted: (ApplicationIntent) -> Unit
 ) {
-    val uiState by mainViewModel.uiState.collectAsState()
-    val uiStateMainScreen by mainScreenViewModel.uiState.collectAsState()
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val expanded = remember { mutableStateOf(false) }
 
@@ -64,10 +64,10 @@ fun MatchFab(
                 Spacer(modifier = Modifier.height(16.dp))
                 if(expanded.value){
                     ChampionDropdown(
-                        uiStateMainScreen.allChampions,
+                        uiState.allChampions,
                         {
                             scope.launch {
-                                mainScreenViewModel.emitIntent(
+                                onIntentEmitted(
                                     MainScreenIntent.AddChampion(
                                         champion = it
                                     )
@@ -82,7 +82,7 @@ fun MatchFab(
             ExtendedFloatingActionButton(
                 onClick = {
                     scope.launch {
-                    mainViewModel.emitIntent(
+                    onIntentEmitted(
                         MainActivityIntent.FabExpandedStateChanged(!uiState.isFabExpanded)
                     )
                 } },

@@ -1,8 +1,8 @@
 package com.yellowtubby.victoryvault.ui.screens.matchup
 
 import com.yellowtubby.victoryvault.ui.ApplicationIntent
-import com.yellowtubby.victoryvault.model.Champion
-import com.yellowtubby.victoryvault.model.Matchup
+import com.yellowtubby.victoryvault.data.datamodels.Champion
+import com.yellowtubby.victoryvault.data.datamodels.Matchup
 
 sealed class MatchupScreenIntent : ApplicationIntent() {
     data class WinLossChanged(val isWon: Boolean) : MatchupScreenIntent()

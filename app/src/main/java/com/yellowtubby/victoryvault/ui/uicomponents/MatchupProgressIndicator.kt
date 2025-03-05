@@ -19,13 +19,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.yellowtubby.victoryvault.ui.ApplicationUIState
 import com.yellowtubby.victoryvault.ui.MAIN_ACTIVITY_STATE
+import timber.log.Timber
 
-@Preview
 @Composable
 fun MatchupProgressIndicator(
-    uiState: ApplicationUIState = MAIN_ACTIVITY_STATE,
-    content: @Composable () -> Unit = {}
+    uiState: ApplicationUIState,
+    content: @Composable () -> Unit
 ) {
+    Timber.d(" executed! ${uiState.loading}")
     if (uiState.loading) {
         Surface(shadowElevation = 9.dp) {
             CircularProgressIndicator(
@@ -42,6 +43,6 @@ fun MatchupProgressIndicator(
             )
         }
     } else {
-        content.invoke()
+        content()
     }
 }

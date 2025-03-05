@@ -1,9 +1,9 @@
-package com.yellowtubby.victoryvault.repositories.room
+package com.yellowtubby.victoryvault.data.datasources.local
 
 import androidx.room.TypeConverter
-import com.yellowtubby.victoryvault.model.DamageModifier
-import com.yellowtubby.victoryvault.model.DamageType
-import com.yellowtubby.victoryvault.model.Role
+import com.yellowtubby.victoryvault.data.datamodels.DamageModifier
+import com.yellowtubby.victoryvault.data.datamodels.DamageType
+import com.yellowtubby.victoryvault.data.datamodels.Role
 
 
 class MatchupTypeConverters() {

@@ -1,9 +1,9 @@
 package com.yellowtubby.victoryvault.ui.screens.main
 
-import com.yellowtubby.victoryvault.model.MatchupFilter
-import com.yellowtubby.victoryvault.model.Champion
-import com.yellowtubby.victoryvault.model.Matchup
-import com.yellowtubby.victoryvault.model.Role
+import com.yellowtubby.victoryvault.data.datamodels.MatchupFilter
+import com.yellowtubby.victoryvault.data.datamodels.Champion
+import com.yellowtubby.victoryvault.data.datamodels.Matchup
+import com.yellowtubby.victoryvault.data.datamodels.Role
 import com.yellowtubby.victoryvault.ui.ApplicationIntent
 
 sealed class MainScreenIntent : ApplicationIntent() {

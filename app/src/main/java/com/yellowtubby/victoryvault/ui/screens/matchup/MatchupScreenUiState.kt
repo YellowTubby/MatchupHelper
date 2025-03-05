@@ -1,6 +1,6 @@
 package com.yellowtubby.victoryvault.ui.screens.matchup
 
-import com.yellowtubby.victoryvault.model.Matchup
+import com.yellowtubby.victoryvault.data.datamodels.Matchup
 import com.yellowtubby.victoryvault.ui.ApplicationUIState
 import com.yellowtubby.victoryvault.ui.uicomponents.SnackbarMessage
 

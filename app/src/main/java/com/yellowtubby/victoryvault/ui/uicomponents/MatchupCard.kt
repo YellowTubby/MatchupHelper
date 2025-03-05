@@ -1,7 +1,6 @@
 package com.yellowtubby.victoryvault.ui.uicomponents
 
 import android.animation.ArgbEvaluator
-import android.util.Log
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -16,12 +15,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,23 +23,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
-import com.bumptech.glide.integration.compose.Placeholder
 import com.bumptech.glide.integration.compose.placeholder
 import com.yellowtubby.victoryvault.R
-import com.yellowtubby.victoryvault.ui.screens.matchup.MatchupViewModel
-import com.yellowtubby.victoryvault.model.Matchup
+import com.yellowtubby.victoryvault.data.datamodels.Matchup
 import com.yellowtubby.victoryvault.ui.screens.main.MAIN_SCREEN_INIT_STATE
-import com.yellowtubby.victoryvault.ui.screens.main.MainScreenIntent
 import com.yellowtubby.victoryvault.ui.screens.main.MainScreenUIState
-import com.yellowtubby.victoryvault.ui.screens.main.MainScreenViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
-import timber.log.Timber
 
 @Preview
 @OptIn(ExperimentalGlideComposeApi::class)

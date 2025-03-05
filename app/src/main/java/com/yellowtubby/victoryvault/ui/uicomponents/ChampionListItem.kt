@@ -27,7 +27,7 @@ import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.integration.compose.placeholder
 import com.yellowtubby.victoryvault.R
-import com.yellowtubby.victoryvault.model.Champion
+import com.yellowtubby.victoryvault.data.datamodels.Champion
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Preview

@@ -1,14 +1,11 @@
-package com.yellowtubby.victoryvault.repositories
+package com.yellowtubby.victoryvault.data.repositories
 
-import android.util.Log
-import com.yellowtubby.victoryvault.model.Champion
-import com.yellowtubby.victoryvault.model.Matchup
-import com.yellowtubby.victoryvault.model.Role
-import com.yellowtubby.victoryvault.model.UserData
+import com.yellowtubby.victoryvault.data.datamodels.Champion
+import com.yellowtubby.victoryvault.data.datamodels.Matchup
+import com.yellowtubby.victoryvault.data.datamodels.Role
+import com.yellowtubby.victoryvault.data.datamodels.UserData
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class UserRepositoryImpl : UserRepository {

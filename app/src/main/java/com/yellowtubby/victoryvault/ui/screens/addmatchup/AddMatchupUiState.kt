@@ -1,7 +1,7 @@
 package com.yellowtubby.victoryvault.ui.screens.addmatchup
 
-import com.yellowtubby.victoryvault.model.Champion
-import com.yellowtubby.victoryvault.model.Role
+import com.yellowtubby.victoryvault.data.datamodels.Champion
+import com.yellowtubby.victoryvault.data.datamodels.Role
 import com.yellowtubby.victoryvault.ui.ApplicationUIState
 import com.yellowtubby.victoryvault.ui.uicomponents.SnackbarMessage
 

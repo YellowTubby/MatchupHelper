@@ -1,4 +1,4 @@
-package com.yellowtubby.victoryvault.model
+package com.yellowtubby.victoryvault.data.datamodels
 
 data class UserData(
     val currentRole: Role = Role.NAN,

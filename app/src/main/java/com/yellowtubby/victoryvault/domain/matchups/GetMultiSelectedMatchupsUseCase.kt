@@ -1,6 +1,6 @@
 package com.yellowtubby.victoryvault.domain.matchups
 
-import com.yellowtubby.victoryvault.model.Matchup
+import com.yellowtubby.victoryvault.data.datamodels.Matchup
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

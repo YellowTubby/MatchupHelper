@@ -5,14 +5,12 @@ import com.yellowtubby.victoryvault.domain.champions.BaseDefinedChampionUseCase
 import com.yellowtubby.victoryvault.domain.champions.ChampionListUseCase
 import com.yellowtubby.victoryvault.domain.champions.GetAllChampionsUseCase
 import com.yellowtubby.victoryvault.domain.champions.GetDefinedChampionsUseCase
-import com.yellowtubby.victoryvault.repositories.MatchupRepository
-import com.yellowtubby.victoryvault.repositories.room.MatchupDatabase
+import com.yellowtubby.victoryvault.data.datasources.local.MatchupDatabase
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
-import kotlin.math.sin
 
 val testModule = module {
     factory<TestCoroutineScheduler> { TestCoroutineScheduler() }

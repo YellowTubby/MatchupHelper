@@ -58,11 +58,10 @@ import androidx.compose.ui.unit.dp
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.yellowtubby.victoryvault.R
-import com.yellowtubby.victoryvault.model.Ability
-import com.yellowtubby.victoryvault.model.DamageType
-import com.yellowtubby.victoryvault.model.Matchup
+import com.yellowtubby.victoryvault.data.datamodels.Ability
+import com.yellowtubby.victoryvault.data.datamodels.DamageType
+import com.yellowtubby.victoryvault.data.datamodels.Matchup
 import com.yellowtubby.victoryvault.ui.screens.getIconPainerResource
-import com.yellowtubby.victoryvault.ui.screens.main.MainScreenViewModel
 import com.yellowtubby.victoryvault.ui.uicomponents.MatchupProgressIndicator
 import com.yellowtubby.victoryvault.ui.uicomponents.TipItem
 import com.yellowtubby.victoryvault.ui.uicomponents.TitleTextComponent

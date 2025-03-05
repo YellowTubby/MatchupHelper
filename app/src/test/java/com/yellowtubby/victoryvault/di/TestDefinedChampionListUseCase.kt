@@ -1,9 +1,7 @@
 package com.yellowtubby.victoryvault.di
 
-import android.util.Log
 import com.yellowtubby.victoryvault.domain.champions.ChampionListUseCase
-import com.yellowtubby.victoryvault.model.Champion
-import kotlinx.coroutines.delay
+import com.yellowtubby.victoryvault.data.datamodels.Champion
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 

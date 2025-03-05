@@ -1,4 +1,4 @@
-package com.yellowtubby.victoryvault.model
+package com.yellowtubby.victoryvault.data.datamodels
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize

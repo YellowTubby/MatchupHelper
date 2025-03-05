@@ -2,8 +2,8 @@ package com.yellowtubby.victoryvault.viewmodels
 
 import com.yellowtubby.victoryvault.domain.champions.BaseDefinedChampionUseCase
 import com.yellowtubby.victoryvault.domain.champions.ChampionListUseCase
-import com.yellowtubby.victoryvault.model.Champion
-import com.yellowtubby.victoryvault.model.Matchup
+import com.yellowtubby.victoryvault.data.datamodels.Champion
+import com.yellowtubby.victoryvault.data.datamodels.Matchup
 import com.yellowtubby.victoryvault.ui.screens.main.MAIN_SCREEN_INIT_STATE
 import com.yellowtubby.victoryvault.ui.screens.main.MainScreenIntent
 import com.yellowtubby.victoryvault.ui.screens.main.MainScreenUIState
@@ -56,7 +56,7 @@ class MainScreenViewModelTest : KoinTest, ViewModelTest<
                 MainScreenIntent.SelectedMatchup(testMatchup)
             ),
             MAIN_SCREEN_INIT_STATE.copy(
-                multiSelectEnabled = true,
+                multiSelectEnabled = true
             )
         )
     }
@@ -77,9 +77,7 @@ class MainScreenViewModelTest : KoinTest, ViewModelTest<
             listOf(MainScreenIntent.AddChampion(testedChampion)),
             MAIN_SCREEN_INIT_STATE.copy(
                 loading = false,
-                snackBarMessage= Pair(
-                    true,
-                    SnackbarMessage(title="Info", stringRes="Ahri has been added", type=SnackBarType.SUCCESS))
+                snackBarMessage = Pair(true,SnackbarMessage(stringRes=2131623965, type= SnackBarType.SUCCESS))
             )
         )
 

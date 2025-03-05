@@ -1,14 +1,9 @@
 package com.yellowtubby.victoryvault.ui.screens.addmatchup
 
-import com.yellowtubby.victoryvault.di.MatchupCoroutineDispatcher
-import com.yellowtubby.victoryvault.di.ScopeProvider
-import com.yellowtubby.victoryvault.di.SharedFlowProvider
 import com.yellowtubby.victoryvault.domain.champions.ChampionListUseCase
 import com.yellowtubby.victoryvault.domain.matchups.AddMatchUpUseCase
-import com.yellowtubby.victoryvault.domain.champions.GetAllChampionsUseCase
-import com.yellowtubby.victoryvault.domain.userdata.GetCurrentUserDataUseCase
 import com.yellowtubby.victoryvault.domain.userdata.UserDataUseCase
-import com.yellowtubby.victoryvault.general.BaseViewModel
+import com.yellowtubby.victoryvault.ui.BaseViewModel
 import com.yellowtubby.victoryvault.ui.ApplicationIntent
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine

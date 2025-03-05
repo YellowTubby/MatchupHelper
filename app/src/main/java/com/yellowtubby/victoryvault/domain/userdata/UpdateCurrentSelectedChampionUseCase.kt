@@ -1,7 +1,7 @@
 package com.yellowtubby.victoryvault.domain.userdata
 
-import com.yellowtubby.victoryvault.model.Champion
-import com.yellowtubby.victoryvault.repositories.UserRepository
+import com.yellowtubby.victoryvault.data.datamodels.Champion
+import com.yellowtubby.victoryvault.data.repositories.UserRepository
 import org.koin.java.KoinJavaComponent.inject
 
 open class UpdateCurrentSelectedChampionUseCase {

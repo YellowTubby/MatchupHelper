@@ -1,6 +1,6 @@
 package com.yellowtubby.victoryvault.domain.champions
 
-import com.yellowtubby.victoryvault.model.Champion
+import com.yellowtubby.victoryvault.data.datamodels.Champion
 import kotlinx.coroutines.flow.Flow
 
 interface ChampionListUseCase {

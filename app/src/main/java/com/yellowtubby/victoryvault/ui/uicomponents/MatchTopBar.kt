@@ -46,16 +46,15 @@ import org.koin.androidx.compose.koinViewModel
 
 fun getIntentBasedOnNavController(actionString: String,
                                   navController: NavController,
-                                  mainScreenUiState: MainActivityUIState,
-                                  screenUIState: MainScreenUIState
+                                  uiState: MainActivityUIState,
 ): ApplicationIntent {
     return when(navController.currentDestination?.route){
         Route.Home.route -> {
             when(actionString){
                 MENU_DELETE_STRING -> {
-                    if (mainScreenUiState.multiSelectEnabled) {
+                    if (uiState.multiSelectEnabled) {
                         MainScreenIntent.DeleteSelected(
-                            screenUIState.selectedMatchups
+                            uiState.selectedMatchups
                         )
                     } else {
                         ApplicationIntent()
@@ -76,13 +75,11 @@ fun getIntentBasedOnNavController(actionString: String,
 @Composable
 fun MatchTopBar(
     scope: CoroutineScope,
-    mainViewModel: MainActivityViewModel,
-    mainScreenViewModel: MainScreenViewModel,
+    uiState: MainActivityUIState,
     navController: NavController,
-    activity: Activity? = LocalContext.current as Activity
+    activity: Activity? = LocalContext.current as Activity,
+    onIntentEmitted: (ApplicationIntent) -> Unit = {},
 ) {
-    val uiState by mainViewModel.uiState.collectAsState()
-    val uiStateForSelectedMatchups = mainScreenViewModel.uiState.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     val leftActionList = listOf(BACK_BUTTON_STRING)
     val rightActionList = getActionsBasedOnStateAndDestination(uiState, navController)
@@ -114,13 +111,13 @@ fun MatchTopBar(
                         IconButton(onClick = {
                             if (uiState.multiSelectEnabled) {
                                 scope.launch {
-                                    mainScreenViewModel.emitIntent(
+                                    onIntentEmitted(
                                         MainScreenIntent.StartMultiSelectChampion(false)
                                     )
                                 }
                             } else {
                                 scope.launch {
-                                    mainViewModel.emitIntent(
+                                    onIntentEmitted(
                                         MainActivityIntent.NavigatedBottomBar(1)
                                     )
                                 }
@@ -144,8 +141,8 @@ fun MatchTopBar(
             rightActionList.forEach {
                 val onClickCallback : () -> Unit = {
                     scope.launch {
-                        mainScreenViewModel.emitIntent(
-                            getIntentBasedOnNavController(it, navController, uiState, uiStateForSelectedMatchups.value)
+                        onIntentEmitted(
+                            getIntentBasedOnNavController(it, navController, uiState)
                         )
                     }
                 }

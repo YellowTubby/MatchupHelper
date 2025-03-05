@@ -1,29 +1,18 @@
-package com.yellowtubby.victoryvault.general
+package com.yellowtubby.victoryvault.ui
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yellowtubby.victoryvault.di.MatchupCoroutineDispatcher
 import com.yellowtubby.victoryvault.di.ScopeProvider
 import com.yellowtubby.victoryvault.di.SharedFlowProvider
-import com.yellowtubby.victoryvault.repositories.ChampionInfoRepository
-import com.yellowtubby.victoryvault.repositories.MatchupRepository
-import com.yellowtubby.victoryvault.ui.ApplicationIntent
-import com.yellowtubby.victoryvault.ui.ApplicationUIState
 import com.yellowtubby.victoryvault.ui.uicomponents.SnackbarMessage
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
-import org.koin.core.component.getScopeName
-import org.koin.java.KoinJavaComponent.getKoin
 import org.koin.java.KoinJavaComponent.inject
 import timber.log.Timber
 
@@ -41,9 +30,9 @@ abstract class BaseViewModel<UIState : ApplicationUIState> : ViewModel() {
     abstract val filterFunction: (ApplicationIntent) -> Boolean
     open val startFunction: () -> Unit = {}
     val uiState: StateFlow<UIState>
-        get() = _uiState
+        get() = _uiState.asStateFlow()
 
-    abstract protected val _uiState: MutableStateFlow<UIState>
+    protected abstract val _uiState: MutableStateFlow<UIState>
 
     fun emitIntent(intent: ApplicationIntent) {
         definedScope.launch(coroutineDispatcher.ui) {

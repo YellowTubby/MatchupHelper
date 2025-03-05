@@ -1,7 +1,7 @@
 package com.yellowtubby.victoryvault.domain.champions
 
-import com.yellowtubby.victoryvault.model.Champion
-import com.yellowtubby.victoryvault.repositories.MatchupRepository
+import com.yellowtubby.victoryvault.data.datamodels.Champion
+import com.yellowtubby.victoryvault.data.repositories.MatchupRepository
 import kotlinx.coroutines.flow.Flow
 import org.koin.java.KoinJavaComponent.inject
 

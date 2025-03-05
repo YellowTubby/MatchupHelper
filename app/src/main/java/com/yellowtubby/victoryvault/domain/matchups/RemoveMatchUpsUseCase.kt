@@ -1,9 +1,9 @@
 package com.yellowtubby.victoryvault.domain.matchups
 
-import com.yellowtubby.victoryvault.model.Champion
-import com.yellowtubby.victoryvault.model.Matchup
-import com.yellowtubby.victoryvault.model.Role
-import com.yellowtubby.victoryvault.repositories.MatchupRepository
+import com.yellowtubby.victoryvault.data.datamodels.Champion
+import com.yellowtubby.victoryvault.data.datamodels.Matchup
+import com.yellowtubby.victoryvault.data.datamodels.Role
+import com.yellowtubby.victoryvault.data.repositories.MatchupRepository
 import org.koin.java.KoinJavaComponent.inject
 
 open class RemoveMatchUpsUseCase {

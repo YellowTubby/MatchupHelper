@@ -53,7 +53,7 @@ data class SnackbarManager(val snackbarHostState: SnackbarHostState,
     private var isSnackbarVisible = false
 
     fun showSuccessSnackbar(description: Int) {
-        val message = SnackbarMessage(description, SnackBarType.ERROR)
+        val message = SnackbarMessage(description, SnackBarType.SUCCESS)
         showSnackbar(message)
     }
 
@@ -72,7 +72,7 @@ data class SnackbarManager(val snackbarHostState: SnackbarHostState,
             scope.launch {
                 isSnackbarVisible = true
                 snackbarHostState.showSnackbar(
-                    message = with(snackbarMessage) { "${SnackBarType.SUCCESS.name.lowercase().capitalize(
+                    message = with(snackbarMessage) { "${type.name.lowercase().capitalize(
                         Locale.current
                     )}: ${ContextCompat.getString(context,stringRes)}" },
                     duration = SnackbarDuration.Short

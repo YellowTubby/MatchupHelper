@@ -1,7 +1,7 @@
 package com.yellowtubby.victoryvault.domain.userdata
 
-import com.yellowtubby.victoryvault.model.UserData
-import com.yellowtubby.victoryvault.repositories.UserRepository
+import com.yellowtubby.victoryvault.data.datamodels.UserData
+import com.yellowtubby.victoryvault.data.repositories.UserRepository
 import kotlinx.coroutines.flow.Flow
 
 

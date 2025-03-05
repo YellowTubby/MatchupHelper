@@ -12,19 +12,20 @@ import com.yellowtubby.victoryvault.domain.userdata.UpdateCurrentMatchupUseCase
 import com.yellowtubby.victoryvault.domain.userdata.UpdateCurrentRoleUseCase
 import com.yellowtubby.victoryvault.domain.userdata.UpdateCurrentSelectedChampionUseCase
 import com.yellowtubby.victoryvault.domain.userdata.UserDataUseCase
-import com.yellowtubby.victoryvault.general.BaseViewModel
-import com.yellowtubby.victoryvault.model.Champion
+import com.yellowtubby.victoryvault.ui.BaseViewModel
+import com.yellowtubby.victoryvault.data.datamodels.Champion
 import com.yellowtubby.victoryvault.ui.ApplicationIntent
 import com.yellowtubby.victoryvault.ui.MainActivityIntent
-import com.yellowtubby.victoryvault.model.FilterType
-import com.yellowtubby.victoryvault.model.Matchup
-import com.yellowtubby.victoryvault.model.MatchupFilter
-import com.yellowtubby.victoryvault.model.Role
-import com.yellowtubby.victoryvault.model.UserData
+import com.yellowtubby.victoryvault.data.datamodels.FilterType
+import com.yellowtubby.victoryvault.data.datamodels.Matchup
+import com.yellowtubby.victoryvault.data.datamodels.MatchupFilter
+import com.yellowtubby.victoryvault.data.datamodels.Role
+import com.yellowtubby.victoryvault.data.datamodels.UserData
 import com.yellowtubby.victoryvault.ui.uicomponents.SnackBarType
 import com.yellowtubby.victoryvault.ui.uicomponents.SnackbarMessage
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -89,7 +90,6 @@ class MainScreenViewModel : BaseViewModel<MainScreenUIState>() {
     }
 
     init {
-
         definedScope.launch(coroutineDispatcher.ui) {
             println("Launching collectSharedFlow in ${javaClass.simpleName}")
             collectSharedFlow()
@@ -98,7 +98,6 @@ class MainScreenViewModel : BaseViewModel<MainScreenUIState>() {
         definedScope.launch(coroutineDispatcher.ui) {
             delay(200)
             getMultiSelectedMatchupsUseCase().collect {
-                Timber.d("COLLECTED DATA: ${it.second}")
                 _uiState.value = _uiState.value.copy(
                     selectedMatchups = it.second,
                     multiSelectEnabled = it.first
@@ -116,6 +115,7 @@ class MainScreenViewModel : BaseViewModel<MainScreenUIState>() {
             ) { allChampions, allDefinedChampions, allMatchups, userData ->
                 ApplicationDataState(allChampions, allDefinedChampions, allMatchups, userData)
             }.collect {
+                Timber.d("COLLECTED DATA: $it")
                 handleCollectedData(it)
             }
         }
@@ -291,6 +291,7 @@ class MainScreenViewModel : BaseViewModel<MainScreenUIState>() {
                     }
                 } else {
                     _uiState.value = _uiState.value.copy(
+                        loading = false,
                         snackBarMessage = Pair(
                             true, SnackbarMessage(
                                 stringRes = R.string.already_defined,
