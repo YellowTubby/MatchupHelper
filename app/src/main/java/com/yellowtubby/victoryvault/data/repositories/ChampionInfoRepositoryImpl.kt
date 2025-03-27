@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 
 class ChampionInfoRepositoryImpl : ChampionInfoRepository {
 
-    private val allChampionStateFlow : MutableStateFlow<List<Champion>> = MutableStateFlow(emptyList())
+    val allChampionStateFlow : MutableStateFlow<List<Champion>> = MutableStateFlow(emptyList())
 
     init {
         val resources = MatchUpApplication.instance.resources

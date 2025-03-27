@@ -60,11 +60,6 @@ android {
     }
 }
 
-android.testOptions {
-    unitTests.all {
-        it.useJUnitPlatform()
-    }
-}
 
 dependencies {
 
@@ -107,7 +102,6 @@ dependencies {
     testImplementation(libs.mockk.android)
     testImplementation(libs.mockk.agent)
     testImplementation(libs.test.coroutines)
-    testImplementation(libs.kotest)
 
 
     androidTestImplementation(libs.androidx.junit)

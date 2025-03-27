@@ -54,7 +54,6 @@ koin-test = { module = "io.insert-koin:koin-test", version.ref = "koin-bom"}
 koin-test-junit4 = { module = "io.insert-koin:koin-test-junit4", version.ref = "koin-bom"}
 koin-test-junit5 = { module = "io.insert-koin:koin-test-junit5", version.ref = "koin-bom"}
 test-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "test-coroutines"}
-kotest = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest_ver"}
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine"}
 mockk-android = { module = "io.mockk:mockk-android", version.ref = "mockk"}
 mockk-agent = { module = "io.mockk:mockk-agent", version.ref = "mockk"}

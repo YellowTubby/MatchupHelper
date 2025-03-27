@@ -30,7 +30,6 @@ class MatchUpApplication : Application() {
 
     companion object {
         lateinit var instance: MatchUpApplication
-            private set
         var applicationScope = MainScope()
     }
 
