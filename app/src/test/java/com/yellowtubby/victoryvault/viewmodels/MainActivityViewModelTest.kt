@@ -1,14 +1,13 @@
 package com.yellowtubby.victoryvault.viewmodels
 
-import com.yellowtubby.victoryvault.ui.MAIN_ACTIVITY_STATE
-import com.yellowtubby.victoryvault.ui.MainActivityIntent
-import com.yellowtubby.victoryvault.ui.MainActivityUIState
-import com.yellowtubby.victoryvault.ui.MainActivityViewModel
+import com.yellowtubby.victoryvault.app.presentation.screen.MAIN_ACTIVITY_STATE
+import com.yellowtubby.victoryvault.app.presentation.screen.MainActivityIntent
+import com.yellowtubby.victoryvault.app.presentation.screen.MainActivityUIState
+import com.yellowtubby.victoryvault.app.presentation.screen.MainActivityViewModel
 import org.junit.Test
 
 import org.junit.Before
 import org.koin.test.KoinTest
-import org.koin.test.get
 
 /**
  * Example local unit test, which will execute on the development machine (host).

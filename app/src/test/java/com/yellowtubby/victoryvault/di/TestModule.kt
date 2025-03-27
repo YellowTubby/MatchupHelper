@@ -1,7 +1,9 @@
 package com.yellowtubby.victoryvault.di
 
+import com.yellowtubby.victoryvault.core.di.CoroutineDispatcherProvider
+import com.yellowtubby.victoryvault.core.di.ScopeProvider
 import com.yellowtubby.victoryvault.domain.champions.AddDefinedChampionUseCase
-import com.yellowtubby.victoryvault.domain.champions.BaseDefinedChampionUseCase
+import com.yellowtubby.victoryvault.core.domain.BaseDefinedChampionUseCase
 import com.yellowtubby.victoryvault.domain.champions.ChampionListUseCase
 import com.yellowtubby.victoryvault.domain.champions.GetAllChampionsUseCase
 import com.yellowtubby.victoryvault.domain.champions.GetDefinedChampionsUseCase
@@ -14,7 +16,7 @@ import org.koin.dsl.module
 
 val testModule = module {
     factory<TestCoroutineScheduler> { TestCoroutineScheduler() }
-    single<MatchupCoroutineDispatcher> { TestCoroutineDispatcherImpl(get()) }
+    single<CoroutineDispatcherProvider> { TestCoroutineDispatcherImpl(get()) }
     factory<ScopeProvider> { TestScopeProviderImpl(get(),get()) }
     single<ChampionListUseCase> { TestDefinedChampionListUseCase() }
     single<MatchupDatabase> {

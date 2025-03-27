@@ -1,8 +1,6 @@
 package com.yellowtubby.victoryvault.data.datasources.local
 
 import androidx.room.TypeConverter
-import com.yellowtubby.victoryvault.data.datamodels.DamageModifier
-import com.yellowtubby.victoryvault.data.datamodels.DamageType
 import com.yellowtubby.victoryvault.data.datamodels.Role
 
 
@@ -31,26 +29,4 @@ class MatchupTypeConverters() {
         }
     }
 
-    @TypeConverter
-    fun stringToDamageModifier(value: String): DamageModifier {
-        value.split("_").also {
-            return DamageModifier(stringToDamageType(it[0]), it[1].toInt())
-        }
-    }
-
-    @TypeConverter
-    fun damageModToString(value: DamageModifier): String {
-        return value.type.name + "_" + value.percentage
-    }
-
-    private fun stringToDamageType(s: String): DamageType {
-        return when(s){
-            "AP" -> DamageType.AP
-            "AD" -> DamageType.AD
-            "HP" -> DamageType.HP
-            "Armor" -> DamageType.Armor
-            "MagicResist" -> DamageType.MagicResist
-            else -> DamageType.AD
-        }
-    }
 }

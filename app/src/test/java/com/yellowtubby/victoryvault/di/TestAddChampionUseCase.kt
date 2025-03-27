@@ -1,6 +1,6 @@
 package com.yellowtubby.victoryvault.di
 
-import com.yellowtubby.victoryvault.domain.champions.BaseDefinedChampionUseCase
+import com.yellowtubby.victoryvault.core.domain.BaseDefinedChampionUseCase
 import com.yellowtubby.victoryvault.data.datamodels.Champion
 
 

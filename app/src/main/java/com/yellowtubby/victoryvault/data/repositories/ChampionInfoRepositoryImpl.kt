@@ -2,7 +2,7 @@ package com.yellowtubby.victoryvault.data.repositories
 
 import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.intl.Locale
-import com.yellowtubby.victoryvault.MatchUpApplication
+import com.yellowtubby.victoryvault.app.presentation.MatchUpApplication
 import com.yellowtubby.victoryvault.R
 import com.yellowtubby.victoryvault.data.datamodels.Champion
 import kotlinx.coroutines.flow.Flow

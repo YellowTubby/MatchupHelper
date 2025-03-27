@@ -1,15 +1,15 @@
 package com.yellowtubby.victoryvault.viewmodels
 
-import com.yellowtubby.victoryvault.domain.champions.BaseDefinedChampionUseCase
+import com.yellowtubby.victoryvault.core.domain.BaseDefinedChampionUseCase
 import com.yellowtubby.victoryvault.domain.champions.ChampionListUseCase
 import com.yellowtubby.victoryvault.data.datamodels.Champion
 import com.yellowtubby.victoryvault.data.datamodels.Matchup
-import com.yellowtubby.victoryvault.ui.screens.main.MAIN_SCREEN_INIT_STATE
-import com.yellowtubby.victoryvault.ui.screens.main.MainScreenIntent
-import com.yellowtubby.victoryvault.ui.screens.main.MainScreenUIState
-import com.yellowtubby.victoryvault.ui.screens.main.MainScreenViewModel
-import com.yellowtubby.victoryvault.ui.uicomponents.SnackBarType
-import com.yellowtubby.victoryvault.ui.uicomponents.SnackbarMessage
+import com.yellowtubby.victoryvault.feature.main.presentation.screens.MAIN_SCREEN_INIT_STATE
+import com.yellowtubby.victoryvault.feature.main.presentation.screens.MainScreenIntent
+import com.yellowtubby.victoryvault.feature.main.presentation.screens.MainScreenUIState
+import com.yellowtubby.victoryvault.feature.main.presentation.screens.MainScreenViewModel
+import com.yellowtubby.victoryvault.uicomponents.SnackBarType
+import com.yellowtubby.victoryvault.uicomponents.SnackbarMessage
 import io.mockk.coEvery
 import io.mockk.coVerify
 import kotlinx.coroutines.delay
