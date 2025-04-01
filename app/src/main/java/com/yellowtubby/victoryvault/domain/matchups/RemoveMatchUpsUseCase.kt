@@ -10,6 +10,9 @@ open class RemoveMatchUpsUseCase {
     protected val matchupRepository: MatchupRepository by inject(MatchupRepository::class.java)
 
     suspend operator fun invoke(champion: Champion, role: Role, matchups: List<Matchup>) {
+        if(champion.name.isEmpty()){
+            throw IllegalArgumentException("Champion name cannot be empty")
+        }
         matchupRepository.deleteMatchups(champion.name,role,matchups)
     }
 }

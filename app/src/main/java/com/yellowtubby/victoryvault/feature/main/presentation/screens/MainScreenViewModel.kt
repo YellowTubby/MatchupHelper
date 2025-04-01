@@ -5,13 +5,13 @@ import com.yellowtubby.victoryvault.core.domain.BaseDefinedChampionUseCase
 import com.yellowtubby.victoryvault.domain.champions.ChampionListUseCase
 import com.yellowtubby.victoryvault.domain.matchups.AddMultiSelectedMatchupsUseCase
 import com.yellowtubby.victoryvault.domain.matchups.GetMultiSelectedMatchupsUseCase
-import com.yellowtubby.victoryvault.domain.matchups.MatchupListUseCase
+import com.yellowtubby.victoryvault.domain.matchups.di.MatchupListUseCase
 import com.yellowtubby.victoryvault.domain.matchups.RemoveMatchUpsUseCase
 import com.yellowtubby.victoryvault.domain.matchups.RemoveMultiSelectedMatchupsUseCase
 import com.yellowtubby.victoryvault.domain.userdata.UpdateCurrentMatchupUseCase
 import com.yellowtubby.victoryvault.domain.userdata.UpdateCurrentRoleUseCase
 import com.yellowtubby.victoryvault.domain.userdata.UpdateCurrentSelectedChampionUseCase
-import com.yellowtubby.victoryvault.domain.userdata.UserDataUseCase
+import com.yellowtubby.victoryvault.domain.userdata.di.UserDataUseCase
 import com.yellowtubby.victoryvault.core.presentation.BaseViewModel
 import com.yellowtubby.victoryvault.data.datamodels.Champion
 import com.yellowtubby.victoryvault.core.presentation.ApplicationIntent

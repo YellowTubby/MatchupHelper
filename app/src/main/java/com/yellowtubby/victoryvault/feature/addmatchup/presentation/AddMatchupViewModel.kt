@@ -2,7 +2,7 @@ package com.yellowtubby.victoryvault.feature.addmatchup.presentation
 
 import com.yellowtubby.victoryvault.domain.champions.ChampionListUseCase
 import com.yellowtubby.victoryvault.domain.matchups.AddMatchUpUseCase
-import com.yellowtubby.victoryvault.domain.userdata.UserDataUseCase
+import com.yellowtubby.victoryvault.domain.userdata.di.UserDataUseCase
 import com.yellowtubby.victoryvault.core.presentation.BaseViewModel
 import com.yellowtubby.victoryvault.core.presentation.ApplicationIntent
 import kotlinx.coroutines.flow.MutableStateFlow

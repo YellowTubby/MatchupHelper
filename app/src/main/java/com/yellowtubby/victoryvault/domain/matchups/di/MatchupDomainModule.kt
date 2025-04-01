@@ -5,7 +5,7 @@ import com.yellowtubby.victoryvault.domain.matchups.AddMatchUpUseCase
 import com.yellowtubby.victoryvault.domain.matchups.AddMultiSelectedMatchupsUseCase
 import com.yellowtubby.victoryvault.domain.matchups.GetFilteredMatchupsUseCase
 import com.yellowtubby.victoryvault.domain.matchups.GetMultiSelectedMatchupsUseCase
-import com.yellowtubby.victoryvault.domain.matchups.MatchupListUseCase
+import com.yellowtubby.victoryvault.domain.matchups.di.MatchupListUseCase
 import com.yellowtubby.victoryvault.domain.matchups.RemoveMatchUpsUseCase
 import com.yellowtubby.victoryvault.domain.matchups.RemoveMultiSelectedMatchupsUseCase
 import com.yellowtubby.victoryvault.domain.matchups.UpdateMatchUpUseCase

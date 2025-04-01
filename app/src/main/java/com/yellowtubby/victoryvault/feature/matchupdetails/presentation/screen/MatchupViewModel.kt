@@ -2,7 +2,7 @@ package com.yellowtubby.victoryvault.feature.matchupdetails.presentation.screen
 
 import com.yellowtubby.victoryvault.domain.userdata.UpdateCurrentMatchupUseCase
 import com.yellowtubby.victoryvault.domain.matchups.UpdateMatchUpUseCase
-import com.yellowtubby.victoryvault.domain.userdata.UserDataUseCase
+import com.yellowtubby.victoryvault.domain.userdata.di.UserDataUseCase
 import com.yellowtubby.victoryvault.core.presentation.BaseViewModel
 import com.yellowtubby.victoryvault.core.presentation.ApplicationIntent
 import com.yellowtubby.victoryvault.uicomponents.SnackbarMessage

@@ -2,6 +2,7 @@ package com.yellowtubby.victoryvault.domain.matchups
 
 import com.yellowtubby.victoryvault.data.datamodels.Matchup
 import com.yellowtubby.victoryvault.data.repositories.MatchupRepository
+import com.yellowtubby.victoryvault.domain.matchups.di.MatchupListUseCase
 import kotlinx.coroutines.flow.Flow
 import org.koin.java.KoinJavaComponent.inject
 
