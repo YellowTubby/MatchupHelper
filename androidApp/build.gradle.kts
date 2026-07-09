@@ -32,7 +32,11 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        val geminiKey = providers.gradleProperty("GEMINI_API_KEY").getOrElse("")
+        val localProps = java.util.Properties().apply {
+            rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()?.use { load(it) }
+        }
+        val geminiKey = localProps.getProperty("GEMINI_API_KEY")
+            ?: providers.gradleProperty("GEMINI_API_KEY").getOrElse("")
         buildConfigField("String", "GEMINI_API_KEY", "\"$geminiKey\"")
     }
     buildFeatures {
