@@ -1,0 +1,34 @@
+CREATE TABLE ReviewDraft (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    yourChampionId TEXT NOT NULL,
+    enemyChampionId TEXT NOT NULL,
+    role TEXT NOT NULL,
+    outcome TEXT NOT NULL,
+    conversationJson TEXT NOT NULL DEFAULT '[]',
+    phase TEXT NOT NULL DEFAULT 'CHATTING',
+    conversationId TEXT,
+    updatedAt INTEGER NOT NULL
+);
+
+selectAll:
+SELECT * FROM ReviewDraft ORDER BY updatedAt DESC;
+
+selectById:
+SELECT * FROM ReviewDraft WHERE id = ?;
+
+upsert:
+INSERT OR REPLACE INTO ReviewDraft (id, yourChampionId, enemyChampionId, role, outcome, conversationJson, phase, conversationId, updatedAt)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+insert:
+INSERT INTO ReviewDraft (yourChampionId, enemyChampionId, role, outcome, conversationJson, phase, conversationId, updatedAt)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+selectLastInsertId:
+SELECT last_insert_rowid();
+
+delete:
+DELETE FROM ReviewDraft WHERE id = ?;
+
+deleteAll:
+DELETE FROM ReviewDraft;

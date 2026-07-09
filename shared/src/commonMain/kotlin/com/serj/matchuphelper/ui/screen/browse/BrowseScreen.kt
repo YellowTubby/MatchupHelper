@@ -17,11 +17,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -62,7 +66,7 @@ class BrowseScreen : Screen {
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 private fun BrowseContent(
     uiState: BrowseUiState,
@@ -74,92 +78,93 @@ private fun BrowseContent(
     getChampionName: (String) -> String,
     getChampionImageUrl: (String) -> String?,
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-    ) {
-        TextButton(onClick = onBack) {
-            Text("< Back")
-        }
-
-        Text(
-            text = "Browse Matchups",
-            style = MaterialTheme.typography.headlineLarge,
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        OutlinedTextField(
-            value = uiState.searchQuery,
-            onValueChange = onSearchChange,
-            placeholder = { Text("Search champion...") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // Role filter chips
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            FilterChip(
-                selected = uiState.roleFilter == null,
-                onClick = { onRoleFilter(null) },
-                label = { Text("All") },
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Browse Matchups") },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Text("←", style = MaterialTheme.typography.titleLarge)
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                ),
             )
-            Role.entries.forEach { role ->
-                FilterChip(
-                    selected = uiState.roleFilter == role,
-                    onClick = { onRoleFilter(role) },
-                    label = { Text(role.name) },
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Sort chips
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            SortBy.entries.forEach { sort ->
-                FilterChip(
-                    selected = uiState.sortBy == sort,
-                    onClick = { onSortBy(sort) },
-                    label = {
-                        Text(
-                            when (sort) {
-                                SortBy.RECENT -> "Recent"
-                                SortBy.DIFFICULTY -> "Difficulty"
-                                SortBy.REVIEW_COUNT -> "Reviews"
-                            }
-                        )
-                    },
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        if (uiState.filteredMatchups.isEmpty()) {
-            Text(
-                text = "No matchups found. Complete a post-game review to start building your knowledge base.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 24.dp),
+        },
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(horizontal = 16.dp),
+        ) {
+            OutlinedTextField(
+                value = uiState.searchQuery,
+                onValueChange = onSearchChange,
+                placeholder = { Text("Search champion...") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
             )
-        } else {
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                items(
-                    items = uiState.filteredMatchups,
-                    key = { it.id },
-                ) { matchup ->
-                    MatchupCard(
-                        matchup = matchup,
-                        onClick = { onMatchupClick(matchup) },
-                        getChampionName = getChampionName,
-                        getChampionImageUrl = getChampionImageUrl,
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FilterChip(
+                    selected = uiState.roleFilter == null,
+                    onClick = { onRoleFilter(null) },
+                    label = { Text("All") },
+                )
+                Role.entries.forEach { role ->
+                    FilterChip(
+                        selected = uiState.roleFilter == role,
+                        onClick = { onRoleFilter(role) },
+                        label = { Text(role.name) },
                     )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                SortBy.entries.forEach { sort ->
+                    FilterChip(
+                        selected = uiState.sortBy == sort,
+                        onClick = { onSortBy(sort) },
+                        label = {
+                            Text(
+                                when (sort) {
+                                    SortBy.RECENT -> "Recent"
+                                    SortBy.DIFFICULTY -> "Difficulty"
+                                    SortBy.REVIEW_COUNT -> "Reviews"
+                                }
+                            )
+                        },
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (uiState.filteredMatchups.isEmpty()) {
+                Text(
+                    text = "No matchups found. Complete a post-game review to start building your knowledge base.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            } else {
+                LazyColumn(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    items(items = uiState.filteredMatchups, key = { it.id }) { matchup ->
+                        MatchupCard(
+                            matchup = matchup,
+                            onClick = { onMatchupClick(matchup) },
+                            getChampionName = getChampionName,
+                            getChampionImageUrl = getChampionImageUrl,
+                        )
+                    }
                 }
             }
         }
@@ -174,61 +179,33 @@ private fun MatchupCard(
     getChampionImageUrl: (String) -> String?,
 ) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() },
+        modifier = Modifier.fillMaxWidth().clickable { onClick() },
     ) {
         Row(
             modifier = Modifier.padding(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            // Champion icons
             AsyncImage(
                 model = getChampionImageUrl(matchup.yourChampionId),
                 contentDescription = null,
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(CircleShape),
+                modifier = Modifier.size(36.dp).clip(CircleShape),
                 contentScale = ContentScale.Crop,
             )
-            Text(
-                text = " vs ",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            Text(" vs ", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             AsyncImage(
                 model = getChampionImageUrl(matchup.enemyChampionId),
                 contentDescription = null,
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(CircleShape),
+                modifier = Modifier.size(36.dp).clip(CircleShape),
                 contentScale = ContentScale.Crop,
             )
-
             Spacer(modifier = Modifier.width(12.dp))
-
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "${getChampionName(matchup.yourChampionId)} vs ${getChampionName(matchup.enemyChampionId)}",
-                    style = MaterialTheme.typography.titleSmall,
-                )
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = matchup.role.name,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Text(
-                        text = "${matchup.reviewCount} reviews",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                Text("${getChampionName(matchup.yourChampionId)} vs ${getChampionName(matchup.enemyChampionId)}", style = MaterialTheme.typography.titleSmall)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(matchup.role.name, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("${matchup.reviewCount} reviews", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
-
             DifficultyChip(matchup.aggregatedDifficulty)
         }
     }
@@ -242,9 +219,5 @@ private fun DifficultyChip(difficulty: Difficulty?) {
         Difficulty.MEDIUM -> "Medium" to MaterialTheme.colorScheme.secondary
         null -> "—" to MaterialTheme.colorScheme.onSurfaceVariant
     }
-    Text(
-        text = text,
-        style = MaterialTheme.typography.labelMedium,
-        color = color,
-    )
+    Text(text = text, style = MaterialTheme.typography.labelMedium, color = color)
 }

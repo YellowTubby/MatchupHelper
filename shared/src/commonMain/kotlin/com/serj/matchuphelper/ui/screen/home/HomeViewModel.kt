@@ -2,12 +2,14 @@ package com.serj.matchuphelper.ui.screen.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.serj.matchuphelper.db.MatchupDatabase
 import com.serj.matchuphelper.domain.model.Champion
-import com.serj.matchuphelper.domain.model.Matchup
 import com.serj.matchuphelper.domain.model.MatchupReview
 import com.serj.matchuphelper.domain.model.Outcome
+import com.serj.matchuphelper.domain.model.Role
 import com.serj.matchuphelper.domain.repository.ChampionRepository
 import com.serj.matchuphelper.domain.repository.MatchupRepository
+import com.serj.matchuphelper.ui.screen.review.DraftReview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,6 +19,7 @@ import kotlinx.coroutines.launch
 class HomeViewModel(
     private val championRepository: ChampionRepository,
     private val matchupRepository: MatchupRepository,
+    private val database: MatchupDatabase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -55,6 +58,32 @@ class HomeViewModel(
                 }
             }
         }
+
+        loadDrafts()
+    }
+
+    fun loadDrafts() {
+        viewModelScope.launch {
+            val drafts = database.reviewDraftQueries.selectAll().executeAsList().map { draft ->
+                DraftReview(
+                    id = draft.id,
+                    yourChampionId = draft.yourChampionId,
+                    enemyChampionId = draft.enemyChampionId,
+                    role = Role.valueOf(draft.role),
+                    outcome = Outcome.valueOf(draft.outcome),
+                    conversationJson = draft.conversationJson,
+                    conversationId = draft.conversationId,
+                )
+            }
+            _uiState.update { it.copy(drafts = drafts) }
+        }
+    }
+
+    fun deleteDraft(draftId: Long) {
+        viewModelScope.launch {
+            database.reviewDraftQueries.delete(draftId)
+            loadDrafts()
+        }
     }
 
     fun getChampionName(id: String): String = champions[id]?.name ?: id
@@ -65,6 +94,7 @@ data class HomeUiState(
     val championCount: Int = 0,
     val reviewCount: Int = 0,
     val recentReviews: List<RecentReviewItem> = emptyList(),
+    val drafts: List<DraftReview> = emptyList(),
     val error: String? = null,
 )
 

@@ -76,8 +76,8 @@ val commonModule = module {
 
     single<MatchupAiService> { get<GeminiMatchupAiService>() }
 
-    viewModel { HomeViewModel(get(), get()) }
-    viewModel { ReviewViewModel(get(), get(), get()) }
+    viewModel { HomeViewModel(get(), get(), get()) }
+    viewModel { ReviewViewModel(get(), get(), get(), get(), get()) }
     viewModel { BrowseViewModel(get(), get()) }
     viewModel { params -> MatchupDetailViewModel(params.get(), get(), get()) }
     viewModel { PoolViewModel(get(), get(), get()) }

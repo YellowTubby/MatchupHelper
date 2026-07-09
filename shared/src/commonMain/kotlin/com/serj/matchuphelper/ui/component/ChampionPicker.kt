@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
@@ -67,13 +65,8 @@ fun ChampionPicker(
                         .fillMaxWidth()
                         .padding(top = 4.dp),
                 ) {
-                    LazyColumn(
-                        modifier = Modifier.padding(4.dp),
-                    ) {
-                        items(
-                            items = searchResults.take(6),
-                            key = { it.id },
-                        ) { champion ->
+                    Column(modifier = Modifier.padding(4.dp)) {
+                        searchResults.take(6).forEach { champion ->
                             ChampionSearchItem(
                                 champion = champion,
                                 onClick = {

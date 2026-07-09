@@ -25,7 +25,7 @@ class GeminiMatchupAiService(
     private val conversations = mutableMapOf<String, ConversationState>()
     private var nextConversationId = 0L
 
-    override suspend fun startReview(context: ReviewContext): AiMessage {
+    override suspend fun startReview(context: ReviewContext): StartReviewResult {
         val conversationId = (nextConversationId++).toString()
         val systemPrompt = MatchupPrompts.buildSystemPrompt(context)
 
@@ -60,7 +60,10 @@ class GeminiMatchupAiService(
         )
         conversations[conversationId] = state
 
-        return AiMessage(role = MessageRole.ASSISTANT, content = responseText)
+        return StartReviewResult(
+            conversationId = conversationId,
+            firstMessage = AiMessage(role = MessageRole.ASSISTANT, content = responseText),
+        )
     }
 
     override suspend fun sendMessage(conversationId: String, userMessage: String): AiMessage {
@@ -145,7 +148,7 @@ class GeminiMatchupAiService(
 
     private suspend fun callGemini(request: GeminiRequest): GeminiResponse {
         return httpClient.post(
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=$apiKey"
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$apiKey"
         ) {
             contentType(ContentType.Application.Json)
             setBody(request)
@@ -153,25 +156,30 @@ class GeminiMatchupAiService(
     }
 
     private fun parseInsightsResponse(responseText: String): List<Insight> {
-        val cleanJson = responseText
-            .removePrefix("```json")
-            .removePrefix("```")
-            .removeSuffix("```")
-            .trim()
+        val jsonStart = responseText.indexOf('{')
+        val jsonEnd = responseText.lastIndexOf('}')
+        if (jsonStart == -1 || jsonEnd == -1 || jsonEnd <= jsonStart) {
+            return emptyList()
+        }
+        val cleanJson = responseText.substring(jsonStart, jsonEnd + 1)
 
         val parsed = json.decodeFromString<ExtractionResponse>(cleanJson)
 
         conversations.values.lastOrNull()?.extractedDifficulty =
-            Difficulty.valueOf(parsed.difficulty)
+            try { Difficulty.valueOf(parsed.difficulty.uppercase()) } catch (_: Exception) { Difficulty.MEDIUM }
 
-        return parsed.insights.map { dto ->
+        return parsed.insights.mapNotNull { dto ->
+            val category = try { InsightCategory.valueOf(dto.category.uppercase()) } catch (_: Exception) { null }
+                ?: return@mapNotNull null
             Insight(
                 id = 0,
                 reviewId = 0,
                 matchupId = 0,
-                category = InsightCategory.valueOf(dto.category),
+                category = category,
                 text = dto.text,
-                gamePhase = dto.gamePhase?.let { GamePhase.valueOf(it) },
+                gamePhase = dto.gamePhase?.let {
+                    try { GamePhase.valueOf(it.uppercase()) } catch (_: Exception) { null }
+                },
             )
         }
     }

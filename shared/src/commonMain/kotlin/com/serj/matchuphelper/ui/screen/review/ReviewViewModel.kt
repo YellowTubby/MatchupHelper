@@ -3,6 +3,7 @@ package com.serj.matchuphelper.ui.screen.review
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.serj.matchuphelper.data.ai.GeminiMatchupAiService
+import com.serj.matchuphelper.db.MatchupDatabase
 import com.serj.matchuphelper.domain.model.AiMessage
 import com.serj.matchuphelper.domain.model.Champion
 import com.serj.matchuphelper.domain.model.Difficulty
@@ -19,18 +20,22 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import kotlin.time.Clock
 
 class ReviewViewModel(
     private val championRepository: ChampionRepository,
     private val matchupRepository: MatchupRepository,
     private val aiService: GeminiMatchupAiService,
+    private val database: MatchupDatabase,
+    private val json: Json,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ReviewUiState())
     val uiState: StateFlow<ReviewUiState> = _uiState.asStateFlow()
 
     private var conversationId: String? = null
+    private var draftId: Long? = null
 
     fun searchChampions(query: String) {
         viewModelScope.launch {
@@ -87,16 +92,18 @@ class ReviewViewModel(
                     existingInsights = existingInsights,
                 )
 
-                val firstMessage = aiService.startReview(context)
-                conversationId = "0"
+                val result = aiService.startReview(context)
+                conversationId = result.conversationId
 
                 _uiState.update {
                     it.copy(
                         isAiLoading = false,
-                        messages = listOf(firstMessage),
+                        messages = listOf(result.firstMessage),
                         matchupId = existingMatchup.id,
                     )
                 }
+
+                saveDraft()
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(isAiLoading = false, error = e.message)
@@ -105,17 +112,52 @@ class ReviewViewModel(
         }
     }
 
+    fun resumeDraft(draft: DraftReview) {
+        viewModelScope.launch {
+            val yourChamp = championRepository.getChampion(draft.yourChampionId)
+            val enemyChamp = championRepository.getChampion(draft.enemyChampionId)
+
+            val messages = try {
+                json.decodeFromString<List<AiMessage>>(draft.conversationJson)
+            } catch (_: Exception) {
+                emptyList()
+            }
+
+            draftId = draft.id
+            conversationId = draft.conversationId
+
+            _uiState.update {
+                it.copy(
+                    phase = ReviewPhase.CHATTING,
+                    yourChampion = yourChamp,
+                    enemyChampion = enemyChamp,
+                    selectedRole = draft.role,
+                    outcome = draft.outcome,
+                    messages = messages,
+                    exchangeCount = messages.count { msg -> msg.role == MessageRole.USER },
+                )
+            }
+        }
+    }
+
     fun sendMessage(text: String) {
-        val convId = conversationId ?: return
+        val convId = conversationId
+        if (convId == null) {
+            _uiState.update { it.copy(error = "No active conversation. Please start a new review.") }
+            return
+        }
 
         _uiState.update {
             it.copy(
                 messages = it.messages + AiMessage(MessageRole.USER, text),
                 isAiLoading = true,
+                error = null,
             )
         }
 
         viewModelScope.launch {
+            saveDraft()
+
             try {
                 val response = aiService.sendMessage(convId, text)
                 _uiState.update {
@@ -125,9 +167,10 @@ class ReviewViewModel(
                         exchangeCount = it.exchangeCount + 1,
                     )
                 }
+                saveDraft()
             } catch (e: Exception) {
                 _uiState.update {
-                    it.copy(isAiLoading = false, error = e.message)
+                    it.copy(isAiLoading = false, error = "AI error: ${e.message}")
                 }
             }
         }
@@ -202,6 +245,8 @@ class ReviewViewModel(
                 }
                 matchupRepository.saveInsights(insightsWithIds)
 
+                deleteDraft()
+
                 _uiState.update {
                     it.copy(phase = ReviewPhase.SAVED, isSaving = false)
                 }
@@ -211,6 +256,38 @@ class ReviewViewModel(
                 }
             }
         }
+    }
+
+    private fun saveDraft() {
+        val state = _uiState.value
+        val yourChamp = state.yourChampion ?: return
+        val enemyChamp = state.enemyChampion ?: return
+
+        val messagesJson = json.encodeToString(
+            kotlinx.serialization.builtins.ListSerializer(AiMessage.serializer()),
+            state.messages,
+        )
+
+        database.reviewDraftQueries.upsert(
+            id = draftId,
+            yourChampionId = yourChamp.id,
+            enemyChampionId = enemyChamp.id,
+            role = state.selectedRole!!.name,
+            outcome = state.outcome!!.name,
+            conversationJson = messagesJson,
+            phase = state.phase.name,
+            conversationId = conversationId,
+            updatedAt = Clock.System.now().toEpochMilliseconds(),
+        )
+
+        if (draftId == null) {
+            draftId = database.reviewDraftQueries.selectLastInsertId().executeAsOne()
+        }
+    }
+
+    private fun deleteDraft() {
+        draftId?.let { database.reviewDraftQueries.delete(it) }
+        draftId = null
     }
 }
 
@@ -235,3 +312,13 @@ data class ReviewUiState(
 enum class ReviewPhase {
     SETUP, CHATTING, EXTRACTING, SUMMARY, SAVED
 }
+
+data class DraftReview(
+    val id: Long,
+    val yourChampionId: String,
+    val enemyChampionId: String,
+    val role: Role,
+    val outcome: Outcome,
+    val conversationJson: String,
+    val conversationId: String?,
+)

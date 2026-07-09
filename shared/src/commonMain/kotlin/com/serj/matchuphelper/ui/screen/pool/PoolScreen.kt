@@ -18,13 +18,17 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -76,53 +80,58 @@ private fun PoolContent(
     onRemoveChampion: (String, Role) -> Unit,
     onUpdateComfort: (String, Role, Int) -> Unit,
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-    ) {
-        TextButton(onClick = onBack) {
-            Text("< Back")
-        }
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
+    Scaffold(
+        topBar = {
+            @OptIn(ExperimentalMaterial3Api::class)
+            TopAppBar(
+                title = { Text("Champion Pool") },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Text("←", style = MaterialTheme.typography.titleLarge)
+                    }
+                },
+                actions = {
+                    OutlinedButton(
+                        onClick = onToggleAdd,
+                        modifier = Modifier.padding(end = 8.dp),
+                    ) {
+                        Text(if (uiState.isAddingChampion) "Cancel" else "+ Add")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                ),
+            )
+        },
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(horizontal = 16.dp),
         ) {
             Text(
-                text = "Champion Pool",
-                style = MaterialTheme.typography.headlineLarge,
+                text = "${uiState.totalCount} champions tracked",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            OutlinedButton(onClick = onToggleAdd) {
-                Text(if (uiState.isAddingChampion) "Cancel" else "+ Add")
-            }
-        }
 
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = "${uiState.totalCount} champions tracked",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Add champion flow
-        if (uiState.isAddingChampion) {
-            AddChampionSection(
-                uiState = uiState,
-                onSetRole = onSetAddRole,
-                onSearch = onSearch,
-                onAdd = onAddChampion,
-            )
             Spacer(modifier = Modifier.height(16.dp))
-        }
 
-        // Pool by role
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
+            if (uiState.isAddingChampion) {
+                AddChampionSection(
+                    uiState = uiState,
+                    onSetRole = onSetAddRole,
+                    onSearch = onSearch,
+                    onAdd = onAddChampion,
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
             Role.entries.forEach { role ->
                 val champions = uiState.entriesByRole[role].orEmpty()
                 if (champions.isNotEmpty()) {
@@ -158,6 +167,7 @@ private fun PoolContent(
                     )
                 }
             }
+        }
         }
     }
 }
