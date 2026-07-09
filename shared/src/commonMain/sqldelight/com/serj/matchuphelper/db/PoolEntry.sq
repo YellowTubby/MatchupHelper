@@ -1,0 +1,32 @@
+CREATE TABLE PoolEntry (
+    championId TEXT NOT NULL,
+    role TEXT NOT NULL,
+    comfort INTEGER NOT NULL DEFAULT 3,
+    PRIMARY KEY (championId, role),
+    FOREIGN KEY (championId) REFERENCES Champion(id)
+);
+
+selectAll:
+SELECT * FROM PoolEntry ORDER BY role ASC, comfort DESC;
+
+selectByRole:
+SELECT * FROM PoolEntry WHERE role = ? ORDER BY comfort DESC;
+
+selectByChampion:
+SELECT * FROM PoolEntry WHERE championId = ?;
+
+insert:
+INSERT OR REPLACE INTO PoolEntry (championId, role, comfort)
+VALUES (?, ?, ?);
+
+delete:
+DELETE FROM PoolEntry WHERE championId = ? AND role = ?;
+
+updateComfort:
+UPDATE PoolEntry SET comfort = ? WHERE championId = ? AND role = ?;
+
+count:
+SELECT COUNT(*) FROM PoolEntry;
+
+countByRole:
+SELECT COUNT(*) FROM PoolEntry WHERE role = ?;

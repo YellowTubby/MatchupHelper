@@ -1,0 +1,29 @@
+CREATE TABLE MatchupReview (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    matchupId INTEGER NOT NULL,
+    timestamp INTEGER NOT NULL,
+    outcome TEXT NOT NULL,
+    difficultyRating TEXT NOT NULL,
+    conversationJson TEXT NOT NULL DEFAULT '[]',
+    personalNotes TEXT NOT NULL DEFAULT '',
+    FOREIGN KEY (matchupId) REFERENCES Matchup(id)
+);
+
+selectByMatchup:
+SELECT * FROM MatchupReview WHERE matchupId = ? ORDER BY timestamp DESC;
+
+selectRecent:
+SELECT * FROM MatchupReview ORDER BY timestamp DESC LIMIT ?;
+
+insert:
+INSERT INTO MatchupReview (matchupId, timestamp, outcome, difficultyRating, conversationJson, personalNotes)
+VALUES (?, ?, ?, ?, ?, ?);
+
+selectLastInsertId:
+SELECT last_insert_rowid();
+
+countByMatchup:
+SELECT COUNT(*) FROM MatchupReview WHERE matchupId = ?;
+
+totalCount:
+SELECT COUNT(*) FROM MatchupReview;

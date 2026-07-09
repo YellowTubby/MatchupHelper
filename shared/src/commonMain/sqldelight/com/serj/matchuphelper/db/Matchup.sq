@@ -1,0 +1,35 @@
+CREATE TABLE Matchup (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    yourChampionId TEXT NOT NULL,
+    enemyChampionId TEXT NOT NULL,
+    role TEXT NOT NULL,
+    aggregatedDifficulty TEXT,
+    keyTipsJson TEXT NOT NULL DEFAULT '[]',
+    reviewCount INTEGER NOT NULL DEFAULT 0,
+    FOREIGN KEY (yourChampionId) REFERENCES Champion(id),
+    FOREIGN KEY (enemyChampionId) REFERENCES Champion(id),
+    UNIQUE(yourChampionId, enemyChampionId, role)
+);
+
+selectById:
+SELECT * FROM Matchup WHERE id = ?;
+
+selectByChampion:
+SELECT * FROM Matchup WHERE yourChampionId = ? ORDER BY reviewCount DESC;
+
+selectByRole:
+SELECT * FROM Matchup WHERE role = ? ORDER BY reviewCount DESC;
+
+selectByPairing:
+SELECT * FROM Matchup
+WHERE yourChampionId = ? AND enemyChampionId = ? AND role = ?;
+
+insert:
+INSERT INTO Matchup (yourChampionId, enemyChampionId, role)
+VALUES (?, ?, ?);
+
+updateAggregated:
+UPDATE Matchup SET aggregatedDifficulty = ?, keyTipsJson = ?, reviewCount = ? WHERE id = ?;
+
+selectAll:
+SELECT * FROM Matchup ORDER BY reviewCount DESC;

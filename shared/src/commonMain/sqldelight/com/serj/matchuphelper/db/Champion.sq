@@ -1,0 +1,26 @@
+CREATE TABLE Champion (
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    title TEXT NOT NULL,
+    roles TEXT NOT NULL,
+    imageUrl TEXT NOT NULL
+);
+
+selectAll:
+SELECT * FROM Champion ORDER BY name ASC;
+
+selectById:
+SELECT * FROM Champion WHERE id = ?;
+
+search:
+SELECT * FROM Champion WHERE name LIKE '%' || ? || '%' ORDER BY name ASC;
+
+insert:
+INSERT OR REPLACE INTO Champion (id, name, title, roles, imageUrl)
+VALUES (?, ?, ?, ?, ?);
+
+deleteAll:
+DELETE FROM Champion;
+
+count:
+SELECT COUNT(*) FROM Champion;
